@@ -15,6 +15,68 @@ resourcestring
    Rst_GamesFound = ' game(s) found.';
 
 type
+   TSystemKind = ( skNES,
+                   skSNES,
+                   skMasterSystem,
+                   skMegaDrive,
+                   skNeoGeo,
+                   skCPC,
+                   skAT2600,
+                   skAT7800,
+                   skATST,
+                   skCS,
+                   skFCD,
+                   skFBA,
+                   skFBALib,
+                   skGW,
+                   skGBC,
+                   skGG,
+                   skGB,
+                   skGBA,
+                   skIV,
+                   skLU,
+                   skLYNX,
+                   skMAME,
+                   skML,
+                   skMSX,
+                   skMSX1,
+                   skMSX2,
+                   skNGP,
+                   skNGPC,
+                   skN64,
+                   skODY,
+                   skPCE,
+                   skPCECD,
+                   skPS,
+                   skPRB,
+                   skSVM,
+                   skS32X,
+                   skSCD,
+                   skSG1000,
+                   skSGFX,
+                   skVCX,
+                   skVB,
+                   skWS,
+                   skWSC,
+                   skZXS,
+                   skZX81,
+                   skAM1200,
+                   skAM600,
+                   skAPPLE,
+                   skCV,
+                   skC64,
+                   skDB,
+                   skDC,
+                   skGC,
+                   skPSP,
+                   skWII );
+
+   TSystemKindObject = class
+   public
+      FSystemKind: TSystemKind;
+      constructor Create( const aName: string );
+   end;
+
    TGame = class
    private
       FId: string;
@@ -73,7 +135,7 @@ type
       Btn_ChangeAll: TButton;
       Cbx_Filter: TComboBox;
       Lbl_Filter: TLabel;
-    Img_Logo: TImage;
+      Img_Logo: TImage;
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
       procedure Cbx_SystemsChange(Sender: TObject);
@@ -86,8 +148,8 @@ type
       procedure Mmo_DescriptionKeyPress(Sender: TObject; var Key: Char);
       procedure Btn_ChangeImageClick(Sender: TObject);
       procedure Btn_SetDefaultPictureClick(Sender: TObject);
-    procedure Cbx_FilterChange(Sender: TObject);
-    procedure Btn_ChangeAllClick(Sender: TObject);
+      procedure Cbx_FilterChange(Sender: TObject);
+      procedure Btn_ChangeAllClick(Sender: TObject);
    private
       FRootPath: string;
       FRootRomsPath: string;
@@ -107,6 +169,8 @@ type
       procedure SetFieldsReadOnly( aValue: Boolean );
       procedure CheckIfChangesToSave;
       procedure ChangeImage( aPath: string; aGame: TGame );
+      function  getSystemKind: TSystemKind;
+      function  getCurrentFolderName: string;
    end;
 
 const
@@ -131,6 +195,7 @@ const
    Cst_ImageSuffixJpeg = '-image.jpeg';
    Cst_DefaultPicsFolderPath = 'Resources\DefaultPictures\';
    Cst_DefaultImageNameSuffix = '-default.png';
+   Cst_PngExt = '.png';
 
 var
    Frm_Editor: TFrm_Editor;
@@ -138,6 +203,250 @@ var
 implementation
 
 {$R *.dfm}
+
+resourcestring
+   Rst_SystemKindNES = 'Nintendo';
+   Rst_SystemKindSNES = 'Super Nintendo';
+   Rst_SystemKindMS = 'Master System';
+   Rst_SystemKindMD = 'MegaDrive';
+   Rst_SystemKindNEOGEO = 'Neo Geo';
+   Rst_SystemKindCPC = 'Amstrad CPC';
+   Rst_SystemKindAT2600 = 'Atari 2600';
+   Rst_SystemKindAT7800 = 'Atari 7800';
+   Rst_SystemKindATST = 'Atari ST';
+   Rst_SystemKindCS = 'CaveStory';
+   Rst_SystemKindFCD = 'Family Computer Disk';
+   Rst_SystemKindFBA = 'Final Burn Alpha';
+   Rst_SystemKindFBALib = 'Final Burn Alpha Libretro';
+   Rst_SystemKindGW = 'Game & Watch';
+   Rst_SystemKindGBC = 'Gameboy Color';
+   Rst_SystemKindGG = 'Game Gear';
+   Rst_SystemKindGB = 'Gameboy';
+   Rst_SystemKindGBA = 'Gameboy Advance';
+   Rst_SystemKindIV = 'Image Viewer';
+   Rst_SystemKindLU = 'Lutro';
+   Rst_SystemKindLYNX = 'Lynx';
+   Rst_SystemKindMAME = 'Mame';
+   Rst_SystemKindML = 'Moonlight';
+   Rst_SystemKindMSX = 'MSX 1-2-2+';
+   Rst_SystemKindMSX1 = 'MSX 1';
+   Rst_SystemKindMSX2 = 'MSX 2+';
+   Rst_SystemKindNGP = 'Neo Geo Pocket B&W';
+   Rst_SystemKindNGPC = 'Neo Geo Pocket Color';
+   Rst_SystemKindN64 = 'Nintendo 64';
+   Rst_SystemKindODY = 'Odyssey 2';
+   Rst_SystemKindPCE = 'PC Engine';
+   Rst_SystemKindPCECD = 'PC Engine CD';
+   Rst_SystemKindPS = 'Playstation';
+   Rst_SystemKindPRB = 'PR Boom';
+   Rst_SystemKindSVM = 'Scumm VM';
+   Rst_SystemKindS32X = 'Sega 32X';
+   Rst_SystemKindSCD = 'Sega CD';
+   Rst_SystemKindSG1000 = 'Sega SG 1000';
+   Rst_SystemKindSGFX = 'Supergrafx';
+   Rst_SystemKindVCX = 'Vectrex';
+   Rst_SystemKindVB = 'Virtual Boy';
+   Rst_SystemKindWS = 'Wonderswan B&W';
+   Rst_SystemKindWSC = 'Wonderswan Color';
+   Rst_SystemKindZXS = 'ZX Spectrum';
+   Rst_SystemKindZX81 = 'ZX81';
+   Rst_SystemKindAM1200 = 'Amiga 1200';
+   Rst_SystemKindAM600 = 'Amiga 600';
+   Rst_SystemKindAPPLE = 'Apple II';
+   Rst_SystemKindCV = 'Colecovision';
+   Rst_SystemKindC64 = 'Commodore 64';
+   Rst_SystemKindDB = 'DosBox';
+   Rst_SystemKindDC = 'Dreamcast';
+   Rst_SystemKindGC = 'Gamecube';
+   Rst_SystemKindPSP = 'Playstation Portable';
+   Rst_SystemKindWII = 'Wii';
+
+const
+   Cst_SystemKindStr: array[TSystemKind] of string =
+    ( Rst_SystemKindNES,
+      Rst_SystemKindSNES,
+      Rst_SystemKindMS,
+      Rst_SystemKindMD,
+      Rst_SystemKindNEOGEO,
+      Rst_SystemKindCPC,
+      Rst_SystemKindAT2600,
+      Rst_SystemKindAT7800,
+      Rst_SystemKindATST,
+      Rst_SystemKindCS,
+      Rst_SystemKindFCD,
+      Rst_SystemKindFBA,
+      Rst_SystemKindFBALib,
+      Rst_SystemKindGW,
+      Rst_SystemKindGBC,
+      Rst_SystemKindGG,
+      Rst_SystemKindGB,
+      Rst_SystemKindGBA,
+      Rst_SystemKindIV,
+      Rst_SystemKindLU,
+      Rst_SystemKindLYNX,
+      Rst_SystemKindMAME,
+      Rst_SystemKindML,
+      Rst_SystemKindMSX,
+      Rst_SystemKindMSX1,
+      Rst_SystemKindMSX2,
+      Rst_SystemKindNGP,
+      Rst_SystemKindNGPC,
+      Rst_SystemKindN64,
+      Rst_SystemKindODY,
+      Rst_SystemKindPCE,
+      Rst_SystemKindPCECD,
+      Rst_SystemKindPS,
+      Rst_SystemKindPRB,
+      Rst_SystemKindSVM,
+      Rst_SystemKindS32X,
+      Rst_SystemKindSCD,
+      Rst_SystemKindSG1000,
+      Rst_SystemKindSGFX,
+      Rst_SystemKindVCX,
+      Rst_SystemKindVB,
+      Rst_SystemKindWS,
+      Rst_SystemKindWSC,
+      Rst_SystemKindZXS,
+      Rst_SystemKindZX81,
+      Rst_SystemKindAM1200,
+      Rst_SystemKindAM600,
+      Rst_SystemKindAPPLE,
+      Rst_SystemKindCV,
+      Rst_SystemKindC64,
+      Rst_SystemKindDB,
+      Rst_SystemKindDC,
+      Rst_SystemKindGC,
+      Rst_SystemKindPSP,
+      Rst_SystemKindWII );
+
+   Cst_SystemKindFolderNames: array[TSystemKind] of string =
+    ( 'nes',
+      'snes',
+      'mastersystem',
+      'megadrive',
+      'neogeo',
+      'amstradcpc',
+      'atari2600',
+      'atari7800',
+      'atarist',
+      'cavestory',
+      'fds',
+      'fba',
+      'fba_libretro',
+      'gw',
+      'gbc',
+      'gamegear',
+      'gb',
+      'gba',
+      'imageviewer',
+      'lutro',
+      'lynx',
+      'mame',
+      'moonlight',
+      'msx',
+      'msx1',
+      'msx2',
+      'ngp',
+      'ngpc',
+      'n64',
+      'odyssey2',
+      'pcengine',
+      'pcenginecd',
+      'psx',
+      'prboom',
+      'scummvm',
+      'sega32x',
+      'segacd',
+      'sg1000',
+      'supergrafx',
+      'vectrex',
+      'virtualboy',
+      'wonderswan',
+      'wonderswancolor',
+      'zxspectrum',
+      'z81',
+      'amiga1200',
+      'amiga600',
+      'apple2',
+      'colecovision',
+      'c64',
+      'pc',
+      'dreamcast',
+      'gc',
+      'psp',
+      'wii' );
+
+
+   Cst_SystemKindImageNames: array[TSystemKind] of string =
+    ( 'nes.png',
+      'snes.png',
+      'mastersystem.png',
+      'megadrive.png',
+      'neogeo.png',
+      'amstradcpc.png',
+      'atari2600.png',
+      'atari7800.png',
+      'atarist.png',
+      'cavestory.png',
+      'fds.png',
+      'fba.png',
+      'fba_libretro.png',
+      'gw.png',
+      'gbc.png',
+      'gamegear.png',
+      'gb.png',
+      'gba.png',
+      'imageviewer.png',
+      'lutro.png',
+      'lynx.png',
+      'mame.png',
+      'moonlight.png',
+      'msx.png',
+      'msx1.png',
+      'msx2.png',
+      'ngp.png',
+      'ngpc.png',
+      'n64.png',
+      'odyssey2.png',
+      'pcengine.png',
+      'pcenginecd.png',
+      'psx.png',
+      'prboom.png',
+      'scummvm.png',
+      'sega32x.png',
+      'segacd.png',
+      'sg1000.png',
+      'supergrafx.png',
+      'vectrex.png',
+      'virtualboy.png',
+      'wonderswan.png',
+      'wonderswancolor.png',
+      'zxspectrum.png',
+      'z81.png',
+      'amiga1200.png',
+      'amiga600.png',
+      'apple2.png',
+      'colecovision.png',
+      'c64.png',
+      'pc.png',
+      'dreamcast.png',
+      'gc.png',
+      'psp.png',
+      'wii.png' );
+
+
+//Constructeur oject SystemKindObject
+constructor TSystemKindObject.Create( const aName: string );
+var
+ _systemKind: TSystemKind;
+begin
+   for _systemKind:= Low( TSystemKind )to High( _systemKind ) do begin
+      if ( Cst_SystemKindFolderNames[_systemKind] = aName ) then begin
+         FSystemKind:= _systemKind;
+         Break;
+      end;
+   end;
+end;
 
 //Constructeur de l'objet TGame
 constructor TGame.Create( aId, aPath, aName, aDescription, aImagePath, aRating,
@@ -239,6 +548,7 @@ var
    IsFound: Boolean;
    ValidFolderCount: Integer;
    TmpList: TObjectList<TGame>;
+   _system: TSystemKindObject;
 begin
    //on met à vide tous les chemins
    FRootPath:= '';
@@ -297,7 +607,8 @@ begin
                GSystemList.Add( Info.Name, TmpList );
 
                //On ajoute ensuite le nom du systeme au combobox des systemes trouvés
-               Cbx_Systems.Items.Add( Info.Name );
+               _system:= TSystemKindObject.Create( Info.Name );
+               Cbx_Systems.Items.AddObject( Cst_SystemKindStr[_system.FSystemKind], _system );
 
                //On incrémente le compteur de dossier système valides
                Inc( ValidFolderCount );
@@ -324,7 +635,8 @@ begin
          Cbx_Filter.Enabled:= Cbx_Systems.Enabled;
          Lbl_Filter.Enabled:= Cbx_Systems.Enabled;
          Cbx_Systems.ItemIndex:= 0;
-         LoadGamesList( Cbx_Systems.Items[0] );
+//         LoadGamesList( Cbx_Systems.Items[0] );
+         LoadGamesList( getCurrentFolderName );
          EnableControls( True );
       end;
 
@@ -404,13 +716,13 @@ end;
 //Action à la sélection d'un filtre
 procedure TFrm_Editor.Cbx_FilterChange(Sender: TObject);
 begin
-   LoadGamesList( Cbx_Systems.Items[Cbx_Systems.ItemIndex] );
+   LoadGamesList( getCurrentFolderName );
 end;
 
 //Action à la sélection d'un item du combobox systemes
 procedure TFrm_Editor.Cbx_SystemsChange(Sender: TObject);
 begin
-   LoadGamesList( Cbx_Systems.Items[Cbx_Systems.ItemIndex] );
+   LoadGamesList( getCurrentFolderName );
 end;
 
 //Je fais une procédure juste pour activer les controls
@@ -496,7 +808,7 @@ var
       Pos:= LastDelimiter( '/', aGame.FRomName );
       FXmlRomsPath:= Copy( aGame.FImagePath, 1, Pos );
       FRootRomsPath:= IncludeTrailingPathDelimiter( FRootPath +
-                                                    Cbx_Systems.Items[Cbx_Systems.ItemIndex] );
+                                                    getCurrentFolderName );
       tmpStr:= Copy( FXmlImagesPath, 1, Pred( FXmlImagesPath.Length ) );
       Pos:= LastDelimiter( '/', tmpStr );
       tmpStr:= Copy( FXmlImagesPath, Succ( Pos ), ( FXmlImagesPath.Length - Succ( Pos ) ) );
@@ -672,7 +984,7 @@ begin
    if OpenFile.Execute and ( OpenFile.FileName <> '' ) then begin
       _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
       ChangeImage( OpenFile.FileName, _Game );
-      LoadGamesList( Cbx_Systems.Items[Cbx_Systems.ItemIndex] );
+      LoadGamesList( getCurrentFolderName );
    end;
 end;
 
@@ -688,13 +1000,13 @@ begin
    //On construit le lien vers l'image défaut selon le système
    PathToDefault:= ExtractFilePath(Application.ExeName) +
                    Cst_DefaultPicsFolderPath + '\' +
-                   Cbx_Systems.Items[Cbx_Systems.ItemIndex] +
+                   getCurrentFolderName +
                    Cst_DefaultImageNameSuffix;
 
    ChangeImage( PathToDefault, _Game );
 
    //on update la liste pour refléter les changements
-   LoadGamesList( Cbx_Systems.Items[Cbx_Systems.ItemIndex] );
+   LoadGamesList( getCurrentFolderName );
 end;
 
 //Action au click "change all missing to default"
@@ -708,7 +1020,7 @@ begin
    //On construit le lien vers l'image défaut selon le système
    PathToDefault:= ExtractFilePath(Application.ExeName) +
                    Cst_DefaultPicsFolderPath + '\' +
-                   Cbx_Systems.Items[Cbx_Systems.ItemIndex] +
+                   getCurrentFolderName +
                    Cst_DefaultImageNameSuffix;
 
    //et on boucle sur tous les jeux de la liste pour remplacer l'image
@@ -718,7 +1030,7 @@ begin
    end;
 
    //on update la liste pour refléter les changements
-   LoadGamesList( Cbx_Systems.Items[Cbx_Systems.ItemIndex] );
+   LoadGamesList( getCurrentFolderName );
 end;
 
 //Remplace l'image actuelle du jeu (par autre ou défaut).
@@ -787,11 +1099,21 @@ begin
    Cursor:= crDefault;
 end;
 
+function TFrm_Editor.getSystemKind: TSystemKind;
+begin
+   Result:= TSystemKindObject( Cbx_Systems.Items.Objects[Cbx_Systems.ItemIndex] ).FSystemKind;
+end;
+
+function TFrm_Editor.getCurrentFolderName: string;
+begin
+   Result:= Cst_SystemKindFolderNames[getSystemKind];
+end;
+
 //Action au click sur bouton "save changes"
 procedure TFrm_Editor.Btn_SaveChangesClick(Sender: TObject);
 begin
    SaveChangesToGamelist;
-   LoadGamesList( Cbx_Systems.Items[Cbx_Systems.ItemIndex] );
+   LoadGamesList( getCurrentFolderName );
    SetCheckBoxes( False );
    SetFieldsReadOnly( True );
    Btn_SaveChanges.Enabled:= False;
@@ -919,7 +1241,7 @@ begin
    Application.Terminate;
 end;
 
- //Nettoyage mémoire à la fermeture du programme
+//Nettoyage mémoire à la fermeture du programme
 procedure TFrm_Editor.FormDestroy(Sender: TObject);
 begin
    //Toutes les listes étant "owner" de leurs objets

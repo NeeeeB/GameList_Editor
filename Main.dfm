@@ -5071,8 +5071,8 @@ object Frm_Editor: TFrm_Editor
     Caption = 'Nb games found for a system'
   end
   object Lbl_SelectSystem: TLabel
-    Left = 31
-    Top = 133
+    Left = 32
+    Top = 136
     Width = 91
     Height = 13
     Caption = 'Select your system'
@@ -5089,24 +5089,24 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Info: TLabel
     Left = 519
     Top = 332
-    Width = 294
-    Height = 18
+    Width = 293
+    Height = 13
     Caption = 'Check the boxes to enable modification of the matching field.'
     Enabled = False
     WordWrap = True
   end
   object Lbl_Filter: TLabel
-    Left = 200
-    Top = 133
+    Left = 308
+    Top = 136
     Width = 79
     Height = 13
     Caption = 'Select your filter'
     Enabled = False
   end
   object Img_Logo: TImage
-    Left = 72
+    Left = 0
     Top = 24
-    Width = 692
+    Width = 532
     Height = 89
     Center = True
     Picture.Data = {
@@ -6207,7 +6207,7 @@ object Frm_Editor: TFrm_Editor
   object Cbx_Systems: TComboBox
     Left = 29
     Top = 155
-    Width = 145
+    Width = 196
     Height = 21
     Style = csDropDownList
     Enabled = False
@@ -6408,7 +6408,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_ChangeImage: TButton
     Left = 600
-    Top = 192
+    Top = 207
     Width = 139
     Height = 25
     Caption = 'Change Picture'
@@ -6418,7 +6418,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_SetDefaultPicture: TButton
     Left = 600
-    Top = 237
+    Top = 247
     Width = 139
     Height = 25
     Caption = 'Change Picture to default'
@@ -6428,7 +6428,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_ChangeAll: TButton
     Left = 571
-    Top = 280
+    Top = 286
     Width = 193
     Height = 25
     Caption = 'Change all missing pictures to default'
@@ -6437,9 +6437,9 @@ object Frm_Editor: TFrm_Editor
     OnClick = Btn_ChangeAllClick
   end
   object Cbx_Filter: TComboBox
-    Left = 200
+    Left = 306
     Top = 155
-    Width = 161
+    Width = 196
     Height = 21
     Style = csDropDownList
     Enabled = False
@@ -6472,8 +6472,8 @@ object Frm_Editor: TFrm_Editor
     Top = 208
   end
   object MainMenu: TMainMenu
-    Left = 16
-    Top = 8
+    Left = 104
+    Top = 264
     object Mnu_File: TMenuItem
       Caption = 'File'
       object Mnu_Choosefolder: TMenuItem
