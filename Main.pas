@@ -15,6 +15,7 @@ resourcestring
    Rst_GamesFound = ' game(s) found.';
 
 type
+   //enumération pour les différents systèmes
    TSystemKind = ( skNES,
                    skSNES,
                    skMasterSystem,
@@ -71,6 +72,8 @@ type
                    skPSP,
                    skWII );
 
+   //Objet stockant uniquement le type système (enum) pour
+   //combobox systems, permet de retrouver facile l'image et le nom du systeme
    TSystemKindObject = class
    public
       FSystemKind: TSystemKind;
@@ -131,11 +134,11 @@ type
       OpenFile: TOpenDialog;
       Btn_ChangeImage: TButton;
       Btn_SetDefaultPicture: TButton;
-      Lbl_Info: TLabel;
       Btn_ChangeAll: TButton;
       Cbx_Filter: TComboBox;
       Lbl_Filter: TLabel;
       Img_Logo: TImage;
+      Img_System: TImage;
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
       procedure Cbx_SystemsChange(Sender: TObject);
@@ -171,6 +174,8 @@ type
       procedure ChangeImage( aPath: string; aGame: TGame );
       function  getSystemKind: TSystemKind;
       function  getCurrentFolderName: string;
+      function GetCurrentLogoName: string;
+      procedure LoadSystemLogo( aPictureName: string );
    end;
 
 const
@@ -195,7 +200,7 @@ const
    Cst_ImageSuffixJpeg = '-image.jpeg';
    Cst_DefaultPicsFolderPath = 'Resources\DefaultPictures\';
    Cst_DefaultImageNameSuffix = '-default.png';
-   Cst_PngExt = '.png';
+   Cst_LogoPicsFolder = 'Resources\SystemsLogos\';
 
 var
    Frm_Editor: TFrm_Editor;
@@ -205,6 +210,7 @@ implementation
 {$R *.dfm}
 
 resourcestring
+   //noms des systemes tels qu'ils seront affichés dans la combobox
    Rst_SystemKindNES = 'Nintendo';
    Rst_SystemKindSNES = 'Super Nintendo';
    Rst_SystemKindMS = 'Master System';
@@ -262,6 +268,7 @@ resourcestring
    Rst_SystemKindWII = 'Wii';
 
 const
+   //tableau de liaison enum systemes / noms systems affichés
    Cst_SystemKindStr: array[TSystemKind] of string =
     ( Rst_SystemKindNES,
       Rst_SystemKindSNES,
@@ -319,6 +326,7 @@ const
       Rst_SystemKindPSP,
       Rst_SystemKindWII );
 
+   //tableau de liaison enum systemes/nom des dossiers systeme
    Cst_SystemKindFolderNames: array[TSystemKind] of string =
     ( 'nes',
       'snes',
@@ -376,7 +384,7 @@ const
       'psp',
       'wii' );
 
-
+   //tableau de liaison enum systemes/nom image systeme
    Cst_SystemKindImageNames: array[TSystemKind] of string =
     ( 'nes.png',
       'snes.png',
@@ -550,10 +558,11 @@ var
    TmpList: TObjectList<TGame>;
    _system: TSystemKindObject;
 begin
-   //on met à vide tous les chemins
+   //on met à vide tous les chemins et le logo systeme
    FRootPath:= '';
    FRootRomsPath:= '';
    FRootImagesPath:= '';
+   Img_System.Picture.Graphic:= nil;
 
    //On vide le combobox des systèmes
    //Et on désactive les Controls non nécessaires
@@ -635,7 +644,6 @@ begin
          Cbx_Filter.Enabled:= Cbx_Systems.Enabled;
          Lbl_Filter.Enabled:= Cbx_Systems.Enabled;
          Cbx_Systems.ItemIndex:= 0;
-//         LoadGamesList( Cbx_Systems.Items[0] );
          LoadGamesList( getCurrentFolderName );
          EnableControls( True );
       end;
@@ -739,7 +747,6 @@ begin
    Chk_Description.Enabled:= aValue;
    Btn_ChangeImage.Enabled:= aValue;
    Btn_SetDefaultPicture.Enabled:= aValue;
-   Lbl_Info.Enabled:= aValue;
 end;
 
 //Permet de tout cocher ou décocher les checkboxes d'un coup
@@ -841,6 +848,9 @@ begin
    //On essaye de récupérer la liste de jeux du système choisi
    if GSystemList.TryGetValue( aSystem, _TmpList ) then begin
 
+      //On charge le logo du systeme choisi
+      LoadSystemLogo( GetCurrentLogoName );
+
       //On désactive les évènements sur les changements dans les champs
       //Sinon ça pète quand on change de système (indice hors limite)
       Edt_Name.OnChange:= nil;
@@ -882,7 +892,7 @@ begin
       end;
 
       //On indique le nombre de jeux trouvés
-      Lbl_NbGamesFound.Caption:= aSystem + ' : ' + IntToStr( Lbx_Games.Items.Count ) + Rst_GamesFound;
+      Lbl_NbGamesFound.Caption:= IntToStr( Lbx_Games.Items.Count ) + Rst_GamesFound;
 
       //On met le focus sur le premier jeu de la liste
       ClearAllFields;
@@ -908,6 +918,21 @@ begin
       Edt_Publisher.OnChange:= FieldChange;
       Edt_NbPlayers.OnChange:= FieldChange;
       Mmo_Description.OnChange:= FieldChange;
+   end;
+end;
+
+//Charge le logo du système sélectionné dans le TImage prévu
+procedure TFrm_Editor.LoadSystemLogo( aPictureName: string );
+var
+   _Image: TPngImage;
+begin
+   _Image:= TPngImage.Create;
+   try
+      _Image.LoadFromFile( ExtractFilePath( Application.ExeName ) +
+                           Cst_LogoPicsFolder + aPictureName );
+      Img_System.Picture.Graphic:= _Image;
+   finally
+      _Image.Free;
    end;
 end;
 
@@ -1099,14 +1124,22 @@ begin
    Cursor:= crDefault;
 end;
 
+//Récupère le nom d'enum du systeme sélectionné dans le combobox
 function TFrm_Editor.getSystemKind: TSystemKind;
 begin
    Result:= TSystemKindObject( Cbx_Systems.Items.Objects[Cbx_Systems.ItemIndex] ).FSystemKind;
 end;
 
+//Récupère le nom du dossier du systeme selectionné dans le combobox
 function TFrm_Editor.getCurrentFolderName: string;
 begin
    Result:= Cst_SystemKindFolderNames[getSystemKind];
+end;
+
+//Récupère le nom du logo du système sélectionné dans le combobox
+function TFrm_Editor.GetCurrentLogoName: string;
+begin
+   Result:= Cst_SystemKindImageNames[getSystemKind];
 end;
 
 //Action au click sur bouton "save changes"

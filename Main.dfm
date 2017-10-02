@@ -4,7 +4,7 @@ object Frm_Editor: TFrm_Editor
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'GameList Editor'
-  ClientHeight = 710
+  ClientHeight = 687
   ClientWidth = 1210
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -5064,11 +5064,12 @@ object Frm_Editor: TFrm_Editor
     Transparent = True
   end
   object Lbl_NbGamesFound: TLabel
-    Left = 29
-    Top = 678
-    Width = 141
+    Left = 626
+    Top = 197
+    Width = 87
     Height = 13
-    Caption = 'Nb games found for a system'
+    Alignment = taCenter
+    Caption = 'xxx games found.'
   end
   object Lbl_SelectSystem: TLabel
     Left = 32
@@ -5086,15 +5087,6 @@ object Frm_Editor: TFrm_Editor
     Center = True
     Proportional = True
   end
-  object Lbl_Info: TLabel
-    Left = 519
-    Top = 332
-    Width = 293
-    Height = 13
-    Caption = 'Check the boxes to enable modification of the matching field.'
-    Enabled = False
-    WordWrap = True
-  end
   object Lbl_Filter: TLabel
     Left = 308
     Top = 136
@@ -5105,7 +5097,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Img_Logo: TImage
     Left = 0
-    Top = 24
+    Top = 16
     Width = 532
     Height = 89
     Center = True
@@ -6204,6 +6196,14 @@ object Frm_Editor: TFrm_Editor
       A809259450420925945042091D53F4FFBA52EF122A4CC7380000000049454E44
       AE426082}
   end
+  object Img_System: TImage
+    Left = 547
+    Top = 92
+    Width = 241
+    Height = 104
+    Center = True
+    Proportional = True
+  end
   object Cbx_Systems: TComboBox
     Left = 29
     Top = 155
@@ -6408,7 +6408,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_ChangeImage: TButton
     Left = 600
-    Top = 207
+    Top = 227
     Width = 139
     Height = 25
     Caption = 'Change Picture'
@@ -6418,7 +6418,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_SetDefaultPicture: TButton
     Left = 600
-    Top = 247
+    Top = 267
     Width = 139
     Height = 25
     Caption = 'Change Picture to default'
@@ -6428,7 +6428,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_ChangeAll: TButton
     Left = 571
-    Top = 286
+    Top = 306
     Width = 193
     Height = 25
     Caption = 'Change all missing pictures to default'
