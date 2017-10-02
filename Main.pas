@@ -327,6 +327,9 @@ begin
          LoadGamesList( Cbx_Systems.Items[0] );
          EnableControls( True );
       end;
+
+      //On remet le curseur par défaut
+      Cursor:= crDefault;
    end;
 end;
 
@@ -394,9 +397,6 @@ begin
    until ( _Node = nil );
 
    XMLDoc.Active:= False;
-
-   //On remet le curseur par défaut
-   Cursor:= crDefault;
 
    Result:= _GameList;
 end;
