@@ -83,6 +83,7 @@ type
    TGame = class
    private
       FId: string;
+      FRomPath: string;
       FRomName: string;
       FName: string;
       FDescription: string;
@@ -95,6 +96,7 @@ type
       FPlayers: string;
       procedure Load( aId, aPath, aName, aDescription, aImagePath, aRating,
                       aDeveloper, aPublisher, aGenre, aPlayers, aDate: string );
+      function GetRomName( aRomPath: string ): string;
    public
       constructor Create( aId, aPath, aName, aDescription, aImagePath, aRating,
                           aDeveloper, aPublisher, aGenre, aPlayers, aDate: string ); reintroduce;
@@ -469,7 +471,8 @@ procedure TGame.Load( aId, aPath, aName, aDescription, aImagePath, aRating,
                       aDeveloper, aPublisher, aGenre, aPlayers, aDate: string );
 begin
    FId:= aId;
-   FRomName:= aPath;
+   FRomPath:= aPath;
+   FRomName:= GetRomName( aPath );
    FName:= aName;
    FDescription:= aDescription;
    FImagePath:= aImagePath;
@@ -479,6 +482,15 @@ begin
    FPublisher:= aPublisher;
    FGenre:= aGenre;
    FPlayers:= aPlayers;
+end;
+
+//Fonction permettant de récupérer le nom de la rom avec son extension
+function TGame.GetRomName( aRomPath: string ): string;
+var
+   _Pos: Integer;
+begin
+   _Pos:= LastDelimiter( '/', aRomPath );
+   Result:= Copy( aRomPath, Succ( _Pos ), ( aRomPath.Length - _Pos ) );
 end;
 
 //Formate correctement la date depuis la string récupérée du xml
@@ -812,7 +824,7 @@ var
    begin
       Pos:= LastDelimiter( '/', aGame.FImagePath );
       FXmlImagesPath:= Copy( aGame.FImagePath, 1, Pos );
-      Pos:= LastDelimiter( '/', aGame.FRomName );
+      Pos:= LastDelimiter( '/', aGame.FRomPath );
       FXmlRomsPath:= Copy( aGame.FImagePath, 1, Pos );
       FRootRomsPath:= IncludeTrailingPathDelimiter( FRootPath +
                                                     getCurrentFolderName );
@@ -961,8 +973,7 @@ begin
    Mmo_Description.Text:= aGame.FDescription;
 
    //on récupère le nom brut du jeu pour construire le chemin vers l'image
-   _RawGameName:= Copy( aGame.FRomName, 3, ( aGame.FRomName.Length - 2 ) );
-   SetLength( _RawGameName, LastDelimiter( '.', _RawGameName ) - 1 );
+   _RawGameName:= ChangeFileExt( aGame.FRomName, '' );
    _PathToImage:= FRootImagesPath + _RawGameName;
 
    //si l'image existe (et chemin existe dans xml)
@@ -1070,8 +1081,7 @@ begin
    Cursor:= crHourGlass;
 
    //on récupère le nom du jeu pour construire le nom de l'image
-   _GameName:= Copy( aGame.FRomName, 3, ( aGame.FRomName.Length - 2 ) );
-   SetLength( _GameName, LastDelimiter( '.', _GameName ) - 1 );
+   _GameName:= ChangeFileExt( aGame.FRomName, '' );
 
    //on détermine ensuite l'extension du fichier chargé et
    //on crée l'objet qui va bien pour affecter au TImage
