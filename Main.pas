@@ -5,16 +5,18 @@ interface
 uses
    Winapi.Windows, Winapi.Messages,
    System.SysUtils, System.Variants, System.Classes, System.IniFiles, System.Generics.Collections,
-   System.DateUtils, System.RegularExpressions,
+   System.DateUtils, System.RegularExpressions, System.UITypes,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
    Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Vcl.StdCtrls, Xml.Win.msxmldom, Winapi.msxml,
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, MoreInfos,
-   IdHashMessageDigest, IdBaseComponent, IdSASL, IdSASLUserPass,
-  IdSASL_CRAMBase, IdSASL_CRAM_MD5;
+   IdHashMessageDigest, IdHashSHA, IdHashCRC;
 
 resourcestring
    Rst_NoValidFolder = 'No folder with gamelist.xml found';
    Rst_GamesFound = ' game(s) found.';
+   Rst_HashWarning = 'Hashing a file can be extremly slow depending on' + sLineBreak +
+                     'the file size, your computer, your HDD...' + sLineBreak +
+                     'Do you want to hash anyway ?';
 
 type
    //enumération pour les différents systèmes
@@ -103,14 +105,16 @@ type
       FSha1: string;
       procedure Load( aPath, aName, aDescription, aImagePath, aRating,
                       aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                      aRegion, aPlaycount, aLastplayed{, aCrc32, aSha1}: string );
+                      aRegion, aPlaycount, aLastplayed: string );
 
       function GetRomName( aRomPath: string ): string;
       function GetMd5( aFileName: string ): string;
+      function GetSha1( aFileName: string ): string;
+      function GetCrc32( aFileName: string ): string;
    public
       constructor Create( aPath, aName, aDescription, aImagePath, aRating,
                           aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                          aRegion, aPlaycount, aLastplayed{, aCrc32, aSha1}: string ); reintroduce;
+                          aRegion, aPlaycount, aLastplayed: string ); reintroduce;
    end;
 
    TFrm_Editor = class(TForm)
@@ -155,6 +159,17 @@ type
       Chk_Region: TCheckBox;
       Edt_Region: TEdit;
       Btn_MoreInfos: TButton;
+      Mnu_Options: TMenuItem;
+      Mnu_About: TMenuItem;
+      Mnu_GodMode: TMenuItem;
+      Mnu_AutoHash: TMenuItem;
+      Mnu_System: TMenuItem;
+      Mnu_Game: TMenuItem;
+      Mnu_LowerCase: TMenuItem;
+      Mnu_UpperCase: TMenuItem;
+      Mnu_GaLowerCase: TMenuItem;
+      Mnu_GaUpperCase: TMenuItem;
+      Mnu_RemoveRegion: TMenuItem;
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
       procedure Cbx_SystemsChange(Sender: TObject);
@@ -478,17 +493,17 @@ end;
 //Constructeur de l'objet TGame
 constructor TGame.Create( aPath, aName, aDescription, aImagePath, aRating,
                           aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                          aRegion, aPlaycount, aLastplayed{, aCrc32 aSha1}: string );
+                          aRegion, aPlaycount, aLastplayed: string );
 begin
    Load( aPath, aName, aDescription, aImagePath, aRating,
          aDeveloper, aPublisher, aGenre, aPlayers, aDate, aRegion, aPlaycount,
-         aLastplayed{, aCrc32, aSha1} );
+         aLastplayed );
 end;
 
 //Chargement des attributs dans l'objet TGame
 procedure TGame.Load( aPath, aName, aDescription, aImagePath, aRating,
                       aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                      aRegion, aPlaycount, aLastplayed{, aCrc32, aSha1}: string );
+                      aRegion, aPlaycount, aLastplayed: string );
 begin
    FRomPath:= aPath;
    FRomName:= GetRomName( aPath );
@@ -504,8 +519,6 @@ begin
    FRegion:= aRegion;
    FPlaycount:= aPlaycount;
    FLastplayed:= aLastplayed;
-//   FCrc32:= aCrc32;
-//   FSha1:= aSha1;
 end;
 
 //Fonction permettant de récupérer le nom de la rom avec son extension
@@ -523,13 +536,51 @@ var
    IdMD5: TIdHashMessageDigest5;
    FS: TFileStream;
 begin
-   IdMD5 := TIdHashMessageDigest5.Create;
-   FS := TFileStream.Create( aFileName, fmOpenRead or fmShareDenyWrite );
-   try
-      Result := IdMD5.HashStreamAsHex(FS)
-   finally
-      FS.Free;
-      IdMD5.Free;
+   if FileExists( aFileName ) then begin
+      IdMD5:= TIdHashMessageDigest5.Create;
+      FS:= TFileStream.Create( aFileName, fmOpenRead or fmShareDenyWrite );
+      try
+         Result:= IdMD5.HashStreamAsHex(FS)
+      finally
+         FS.Free;
+         IdMD5.Free;
+      end;
+   end;
+end;
+
+//fonction permettant de récupérer le SHA1 des roms
+function TGame.GetSha1( aFileName: string ): string;
+var
+   IdSHA1: TIdHashSHA1;
+   FS: TFileStream;
+begin
+   if FileExists( aFileName ) then begin
+      IdSHA1:= TIdHashSHA1.Create;
+      FS:= TFileStream.Create( aFileName, fmOpenRead or fmShareDenyWrite );
+      try
+         Result:= IdSHA1.HashStreamAsHex(FS)
+      finally
+         FS.Free;
+         IdSHA1.Free;
+      end;
+   end;
+end;
+
+//fonction permettant de récupérer le SHA1 des roms
+function TGame.GetCrc32( aFileName: string ): string;
+var
+   IdCRC32: TIdHashCRC32;
+   FS: TFileStream;
+begin
+   if FileExists( aFileName ) then begin
+      IdCRC32:= TIdHashCRC32.Create;
+      FS:= TFileStream.Create( aFileName, fmOpenRead or fmShareDenyWrite );
+      try
+         Result:= IdCRC32.HashStreamAsHex(FS)
+      finally
+         FS.Free;
+         IdCRC32.Free;
+      end;
    end;
 end;
 
@@ -1363,15 +1414,25 @@ var
    _Infos: TStringList;
    _Game: TGame;
    MoreInfos: TFrm_MoreInfos;
+   _PathToRom: string;
 begin
    //on crée une liste avec les infos à afficher
    _Infos:= TStringList.Create;
    try
       //on récupère le jeu sélectionné
       _Game:= TGame( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] );
+      _PathToRom:= FRootPath + getCurrentFolderName + '\' + _Game.FRomName;
 
-       //On ajoute le Hash MD5
-       _Game.FMd5:= _Game.GetMd5( FRootPath + getCurrentFolderName + '\' + _Game.FRomName );
+      if ( MessageDlg( Rst_HashWarning, mtInformation,
+         [mbYes, mbNo], 0, mbNo ) = mrYes ) then begin
+         //On ajoute les hash si nécessaire.
+         if _Game.FMd5.IsEmpty then
+            _Game.FMd5:= _Game.GetMd5( _PathToRom );
+         if _Game.FSha1.IsEmpty then
+            _Game.FSha1:= _Game.GetSha1( _PathToRom );
+         if _Game.FCrc32.IsEmpty then
+            _Game.FCrc32:= _Game.GetCrc32( _PathToRom );
+      end;
 
       //on remplit la liste avec les infos dont on a besoin
       _Infos.Add( _Game.FPlaycount );

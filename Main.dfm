@@ -6519,6 +6519,43 @@ object Frm_Editor: TFrm_Editor
     end
     object Mnu_Actions: TMenuItem
       Caption = 'Actions'
+      object Mnu_System: TMenuItem
+        Caption = 'System'
+        object Mnu_LowerCase: TMenuItem
+          Caption = 'Convert all text to lowercase'
+        end
+        object Mnu_UpperCase: TMenuItem
+          Caption = 'Convert all text to uppercase'
+        end
+        object Mnu_RemoveRegion: TMenuItem
+          Caption = 'Remove region from game name'
+        end
+      end
+      object Mnu_Game: TMenuItem
+        Caption = 'Game'
+        object Mnu_GaLowerCase: TMenuItem
+          Caption = 'Convert all text to lowercase'
+        end
+        object Mnu_GaUpperCase: TMenuItem
+          Caption = 'Convert all text to uppercase'
+        end
+      end
+    end
+    object Mnu_Options: TMenuItem
+      Caption = 'Options'
+      object Mnu_GodMode: TMenuItem
+        AutoCheck = True
+        Caption = 'Enable God Mode'
+        Checked = True
+      end
+      object Mnu_AutoHash: TMenuItem
+        AutoCheck = True
+        Caption = 'Auto Hash'
+        Checked = True
+      end
+    end
+    object Mnu_About: TMenuItem
+      Caption = 'About'
     end
   end
   object OpenFile: TOpenDialog
