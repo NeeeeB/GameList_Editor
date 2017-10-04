@@ -6456,10 +6456,42 @@ object Frm_Editor: TFrm_Editor
       'Missing Developer'
       'Missing Publisher'
       'Missing Description'
-      'Missing Genre')
+      'Missing Genre'
+      'Missing Region')
+  end
+  object Chk_Region: TCheckBox
+    Tag = 9
+    Left = 997
+    Top = 359
+    Width = 97
+    Height = 17
+    Caption = 'Region'
+    Enabled = False
+    TabOrder = 23
+    OnClick = ChkClick
+  end
+  object Edt_Region: TEdit
+    Left = 997
+    Top = 376
+    Width = 185
+    Height = 21
+    ReadOnly = True
+    TabOrder = 24
+    OnChange = FieldChange
+  end
+  object Btn_MoreInfos: TButton
+    Left = 533
+    Top = 640
+    Width = 97
+    Height = 25
+    Caption = 'More infos...'
+    Enabled = False
+    TabOrder = 25
+    OnClick = Btn_MoreInfosClick
   end
   object XMLDoc: TXMLDocument
     NodeIndentStr = #9
+    Options = [doAttrNull, doAutoPrefix, doNamespaceDecl]
     Left = 45
     Top = 264
     DOMVendorDesc = 'MSXML'

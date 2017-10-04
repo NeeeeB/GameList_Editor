@@ -8,7 +8,9 @@ uses
    System.DateUtils, System.RegularExpressions,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
    Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Vcl.StdCtrls, Xml.Win.msxmldom, Winapi.msxml,
-   Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls;
+   Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, MoreInfos,
+   IdHashMessageDigest, IdBaseComponent, IdSASL, IdSASLUserPass,
+  IdSASL_CRAMBase, IdSASL_CRAM_MD5;
 
 resourcestring
    Rst_NoValidFolder = 'No folder with gamelist.xml found';
@@ -82,7 +84,6 @@ type
 
    TGame = class
    private
-      FId: string;
       FRomPath: string;
       FRomName: string;
       FName: string;
@@ -94,12 +95,22 @@ type
       FPublisher: string;
       FGenre: string;
       FPlayers: string;
-      procedure Load( aId, aPath, aName, aDescription, aImagePath, aRating,
-                      aDeveloper, aPublisher, aGenre, aPlayers, aDate: string );
+      FRegion: string;
+      FPlaycount: string;
+      FLastplayed: string;
+      FCrc32: string;
+      FMd5: string;
+      FSha1: string;
+      procedure Load( aPath, aName, aDescription, aImagePath, aRating,
+                      aDeveloper, aPublisher, aGenre, aPlayers, aDate,
+                      aRegion, aPlaycount, aLastplayed{, aCrc32, aSha1}: string );
+
       function GetRomName( aRomPath: string ): string;
+      function GetMd5( aFileName: string ): string;
    public
-      constructor Create( aId, aPath, aName, aDescription, aImagePath, aRating,
-                          aDeveloper, aPublisher, aGenre, aPlayers, aDate: string ); reintroduce;
+      constructor Create( aPath, aName, aDescription, aImagePath, aRating,
+                          aDeveloper, aPublisher, aGenre, aPlayers, aDate,
+                          aRegion, aPlaycount, aLastplayed{, aCrc32, aSha1}: string ); reintroduce;
    end;
 
    TFrm_Editor = class(TForm)
@@ -141,6 +152,9 @@ type
       Lbl_Filter: TLabel;
       Img_Logo: TImage;
       Img_System: TImage;
+      Chk_Region: TCheckBox;
+      Edt_Region: TEdit;
+      Btn_MoreInfos: TButton;
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
       procedure Cbx_SystemsChange(Sender: TObject);
@@ -155,6 +169,7 @@ type
       procedure Btn_SetDefaultPictureClick(Sender: TObject);
       procedure Cbx_FilterChange(Sender: TObject);
       procedure Btn_ChangeAllClick(Sender: TObject);
+      procedure Btn_MoreInfosClick(Sender: TObject);
    private
       FRootPath: string;
       FRootRomsPath: string;
@@ -181,7 +196,6 @@ type
    end;
 
 const
-   Cst_Id = 'id';
    Cst_Path = 'path';
    Cst_Game = 'game';
    Cst_Name = 'name';
@@ -193,6 +207,9 @@ const
    Cst_Publisher = 'publisher';
    Cst_Genre = 'genre';
    Cst_Players = 'players';
+   Cst_Region = 'region';
+   Cst_Playcount = 'playcount';
+   Cst_LastPlayed = 'lastplayed';
    Cst_GameListFileName = 'gamelist.xml';
    Cst_DateShortFill = '00';
    Cst_DateLongFill = '0000';
@@ -459,18 +476,20 @@ begin
 end;
 
 //Constructeur de l'objet TGame
-constructor TGame.Create( aId, aPath, aName, aDescription, aImagePath, aRating,
-                          aDeveloper, aPublisher, aGenre, aPlayers, aDate: string );
+constructor TGame.Create( aPath, aName, aDescription, aImagePath, aRating,
+                          aDeveloper, aPublisher, aGenre, aPlayers, aDate,
+                          aRegion, aPlaycount, aLastplayed{, aCrc32 aSha1}: string );
 begin
-   Load( aId, aPath, aName, aDescription, aImagePath, aRating,
-         aDeveloper, aPublisher, aGenre, aPlayers, aDate );
+   Load( aPath, aName, aDescription, aImagePath, aRating,
+         aDeveloper, aPublisher, aGenre, aPlayers, aDate, aRegion, aPlaycount,
+         aLastplayed{, aCrc32, aSha1} );
 end;
 
 //Chargement des attributs dans l'objet TGame
-procedure TGame.Load( aId, aPath, aName, aDescription, aImagePath, aRating,
-                      aDeveloper, aPublisher, aGenre, aPlayers, aDate: string );
+procedure TGame.Load( aPath, aName, aDescription, aImagePath, aRating,
+                      aDeveloper, aPublisher, aGenre, aPlayers, aDate,
+                      aRegion, aPlaycount, aLastplayed{, aCrc32, aSha1}: string );
 begin
-   FId:= aId;
    FRomPath:= aPath;
    FRomName:= GetRomName( aPath );
    FName:= aName;
@@ -482,6 +501,11 @@ begin
    FPublisher:= aPublisher;
    FGenre:= aGenre;
    FPlayers:= aPlayers;
+   FRegion:= aRegion;
+   FPlaycount:= aPlaycount;
+   FLastplayed:= aLastplayed;
+//   FCrc32:= aCrc32;
+//   FSha1:= aSha1;
 end;
 
 //Fonction permettant de récupérer le nom de la rom avec son extension
@@ -491,6 +515,22 @@ var
 begin
    _Pos:= LastDelimiter( '/', aRomPath );
    Result:= Copy( aRomPath, Succ( _Pos ), ( aRomPath.Length - _Pos ) );
+end;
+
+//Fonction permettant de récupérer le MD5 des roms
+function TGame.GetMd5( aFileName: string ): string;
+var
+   IdMD5: TIdHashMessageDigest5;
+   FS: TFileStream;
+begin
+   IdMD5 := TIdHashMessageDigest5.Create;
+   FS := TFileStream.Create( aFileName, fmOpenRead or fmShareDenyWrite );
+   try
+      Result := IdMD5.HashStreamAsHex(FS)
+   finally
+      FS.Free;
+      IdMD5.Free;
+   end;
 end;
 
 //Formate correctement la date depuis la string récupérée du xml
@@ -661,7 +701,7 @@ begin
       end;
 
       //On remet le curseur par défaut
-      Cursor:= crDefault;
+      Screen.Cursor:= crDefault;
    end;
 end;
 
@@ -683,7 +723,7 @@ var
    _Node: IXmlNode;
 begin
    //on met le curseur sablier pour montrer que ça bosse.
-   Cursor:= crHourGlass;
+   Screen.Cursor:= crHourGlass;
 
    //Initialisation à nil au cas où liste de jeux vide
    Result:= nil;
@@ -694,6 +734,7 @@ begin
 
    //On cherche le premier "jeu"
    _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
+//   _Node := XMLDoc.ChildNodes.FindNode( Cst_Game );
 
    //Si pas de jeu trouvé on sort et on renvoie nil
    if not Assigned( _Node ) then Exit;
@@ -708,8 +749,7 @@ begin
       if _Node.HasChildNodes then begin
 
          //Création de l'objet TGame et passage des infos en argument
-         _Game:= TGame.Create( _Node.AttributeNodes[Cst_Id].Text,
-                               GetNodeValue( _Node, Cst_Path ),
+         _Game:= TGame.Create( GetNodeValue( _Node, Cst_Path ),
                                GetNodeValue( _Node, Cst_Name ),
                                GetNodeValue( _Node,Cst_Description ),
                                GetNodeValue( _Node, Cst_ImageLink ),
@@ -718,7 +758,10 @@ begin
                                GetNodeValue( _Node, Cst_Publisher ),
                                GetNodeValue( _Node, Cst_Genre ),
                                GetNodeValue( _Node, Cst_Players ),
-                               FormatDateFromString( GetNodeValue( _Node, Cst_ReleaseDate ) ) );
+                               FormatDateFromString( GetNodeValue( _Node, Cst_ReleaseDate ) ),
+                               GetNodeValue( _Node, Cst_Region ),
+                               GetNodeValue( _Node, Cst_Playcount ),
+                               GetNodeValue( _Node, Cst_LastPlayed ) );
 
          //On ajoute à la _Gamelist
          _GameList.Add( _Game );
@@ -757,8 +800,10 @@ begin
    Chk_NbPlayers.Enabled:= aValue;
    Chk_ReleaseDate.Enabled:= aValue;
    Chk_Description.Enabled:= aValue;
+   Chk_Region.Enabled:= aValue;
    Btn_ChangeImage.Enabled:= aValue;
    Btn_SetDefaultPicture.Enabled:= aValue;
+   Btn_MoreInfos.Enabled:= aValue;
 end;
 
 //Permet de tout cocher ou décocher les checkboxes d'un coup
@@ -772,6 +817,7 @@ begin
    Chk_NbPlayers.Checked:= aValue;
    Chk_ReleaseDate.Checked:= aValue;
    Chk_Description.Checked:= aValue;
+   Chk_Region.Checked:= aValue;
 end;
 
 //Repasse tous les champs en readonly ou non
@@ -784,6 +830,7 @@ begin
    Edt_Publisher.ReadOnly:= aValue;
    Edt_NbPlayers.ReadOnly:= aValue;
    Edt_ReleaseDate.ReadOnly:= aValue;
+   Edt_Region.ReadOnly:= aValue;
    Mmo_Description.ReadOnly:= aValue;
 end;
 
@@ -807,7 +854,8 @@ begin
                              not ( _Game.FDeveloper.Equals( Edt_Developer.Text ) ) or
                              not ( _Game.FPublisher.Equals( Edt_Publisher.Text ) ) or
                              not ( _Game.FReleaseDate.Equals( Edt_ReleaseDate.Text ) ) or
-                             not ( _Game.FDescription.Equals( Mmo_Description.Text ) );
+                             not ( _Game.FDescription.Equals( Mmo_Description.Text ) ) or
+                             not ( _Game.FRegion.Equals( Edt_Region.Text ) );
 end;
 
 //Chargement de la liste des jeux d'un système dans le listbox des jeux
@@ -872,6 +920,7 @@ begin
       Edt_Developer.OnChange:= nil;
       Edt_Publisher.OnChange:= nil;
       Edt_NbPlayers.OnChange:= nil;
+      Edt_Region.OnChange:= nil;
       Mmo_Description.OnChange:= nil;
 
       //On commence par vider le listbox
@@ -897,7 +946,8 @@ begin
             ( ( _FilterIndex = 5 ) and ( _TmpGame.FDeveloper.IsEmpty ) ) or
             ( ( _FilterIndex = 6 ) and ( _TmpGame.FPublisher.IsEmpty ) ) or
             ( ( _FilterIndex = 7 ) and ( _TmpGame.FDescription.IsEmpty ) ) or
-            ( ( _FilterIndex = 8 ) and ( _TmpGame.FGenre.IsEmpty ) ) then begin
+            ( ( _FilterIndex = 8 ) and ( _TmpGame.FGenre.IsEmpty ) ) or
+            ( ( _FilterIndex = 9 ) and ( _TmpGame.FRegion.IsEmpty) ) then begin
 
             Lbx_Games.Items.AddObject( _TmpGame.FName, _TmpGame );
          end
@@ -930,6 +980,7 @@ begin
       Edt_Publisher.OnChange:= FieldChange;
       Edt_NbPlayers.OnChange:= FieldChange;
       Mmo_Description.OnChange:= FieldChange;
+      Edt_Region.OnChange:= FieldChange;
    end;
 end;
 
@@ -971,6 +1022,7 @@ begin
    Edt_NbPlayers.Text:= aGame.FPlayers;
    Edt_Genre.Text:= aGame.FGenre;
    Mmo_Description.Text:= aGame.FDescription;
+   Edt_Region.Text:= aGame.FRegion;
 
    //on récupère le nom brut du jeu pour construire le chemin vers l'image
    _RawGameName:= ChangeFileExt( aGame.FRomName, '' );
@@ -1078,7 +1130,7 @@ var
    _Node: IXMLNode;
 
 begin
-   Cursor:= crHourGlass;
+   Screen.Cursor:= crHourGlass;
 
    //on récupère le nom du jeu pour construire le nom de l'image
    _GameName:= ChangeFileExt( aGame.FRomName, '' );
@@ -1116,7 +1168,7 @@ begin
 
    //Et on boucle pour trouver le noeud avec le bon Id
    repeat
-      if ( _Node.AttributeNodes[Cst_Id].Text = aGame.FId ) then Break;
+      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.FRomPath ) then Break;
       _Node := _Node.NextSibling;
    until not Assigned( _Node );
 
@@ -1131,7 +1183,7 @@ begin
    //Et enfin on met à jour l'objet TGame associé
    aGame.FImagePath:= _ImageLink;
 
-   Cursor:= crDefault;
+   Screen.Cursor:= crDefault;
 end;
 
 //Récupère le nom d'enum du systeme sélectionné dans le combobox
@@ -1165,11 +1217,22 @@ end;
 //Enregistre les changements effectués pour le jeu dans le fichier .xml
 //et rafraichit le listbox si besoin
 procedure TFrm_Editor.SaveChangesToGamelist;
+
+   //Permet de s'assurer q'un noeud existe
+   function NodeExists( aNode: IXMLNode; aNodeName: string ): Boolean;
+   begin
+      Result:= False;
+      if Assigned( aNode.ChildNodes.FindNode( aNodeName ) ) then
+         Result:= True;
+   end;
+
 var
    _Node: IXMLNode;
    _Game: TGame;
    _GameListPath, _Date: string;
+   _NodeAdded: Boolean;
 begin
+   _NodeAdded:= False;
    //On récupère le chemin du fichier gamelist.xml
    _GameListPath:= FRootRomsPath + Cst_GameListFileName;
 
@@ -1178,14 +1241,13 @@ begin
 
    //On ouvre le fichier xml
    XMLDoc.LoadFromFile( _GameListPath );
-   XMLDoc.Active:= True;
 
    //On récupère le premier noeud "game"
    _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
 
    //Et on boucle pour trouver le noeud avec le bon Id
    repeat
-      if ( _Node.AttributeNodes[Cst_Id].Text = _Game.FId ) then Break;
+      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = _Game.FRomPath ) then Break;
       _Node := _Node.NextSibling;
    until not Assigned( _Node );
 
@@ -1229,8 +1291,22 @@ begin
       _Node.ChildNodes.Nodes[Cst_Description].Text:= Mmo_Description.Text;
       _Game.FDescription:= Mmo_Description.Text;
    end;
+   if not ( _Game.FRegion.Equals( Edt_Region.Text ) ) then begin
+      if not ( NodeExists( _Node, Cst_Region ) ) then begin
+         _Node.AddChild( Cst_Region );
+         _NodeAdded:= True;
+      end;
+      _Node.ChildNodes.Nodes[Cst_Region].Text:= Edt_Region.Text;
+      _Game.FRegion:= Edt_Region.Text;
+   end;
 
-   //Et enfin on enregistre le fichier.
+   //Et enfin on enregistre le fichier (en formatant correctement si on a ajouté un noeud)
+   if _NodeAdded then begin
+      Screen.Cursor:= crHourGlass;
+      XMLDoc.XML.Text:= Xml.Xmldoc.FormatXMLData( XMLDoc.XML.Text );
+      Screen.Cursor:= crDefault;
+      XMLDoc.Active:= True;
+   end;
    XMLDoc.SaveToFile( _GameListPath );
    XMLDoc.Active:= False;
 end;
@@ -1245,6 +1321,7 @@ begin
    Edt_Developer.Text:= '';
    Edt_NbPlayers.Text:= '';
    Edt_Genre.Text:= '';
+   Edt_Region.Text:= '';
    Mmo_Description.Text:= '';
    Img_Game.Picture.Graphic:= nil;
 end;
@@ -1266,6 +1343,7 @@ begin
       6: Edt_Developer.ReadOnly:= not (Sender as TCheckBox).Checked;
       7: Edt_Genre.ReadOnly:= not (Sender as TCheckBox).Checked;
       8: Mmo_Description.ReadOnly:= not (Sender as TCheckBox).Checked;
+      9: Edt_Region.ReadOnly:= not (Sender as TCheckBox).Checked;
    end;
 end;
 
@@ -1275,6 +1353,43 @@ begin
    if ( Key = ^A ) then begin
       (Sender as TMemo).SelectAll;
        Key:= #0;
+   end;
+end;
+
+//Click sur le bouton more infos pour afficher la fenêtre de complément d'infos
+//sur le jeu sélectionné
+procedure TFrm_Editor.Btn_MoreInfosClick(Sender: TObject);
+var
+   _Infos: TStringList;
+   _Game: TGame;
+   MoreInfos: TFrm_MoreInfos;
+begin
+   //on crée une liste avec les infos à afficher
+   _Infos:= TStringList.Create;
+   try
+      //on récupère le jeu sélectionné
+      _Game:= TGame( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] );
+
+       //On ajoute le Hash MD5
+       _Game.FMd5:= _Game.GetMd5( FRootPath + getCurrentFolderName + '\' + _Game.FRomName );
+
+      //on remplit la liste avec les infos dont on a besoin
+      _Infos.Add( _Game.FPlaycount );
+      _Infos.Add( _Game.FLastplayed );
+      _Infos.Add( _Game.FCrc32 );
+      _Infos.Add( _Game.FMd5 );
+      _Infos.Add( _Game.FSha1 );
+
+      //et on affiche la fenêtre
+      MoreInfos:= TFrm_MoreInfos.Create( nil );
+      try
+         MoreInfos.Execute( _Infos );
+      finally
+         MoreInfos.Free;
+      end;
+   finally
+      //Ensuite on supprime la liste
+      _Infos.Free;
    end;
 end;
 
