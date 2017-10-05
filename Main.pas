@@ -9,7 +9,7 @@ uses
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
    Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Vcl.StdCtrls, Xml.Win.msxmldom, Winapi.msxml,
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, MoreInfos,
-   IdHashMessageDigest, IdHashSHA, IdHashCRC;
+   IdHashMessageDigest, IdHashSHA, IdHashCRC, System.ImageList, Vcl.ImgList;
 
 resourcestring
    Rst_NoValidFolder = 'No folder with gamelist.xml found';
@@ -17,6 +17,9 @@ resourcestring
    Rst_HashWarning = 'Hashing a file can be extremly slow depending on' + sLineBreak +
                      'the file size, your computer, your HDD...' + sLineBreak +
                      'Do you want to hash anyway ?';
+   Rst_DeleteWarning = 'This will delete the entry in the gamelist,' + sLinebreak +
+                       'the rom itself and the associated image permanently.' + sLineBreak +
+                       'Proceed anyway ?';
 
 type
    //enumération pour les différents systèmes
@@ -86,8 +89,10 @@ type
 
    TGame = class
    private
+
       FRomPath: string;
       FRomName: string;
+      FRomNameWoExt: string;
       FName: string;
       FDescription: string;
       FImagePath: string;
@@ -103,6 +108,7 @@ type
       FCrc32: string;
       FMd5: string;
       FSha1: string;
+
       procedure Load( aPath, aName, aDescription, aImagePath, aRating,
                       aDeveloper, aPublisher, aGenre, aPlayers, aDate,
                       aRegion, aPlaycount, aLastplayed: string );
@@ -111,7 +117,9 @@ type
       function GetMd5( aFileName: string ): string;
       function GetSha1( aFileName: string ): string;
       function GetCrc32( aFileName: string ): string;
+
    public
+
       constructor Create( aPath, aName, aDescription, aImagePath, aRating,
                           aDeveloper, aPublisher, aGenre, aPlayers, aDate,
                           aRegion, aPlaycount, aLastplayed: string ); reintroduce;
@@ -170,6 +178,11 @@ type
       Mnu_GaLowerCase: TMenuItem;
       Mnu_GaUpperCase: TMenuItem;
       Mnu_RemoveRegion: TMenuItem;
+      Btn_Delete: TButton;
+      Img_List: TImageList;
+      Mnu_DeleteWoPrompt: TMenuItem;
+      ProgressBar: TProgressBar;
+
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
       procedure Cbx_SystemsChange(Sender: TObject);
@@ -185,29 +198,46 @@ type
       procedure Cbx_FilterChange(Sender: TObject);
       procedure Btn_ChangeAllClick(Sender: TObject);
       procedure Btn_MoreInfosClick(Sender: TObject);
+      procedure Mnu_GodModeClick(Sender: TObject);
+      procedure Mnu_AutoHashClick(Sender: TObject);
+      procedure FormClose(Sender: TObject; var Action: TCloseAction);
+      procedure Btn_DeleteClick(Sender: TObject);
+      procedure Mnu_DeleteWoPromptClick(Sender: TObject);
+      procedure ChangeCaseClick(Sender: TObject);
+      procedure ChangeCaseGameClick(Sender: TObject);
+
    private
+
       FRootPath: string;
       FRootRomsPath: string;
       FRootImagesPath: string;
       FXmlImagesPath: string;
       FXmlRomsPath: string;
+      FGodMode, FAutoHash, FDelWoPrompt: Boolean;
       GSystemList: TObjectDictionary<string,TObjectList<TGame>>;
+
+      procedure LoadFromIni;
+      procedure SaveToIni;
       procedure BuildSystemsList;
-      function BuildGamesList( aPathToFile: string ): TObjectList<TGame>;
       procedure LoadGamesList( aSystem: string );
       procedure LoadGame( aGame: TGame );
       procedure ClearAllFields;
-      function FormatDateFromString( aDate: string; aIso: Boolean = False ): string;
       procedure SaveChangesToGamelist;
       procedure EnableControls( aValue: Boolean );
       procedure SetCheckBoxes( aValue: Boolean );
       procedure SetFieldsReadOnly( aValue: Boolean );
       procedure CheckIfChangesToSave;
       procedure ChangeImage( aPath: string; aGame: TGame );
+      procedure LoadSystemLogo( aPictureName: string );
+      procedure DeleteGame;
+      procedure ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False; aUp: Boolean = False );
+
       function  getSystemKind: TSystemKind;
       function  getCurrentFolderName: string;
       function GetCurrentLogoName: string;
-      procedure LoadSystemLogo( aPictureName: string );
+      function BuildGamesList( aPathToFile: string ): TObjectList<TGame>;
+      function FormatDateFromString( aDate: string; aIso: Boolean = False ): string;
+
    end;
 
 const
@@ -235,6 +265,11 @@ const
    Cst_DefaultPicsFolderPath = 'Resources\DefaultPictures\';
    Cst_DefaultImageNameSuffix = '-default.png';
    Cst_LogoPicsFolder = 'Resources\SystemsLogos\';
+   Cst_IniFilePath = 'Resources\Settings.ini';
+   Cst_IniOptions = 'Options';
+   Cst_IniGodMode = 'GodMode';
+   Cst_IniAutoHash = 'AutoHash';
+   Cst_IniDelWoPrompt = 'DelWoPrompt';
 
 var
    Frm_Editor: TFrm_Editor;
@@ -477,7 +512,7 @@ const
       'wii.png' );
 
 
-//Constructeur oject SystemKindObject
+//Constructeur object SystemKindObject
 constructor TSystemKindObject.Create( const aName: string );
 var
  _systemKind: TSystemKind;
@@ -507,6 +542,7 @@ procedure TGame.Load( aPath, aName, aDescription, aImagePath, aRating,
 begin
    FRomPath:= aPath;
    FRomName:= GetRomName( aPath );
+   FRomNameWoExt:= ChangeFileExt( FRomName, '' );
    FName:= aName;
    FDescription:= aDescription;
    FImagePath:= aImagePath;
@@ -633,11 +669,50 @@ begin
    end;
 end;
 
+//Chargement des paramètres depuis le fichier INI
+procedure TFrm_Editor.LoadFromIni;
+var
+   FileIni: TIniFile;
+begin
+   FileIni:= TIniFile.Create( ExtractFilePath( Application.ExeName ) + Cst_IniFilePath );
+   try
+      //On tent de lire les fichier ini, si on ne trouve pas on met tout à false par défaut
+      FGodMode:= FileIni.ReadBool( Cst_IniOptions, Cst_IniGodMode, False );
+      Mnu_GodMode.Checked:= FGodMode;
+      Mnu_DeleteWoPrompt.Enabled:= FGodMode;
+
+      FAutoHash:= FileIni.ReadBool( Cst_IniOptions, Cst_IniAutoHash, False );
+      Mnu_AutoHash.Checked:= FAutoHash;
+
+      FDelWoPrompt:= FileIni.ReadBool( Cst_IniOptions, Cst_IniDelWoPrompt, False );
+      Mnu_DeleteWoPrompt.Checked:= FDelWoPrompt;
+   finally
+      FileIni.Free;
+   end;
+end;
+
+//Enregistrement des paramètres dans le fichier INI
+procedure TFrm_Editor.SaveToIni;
+var
+   FileIni: TIniFile;
+begin
+   FileIni:= TIniFile.Create( ExtractFilePath( Application.ExeName ) + Cst_IniFilePath );
+   try
+      FileIni.WriteBool( Cst_IniOptions, Cst_IniGodMode, FGodMode );
+      FileIni.WriteBool( Cst_IniOptions, Cst_IniAutoHash, FAutoHash );
+      FileIni.WriteBool( Cst_IniOptions, Cst_IniDelWoPrompt, ( FGodMode and FDelWoPrompt ) );
+   finally
+      FileIni.Free;
+   end;
+end;
+
 //A l'ouverture du programme
 procedure TFrm_Editor.FormCreate(Sender: TObject);
 begin
    Lbl_NbGamesFound.Caption:= '';
    GSystemList:= TObjectDictionary<string, TObjectList<TGame>>.Create([doOwnsValues]);
+   LoadFromIni;
+   Btn_Delete.Visible:= Mnu_GodMode.Checked;
 end;
 
 //Action au click sur le menuitem "choose folder"
@@ -855,6 +930,14 @@ begin
    Btn_ChangeImage.Enabled:= aValue;
    Btn_SetDefaultPicture.Enabled:= aValue;
    Btn_MoreInfos.Enabled:= aValue;
+   Btn_Delete.Enabled:= aValue;
+   Mnu_System.Enabled:= aValue;
+   Mnu_Game.Enabled:= aValue;
+   Mnu_LowerCase.Enabled:= aValue;
+   Mnu_UpperCase.Enabled:= aValue;
+   Mnu_GaLowerCase.Enabled:= aValue;
+   Mnu_GaUpperCase.Enabled:= aValue;
+   Mnu_RemoveRegion.Enabled:= aValue;
 end;
 
 //Permet de tout cocher ou décocher les checkboxes d'un coup
@@ -1163,10 +1246,15 @@ begin
                    Cst_DefaultImageNameSuffix;
 
    //et on boucle sur tous les jeux de la liste pour remplacer l'image
+   ProgressBar.Visible:= True;
+   ProgressBar.Max:= Pred( Lbx_Games.Items.Count );
+   ProgressBar.Position:= 0;
    for ii:= 0 to Pred( Lbx_Games.Items.Count ) do begin
       _Game:= ( Lbx_Games.Items.Objects[ii] as TGame );
       ChangeImage( PathToDefault, _Game );
+      ProgressBar.Position:= ( ProgressBar.Position + 1 );
    end;
+   ProgressBar.Visible:= False;
 
    //on update la liste pour refléter les changements
    LoadGamesList( getCurrentFolderName );
@@ -1259,7 +1347,6 @@ end;
 procedure TFrm_Editor.Btn_SaveChangesClick(Sender: TObject);
 begin
    SaveChangesToGamelist;
-   LoadGamesList( getCurrentFolderName );
    SetCheckBoxes( False );
    SetFieldsReadOnly( True );
    Btn_SaveChanges.Enabled:= False;
@@ -1281,9 +1368,10 @@ var
    _Node: IXMLNode;
    _Game: TGame;
    _GameListPath, _Date: string;
-   _NodeAdded: Boolean;
+   _NodeAdded, _NameChanged: Boolean;
 begin
    _NodeAdded:= False;
+   _NameChanged:= False;
    //On récupère le chemin du fichier gamelist.xml
    _GameListPath:= FRootRomsPath + Cst_GameListFileName;
 
@@ -1296,7 +1384,7 @@ begin
    //On récupère le premier noeud "game"
    _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
 
-   //Et on boucle pour trouver le noeud avec le bon Id
+   //Et on boucle pour trouver le bon noeud
    repeat
       if ( _Node.ChildNodes.Nodes[Cst_Path].Text = _Game.FRomPath ) then Break;
       _Node := _Node.NextSibling;
@@ -1307,6 +1395,7 @@ begin
       _Node.ChildNodes.Nodes[Cst_Name].Text:= Edt_Name.Text;
       _Game.FName:= Edt_Name.Text;
       Lbx_Games.Items[Lbx_Games.ItemIndex]:= Edt_Name.Text;
+      _NameChanged:= True;
    end;
    if not ( _Game.FGenre.Equals( Edt_Genre.Text ) ) then begin
       _Node.ChildNodes.Nodes[Cst_Genre].Text:= Edt_Genre.Text;
@@ -1360,6 +1449,76 @@ begin
    end;
    XMLDoc.SaveToFile( _GameListPath );
    XMLDoc.Active:= False;
+
+   //si on a changé le nom du jeu, on rafraichit la liste
+   if _NameChanged then  LoadGamesList( getCurrentFolderName );
+
+end;
+
+//Action au click sur le bouton delete this game
+procedure TFrm_Editor.Btn_DeleteClick(Sender: TObject);
+begin
+   if FDelWoPrompt or
+      ( MessageDlg( Rst_DeleteWarning, mtInformation,
+                    [mbYes, mbNo], 0, mbNo ) = mrYes ) then
+      DeleteGame;
+end;
+
+//Supprime un jeu du gamelist et physiquement sur le disque (ou carte SD ou clé...)
+procedure TFrm_Editor.DeleteGame;
+var
+   _Game: TGame;
+   _Node: IXMLNode;
+   _RomPath, _GameListPath, _ImagePath: string;
+   _List: TObjectList<TGame>;
+begin
+   //on récupère le jeu sélectionné
+   _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
+
+   //on construit le chemin vers la rom à supprimer
+   _RomPath:= FRootRomsPath + _Game.FRomName;
+
+   //on construit le chemin vers le gamelist.xml
+   _GameListPath:= FRootRomsPath + Cst_GameListFileName;
+
+   //on construit le chemin vers l'image
+   _ImagePath:= FRootImagesPath + _Game.FRomNameWoExt;
+
+   //on chope la liste de jeux correspondante
+   GSystemList.TryGetValue( getCurrentFolderName, _List );
+
+    //On ouvre le fichier xml
+    XMLDoc.LoadFromFile( _GameListPath );
+
+    //On récupère le premier noeud "game"
+    _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
+
+    //Et on boucle pour trouver le bon noeud
+    repeat
+       if ( _Node.ChildNodes.Nodes[Cst_Path].Text = _Game.FRomPath ) then Break;
+       _Node := _Node.NextSibling;
+    until not Assigned( _Node );
+
+    //on vire le noeud du fichier xml
+    XMLDoc.DocumentElement.ChildNodes.Remove( _Node );
+    XMLDoc.Active:= True;
+    XMLDoc.SaveToFile( _GameListPath );
+    XMLDoc.Active:= False;
+
+    //On supprime l'image du jeu (on teste les extensions en cascade pour être sur de supprimer)
+    if not DeleteFile( _ImagePath + Cst_ImageSuffixPng ) then begin
+       if not DeleteFile( _ImagePath + Cst_ImageSuffixJpg ) then
+          DeleteFile( _ImagePath + Cst_ImageSuffixJpeg );
+    end;
+
+    //suppression du jeu physiquement
+    DeleteFile( _RomPath );
+
+    //Suppression du jeu dans sa liste mère
+    _List.Remove( _Game );
+
+    //et mise à jour de l'affichage du listbox pour prendre en compte la suppression
+    LoadGamesList( getCurrentFolderName );
 end;
 
 //Vidage de tous les champs et de l'image
@@ -1398,6 +1557,135 @@ begin
    end;
 end;
 
+//Au click sur le menuitem godmode on change la visibilité du bouton delete
+procedure TFrm_Editor.Mnu_GodModeClick(Sender: TObject);
+begin
+   Btn_Delete.Visible:= Mnu_GodMode.Checked;
+   FGodMode:= Mnu_GodMode.Checked;
+   Mnu_DeleteWoPrompt.Enabled:= FGodMode;
+   if not FGodMode then begin
+      Mnu_DeleteWoPrompt.Checked:= False;
+      FDelWoPrompt:= False;
+   end;
+end;
+
+//Au click sur Menuitem autohash
+procedure TFrm_Editor.Mnu_AutoHashClick(Sender: TObject);
+begin
+   FAutoHash:= Mnu_AutoHash.Checked;
+end;
+
+//Au click sur le menu item Del Without Prompt
+procedure TFrm_Editor.Mnu_DeleteWoPromptClick(Sender: TObject);
+begin
+   FDelWoPrompt:= Mnu_DeleteWoPrompt.Checked;
+end;
+
+//Au click sur le menu item convert to lower ou upper case (system)
+procedure TFrm_Editor.ChangeCaseClick(Sender: TObject);
+var
+   _Game: TGame;
+   ii: Integer;
+   _List: TObjectList<TGame>;
+begin
+   GSystemList.TryGetValue( getCurrentFolderName, _List );
+
+   Screen.Cursor:= crHourGlass;
+   ProgressBar.Visible:= True;
+   ProgressBar.Max:= Pred( _List.Count );
+   ProgressBar.Position:= 0;
+   for ii:= 0 to Pred( _List.Count ) do begin
+      _Game:= ( Lbx_Games.Items.Objects[ii] as TGame );
+      if ( ( sender as TMenuItem ).Tag = 10 ) then
+         ConvertFieldsCase( _Game )
+      else if ( ( sender as TMenuItem ).Tag = 11 ) then
+         ConvertFieldsCase( _Game, False, True );
+      ProgressBar.Position:= ( ProgressBar.Position + 1 );
+   end;
+   LoadGamesList( getCurrentFolderName );
+   ProgressBar.Visible:= False;
+   Screen.Cursor:= crDefault;
+end;
+
+//Au click sur le menu item convert to lower ou upper case (system)
+procedure TFrm_Editor.ChangeCaseGameClick(Sender: TObject);
+var
+   _Game: TGame;
+begin
+
+   _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
+   if ( ( sender as TMenuItem ).Tag = 12 ) then
+      ConvertFieldsCase( _Game, True )
+   else if ( ( sender as TMenuItem ).Tag = 13 ) then
+      ConvertFieldsCase( _Game, True, True );
+end;
+
+//Permet de convertir les champs en majuscule ou minuscule en fonction
+// des paramètres passés (fonctionne par systeme ou par jeu)
+procedure TFrm_Editor.ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False; aUp: Boolean = False );
+
+   //rafraichit les données des champs EDIT dans le cas de modif d'un seul jeu
+   procedure RefreshDisplay( aGame: TGame );
+   begin
+      Edt_Name.Text:= aGame.FName;
+      Edt_Genre.Text:= aGame.FGenre;
+      Edt_Region.Text:= aGame.FRegion;
+      Edt_Publisher.Text:= aGame.FPublisher;
+      Edt_Developer.Text:= aGame.FDeveloper;
+      Mmo_Description.Text:= aGame.FDescription;
+      Lbx_Games.Items[Lbx_Games.ItemIndex]:= Edt_Name.Text;
+   end;
+
+   //factorisation de code
+   function ConvertUpOrLow( aNode: IXMLNode; aNodeName: string; aUp: Boolean; aField: string ): string;
+   begin
+      if aUp then begin
+         Result:= UpperCase( aField );
+      end else begin
+         Result:= LowerCase( aField );
+      end;
+      if Assigned( aNode.ChildNodes.FindNode( aNodeName ) ) then
+         aNode.ChildNodes.Nodes[aNodeName].Text:= Result;
+   end;
+
+var
+   _Node: IXMLNode;
+   _GameListPath: string;
+begin
+   //on construit le chemin vers le gamelist.xml
+   _GameListPath:= FRootRomsPath + Cst_GameListFileName;
+
+   //On ouvre le fichier xml
+   XMLDoc.LoadFromFile( _GameListPath );
+
+   //on l'active
+   XMLDoc.Active:= True;
+
+   //On récupère le premier noeud correspondant au jeu
+   _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
+
+   //Et on boucle pour trouver le bon noeud
+   repeat
+      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.FRomPath ) then Break;
+         _Node := _Node.NextSibling;
+   until not Assigned( _Node );
+
+   //on met à jour le xml et l'objet game
+   aGame.FName:= ConvertUpOrLow( _Node, Cst_Name, aUp, aGame.FName );
+   aGame.FRegion:= ConvertUpOrLow( _Node, Cst_Region, aUp, aGame.FRegion );
+   aGame.FDeveloper:= ConvertUpOrLow( _Node, Cst_Developer, aUp, aGame.FDeveloper );
+   aGame.FPublisher:= ConvertUpOrLow( _Node, Cst_Publisher, aUp, aGame.FPublisher );
+   aGame.FGenre:= ConvertUpOrLow( _Node, Cst_Genre, aUp, aGame.FGenre );
+   aGame.FDescription:= ConvertUpOrLow( _Node, Cst_Description, aUp, aGame.FDescription );
+
+   //si maj d'un seul jeu on met à jour l'affichage du jeu
+   if aUnique then RefreshDisplay( aGame );
+
+   //on enregistre le fichier xml
+   XMLDoc.SaveToFile( _GameListPath );
+   XMLDoc.Active:= False;
+end;
+
 //Sans ça pas de Ctrl+A dans le mémo...(c'est triste en 2017)
 procedure TFrm_Editor.Mmo_DescriptionKeyPress(Sender: TObject; var Key: Char);
 begin
@@ -1423,15 +1711,18 @@ begin
       _Game:= TGame( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] );
       _PathToRom:= FRootPath + getCurrentFolderName + '\' + _Game.FRomName;
 
-      if ( MessageDlg( Rst_HashWarning, mtInformation,
-         [mbYes, mbNo], 0, mbNo ) = mrYes ) then begin
-         //On ajoute les hash si nécessaire.
-         if _Game.FMd5.IsEmpty then
+      //On ajoute les hash si nécessaire.
+      if ( ( _Game.FMd5.IsEmpty ) or
+           ( _Game.FSha1.IsEmpty ) or
+           ( _Game.FCrc32.IsEmpty ) ) then begin
+         if FAutoHash or
+            ( ( not FAutoHash ) and ( MessageDlg( Rst_HashWarning, mtInformation,
+            [mbYes, mbNo], 0, mbNo ) = mrYes ) ) then begin
+
             _Game.FMd5:= _Game.GetMd5( _PathToRom );
-         if _Game.FSha1.IsEmpty then
             _Game.FSha1:= _Game.GetSha1( _PathToRom );
-         if _Game.FCrc32.IsEmpty then
             _Game.FCrc32:= _Game.GetCrc32( _PathToRom );
+         end;
       end;
 
       //on remplit la liste avec les infos dont on a besoin
@@ -1457,7 +1748,14 @@ end;
 //Click sur le menuitem "Quit"
 procedure TFrm_Editor.Mnu_QuitClick(Sender: TObject);
 begin
+   SaveToIni;
    Application.Terminate;
+end;
+
+//Juste avant la fermeture du programme, on sauvegarde les options dansle .INI
+procedure TFrm_Editor.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+   SaveToIni;
 end;
 
 //Nettoyage mémoire à la fermeture du programme
