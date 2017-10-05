@@ -1021,6 +1021,7 @@ object Frm_Editor: TFrm_Editor
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Img_BackGround: TImage
@@ -6220,8 +6221,9 @@ object Frm_Editor: TFrm_Editor
     Top = 192
     Width = 473
     Height = 473
-    Enabled = False
+    DoubleBuffered = True
     ItemHeight = 13
+    ParentDoubleBuffered = False
     Sorted = True
     TabOrder = 1
     OnClick = Lbx_GamesClick
@@ -6231,6 +6233,7 @@ object Frm_Editor: TFrm_Editor
     Top = 516
     Width = 649
     Height = 113
+    Enabled = False
     ReadOnly = True
     TabOrder = 2
     OnChange = FieldChange
@@ -6241,6 +6244,7 @@ object Frm_Editor: TFrm_Editor
     Top = 423
     Width = 185
     Height = 21
+    Enabled = False
     ReadOnly = True
     TabOrder = 3
     OnChange = FieldChange
@@ -6253,6 +6257,7 @@ object Frm_Editor: TFrm_Editor
     Hint = 
       'Following formats are accepted :'#13#10#13#10'dd/mm/yyyy'#13#10'mm/yyyy'#13#10'yyyy'#13#10#13 +
       #10'Everything else will be saved as blank.'
+    Enabled = False
     ParentShowHint = False
     ReadOnly = True
     ShowHint = True
@@ -6264,6 +6269,7 @@ object Frm_Editor: TFrm_Editor
     Top = 469
     Width = 185
     Height = 21
+    Enabled = False
     ReadOnly = True
     TabOrder = 5
     OnChange = FieldChange
@@ -6273,6 +6279,7 @@ object Frm_Editor: TFrm_Editor
     Top = 469
     Width = 185
     Height = 21
+    Enabled = False
     ReadOnly = True
     TabOrder = 6
     OnChange = FieldChange
@@ -6282,6 +6289,7 @@ object Frm_Editor: TFrm_Editor
     Top = 469
     Width = 185
     Height = 21
+    Enabled = False
     ReadOnly = True
     TabOrder = 7
     OnChange = FieldChange
@@ -6291,6 +6299,7 @@ object Frm_Editor: TFrm_Editor
     Top = 423
     Width = 185
     Height = 21
+    Enabled = False
     ReadOnly = True
     TabOrder = 8
     OnChange = FieldChange
@@ -6382,6 +6391,7 @@ object Frm_Editor: TFrm_Editor
     Top = 376
     Width = 417
     Height = 21
+    Enabled = False
     ReadOnly = True
     TabOrder = 16
     OnChange = FieldChange
@@ -6419,7 +6429,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_SetDefaultPicture: TButton
     Left = 600
-    Top = 267
+    Top = 286
     Width = 139
     Height = 25
     Caption = 'Change Picture to default'
@@ -6429,7 +6439,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_ChangeAll: TButton
     Left = 571
-    Top = 306
+    Top = 315
     Width = 193
     Height = 25
     Caption = 'Change all missing pictures to default'
@@ -6476,6 +6486,7 @@ object Frm_Editor: TFrm_Editor
     Top = 376
     Width = 185
     Height = 21
+    Enabled = False
     ReadOnly = True
     TabOrder = 24
     OnChange = FieldChange
@@ -6520,6 +6531,16 @@ object Frm_Editor: TFrm_Editor
     TabOrder = 27
     Visible = False
   end
+  object Btn_RemovePicture: TButton
+    Left = 600
+    Top = 256
+    Width = 139
+    Height = 25
+    Caption = 'Delete Picture'
+    Enabled = False
+    TabOrder = 28
+    OnClick = Btn_RemovePictureClick
+  end
   object XMLDoc: TXMLDocument
     NodeIndentStr = #9
     Options = [doAttrNull, doAutoPrefix, doNamespaceDecl]
@@ -6556,18 +6577,15 @@ object Frm_Editor: TFrm_Editor
         object Mnu_LowerCase: TMenuItem
           Tag = 10
           Caption = 'Convert all text to lowercase'
-          Enabled = False
           OnClick = ChangeCaseClick
         end
         object Mnu_UpperCase: TMenuItem
           Tag = 11
           Caption = 'Convert all text to uppercase'
-          Enabled = False
           OnClick = ChangeCaseClick
         end
         object Mnu_RemoveRegion: TMenuItem
-          Caption = 'Remove region from game name'
-          Enabled = False
+          Caption = 'Remove region from games names'
         end
       end
       object Mnu_Game: TMenuItem
@@ -6576,13 +6594,11 @@ object Frm_Editor: TFrm_Editor
         object Mnu_GaLowerCase: TMenuItem
           Tag = 12
           Caption = 'Convert all text to lowercase'
-          Enabled = False
           OnClick = ChangeCaseGameClick
         end
         object Mnu_GaUpperCase: TMenuItem
           Tag = 13
           Caption = 'Convert all text to uppercase'
-          Enabled = False
           OnClick = ChangeCaseGameClick
         end
       end
@@ -6608,6 +6624,7 @@ object Frm_Editor: TFrm_Editor
     end
     object Mnu_About: TMenuItem
       Caption = 'About'
+      OnClick = Mnu_AboutClick
     end
   end
   object OpenFile: TOpenDialog
@@ -6619,7 +6636,7 @@ object Frm_Editor: TFrm_Editor
     Left = 176
     Top = 208
     Bitmap = {
-      494C010101000800140010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800180010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -6,7 +6,7 @@ uses
    Winapi.Windows, Winapi.Messages,
    System.SysUtils, System.Variants, System.Classes, System.IniFiles, System.Generics.Collections,
    System.DateUtils, System.RegularExpressions, System.UITypes,
-   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes,
    Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Vcl.StdCtrls, Xml.Win.msxmldom, Winapi.msxml,
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, MoreInfos,
    IdHashMessageDigest, IdHashSHA, IdHashCRC, System.ImageList, Vcl.ImgList;
@@ -182,6 +182,7 @@ type
       Img_List: TImageList;
       Mnu_DeleteWoPrompt: TMenuItem;
       ProgressBar: TProgressBar;
+      Btn_RemovePicture: TButton;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -205,6 +206,9 @@ type
       procedure Mnu_DeleteWoPromptClick(Sender: TObject);
       procedure ChangeCaseClick(Sender: TObject);
       procedure ChangeCaseGameClick(Sender: TObject);
+      procedure FormShow(Sender: TObject);
+    procedure Btn_RemovePictureClick(Sender: TObject);
+    procedure Mnu_AboutClick(Sender: TObject);
 
    private
 
@@ -230,7 +234,8 @@ type
       procedure ChangeImage( aPath: string; aGame: TGame );
       procedure LoadSystemLogo( aPictureName: string );
       procedure DeleteGame;
-      procedure ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False; aUp: Boolean = False );
+      procedure ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False;
+                                   aUp: Boolean = False );
 
       function  getSystemKind: TSystemKind;
       function  getCurrentFolderName: string;
@@ -680,6 +685,7 @@ begin
       FGodMode:= FileIni.ReadBool( Cst_IniOptions, Cst_IniGodMode, False );
       Mnu_GodMode.Checked:= FGodMode;
       Mnu_DeleteWoPrompt.Enabled:= FGodMode;
+      Btn_Delete.Visible:= FGodMode;
 
       FAutoHash:= FileIni.ReadBool( Cst_IniOptions, Cst_IniAutoHash, False );
       Mnu_AutoHash.Checked:= FAutoHash;
@@ -712,7 +718,12 @@ begin
    Lbl_NbGamesFound.Caption:= '';
    GSystemList:= TObjectDictionary<string, TObjectList<TGame>>.Create([doOwnsValues]);
    LoadFromIni;
-   Btn_Delete.Visible:= Mnu_GodMode.Checked;
+end;
+
+//Met le focus sur le combo system à l'affichage de la fenêtre
+procedure TFrm_Editor.FormShow(Sender: TObject);
+begin
+   Lbx_Games.SetFocus;
 end;
 
 //Action au click sur le menuitem "choose folder"
@@ -747,7 +758,6 @@ begin
    Cbx_Systems.Items.Clear;
    Cbx_Systems.Enabled:= False;
    Cbx_Filter.Enabled:= False;
-   Lbx_Games.Enabled:= False;
    Lbl_SelectSystem.Enabled:= False;
    Lbl_Filter.Enabled:= False;
    Lbl_NbGamesFound.Caption:= '';
@@ -778,10 +788,13 @@ begin
          //bien un fichier gamelist.xml alors on crée la liste de jeux
          if ( (Info.Attr and faDirectory) <> 0 ) and
             ( Info.Name[1] <> '.' ) and
-            ( FileExists( FRootPath + Info.Name + '\' + Cst_GameListFileName ) ) then begin
+            ( FileExists( FRootPath + IncludeTrailingPathDelimiter( Info.Name ) +
+                          Cst_GameListFileName ) ) then begin
 
             //Ici on récupère le chemin vers le fichier gamelist.xml
-            _GameListPath:= FRootPath + Info.Name + '\' + Cst_GameListFileName;
+            _GameListPath:= FRootPath +
+                            IncludeTrailingPathDelimiter( Info.Name ) +
+                            Cst_GameListFileName;
 
             //On tente de construire la liste des jeux depuis le .xml
             TmpList:= BuildGamesList( _GameListPath );
@@ -817,13 +830,12 @@ begin
       //Idem pour le listbox des jeux du systeme et on charge la liste du premier système
       if not ( ValidFolderCount = 0 ) then begin
          Cbx_Systems.Enabled:= True;
-         Lbx_Games.Enabled:= Cbx_Systems.Enabled;
          Lbl_SelectSystem.Enabled:= Cbx_Systems.Enabled;
          Cbx_Filter.Enabled:= Cbx_Systems.Enabled;
          Lbl_Filter.Enabled:= Cbx_Systems.Enabled;
          Cbx_Systems.ItemIndex:= 0;
-         LoadGamesList( getCurrentFolderName );
          EnableControls( True );
+         LoadGamesList( getCurrentFolderName );
       end;
 
       //On remet le curseur par défaut
@@ -860,7 +872,6 @@ begin
 
    //On cherche le premier "jeu"
    _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
-//   _Node := XMLDoc.ChildNodes.FindNode( Cst_Game );
 
    //Si pas de jeu trouvé on sort et on renvoie nil
    if not Assigned( _Node ) then Exit;
@@ -928,16 +939,21 @@ begin
    Chk_Description.Enabled:= aValue;
    Chk_Region.Enabled:= aValue;
    Btn_ChangeImage.Enabled:= aValue;
+   Btn_RemovePicture.Enabled:= aValue;
    Btn_SetDefaultPicture.Enabled:= aValue;
    Btn_MoreInfos.Enabled:= aValue;
    Btn_Delete.Enabled:= aValue;
-   Mnu_System.Enabled:= aValue;
-   Mnu_Game.Enabled:= aValue;
-   Mnu_LowerCase.Enabled:= aValue;
-   Mnu_UpperCase.Enabled:= aValue;
-   Mnu_GaLowerCase.Enabled:= aValue;
-   Mnu_GaUpperCase.Enabled:= aValue;
-   Mnu_RemoveRegion.Enabled:= aValue;
+   Mnu_System.Enabled:= aValue or not ( GSystemList.Count = 0 );
+   Mnu_Game.Enabled:= aValue and not ( Lbx_Games.Items.Count = 0 );
+   Edt_Name.Enabled:= aValue;
+   Edt_Genre.Enabled:= aValue;
+   Edt_Rating.Enabled:= aValue;
+   Edt_Region.Enabled:= aValue;
+   Edt_Developer.Enabled:= aValue;
+   Edt_Publisher.Enabled:= aValue;
+   Edt_ReleaseDate.Enabled:= aValue;
+   Edt_NbPlayers.Enabled:= aValue;
+   Mmo_Description.Enabled:= aValue;
 end;
 
 //Permet de tout cocher ou décocher les checkboxes d'un coup
@@ -1096,10 +1112,10 @@ begin
 
       //Si il y a des jeux dans la liste on affiche auto le premier
       if ( Lbx_Games.Items.Count > 0 ) then begin
+         EnableControls( True );
          Lbx_Games.Selected[0]:= True;
          LoadGame( ( Lbx_Games.Items.Objects[0] as TGame ) );
          Btn_ChangeAll.Enabled:= ( Cbx_Filter.ItemIndex = 1 );
-         EnableControls( True );
       end else begin
          Btn_ChangeAll.Enabled:= False;
          EnableControls( False );
@@ -1170,6 +1186,7 @@ begin
       try
          _Image.LoadFromFile( _PathToImage + Cst_ImageSuffixPng );
          Img_Game.Picture.Graphic:= _Image;
+         Btn_RemovePicture.Enabled:= True;
          Exit;
       finally
          _Image.Free;
@@ -1180,6 +1197,7 @@ begin
       try
          _ImageJpg.LoadFromFile( _PathToImage + Cst_ImageSuffixJpg );
          Img_Game.Picture.Graphic:= _ImageJpg;
+         Btn_RemovePicture.Enabled:= True;
          Exit;
       finally
          _ImageJpg.Free;
@@ -1190,11 +1208,13 @@ begin
       try
          _ImageJpg.LoadFromFile( _PathToImage + Cst_ImageSuffixJpeg );
          Img_Game.Picture.Graphic:= _ImageJpg;
+         Btn_RemovePicture.Enabled:= True;
          Exit;
       finally
          _ImageJpg.Free;
       end;
-   end;
+   end else
+      Btn_RemovePicture.Enabled:= False;
 end;
 
 //Action au click sur bouton "change image"
@@ -1206,7 +1226,8 @@ begin
    if OpenFile.Execute and ( OpenFile.FileName <> '' ) then begin
       _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
       ChangeImage( OpenFile.FileName, _Game );
-      LoadGamesList( getCurrentFolderName );
+      LoadGame( _Game );
+      Lbx_Games.SetFocus;
    end;
 end;
 
@@ -1226,9 +1247,8 @@ begin
                    Cst_DefaultImageNameSuffix;
 
    ChangeImage( PathToDefault, _Game );
-
-   //on update la liste pour refléter les changements
-   LoadGamesList( getCurrentFolderName );
+   LoadGame( _Game );
+   Lbx_Games.SetFocus;
 end;
 
 //Action au click "change all missing to default"
@@ -1255,9 +1275,8 @@ begin
       ProgressBar.Position:= ( ProgressBar.Position + 1 );
    end;
    ProgressBar.Visible:= False;
-
-   //on update la liste pour refléter les changements
    LoadGamesList( getCurrentFolderName );
+   Lbx_Games.SetFocus;
 end;
 
 //Remplace l'image actuelle du jeu (par autre ou défaut).
@@ -1267,8 +1286,10 @@ var
    _ImageJpg: TJPEGImage;
    _GameName, _ImageLink: string;
    _Node: IXMLNode;
+   _NodeAdded: Boolean;
 
 begin
+   _NodeAdded:= False;
    Screen.Cursor:= crHourGlass;
 
    //on récupère le nom du jeu pour construire le nom de l'image
@@ -1300,7 +1321,6 @@ begin
 
    //On ouvre le fichier xml
    XMLDoc.LoadFromFile( FRootRomsPath + Cst_GameListFileName );
-   XMLDoc.Active:= True;
 
    //On récupère le premier noeud "game"
    _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
@@ -1313,9 +1333,17 @@ begin
 
    //on écrit le chemin vers l'image
    _ImageLink:= FXmlImagesPath + _GameName + Cst_ImageSuffixPng;
+   if not Assigned( _Node.ChildNodes.FindNode( Cst_ImageLink ) ) then begin
+      _Node.AddChild( Cst_ImageLink );
+      _NodeAdded:= True;
+   end;
    _Node.ChildNodes.Nodes[Cst_ImageLink].Text:= _ImageLink;
 
    //On enregistre le fichier.
+   if _NodeAdded then begin
+      XMLDoc.XML.Text:= Xml.Xmldoc.FormatXMLData( XMLDoc.XML.Text );
+      XMLDoc.Active:= True;
+   end;
    XMLDoc.SaveToFile( FRootRomsPath + Cst_GameListFileName );
    XMLDoc.Active:= False;
 
@@ -1323,6 +1351,12 @@ begin
    aGame.FImagePath:= _ImageLink;
 
    Screen.Cursor:= crDefault;
+end;
+
+//Au click sur le bouton delete picture
+procedure TFrm_Editor.Btn_RemovePictureClick(Sender: TObject);
+begin
+   Lbx_Games.SetFocus;
 end;
 
 //Récupère le nom d'enum du systeme sélectionné dans le combobox
@@ -1350,6 +1384,7 @@ begin
    SetCheckBoxes( False );
    SetFieldsReadOnly( True );
    Btn_SaveChanges.Enabled:= False;
+   Lbx_Games.SetFocus;
 end;
 
 //Enregistre les changements effectués pour le jeu dans le fichier .xml
@@ -1462,6 +1497,7 @@ begin
       ( MessageDlg( Rst_DeleteWarning, mtInformation,
                     [mbYes, mbNo], 0, mbNo ) = mrYes ) then
       DeleteGame;
+   Lbx_Games.SetFocus;
 end;
 
 //Supprime un jeu du gamelist et physiquement sur le disque (ou carte SD ou clé...)
@@ -1622,7 +1658,8 @@ end;
 
 //Permet de convertir les champs en majuscule ou minuscule en fonction
 // des paramètres passés (fonctionne par systeme ou par jeu)
-procedure TFrm_Editor.ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False; aUp: Boolean = False );
+procedure TFrm_Editor.ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False;
+                                          aUp: Boolean = False );
 
    //rafraichit les données des champs EDIT dans le cas de modif d'un seul jeu
    procedure RefreshDisplay( aGame: TGame );
@@ -1686,6 +1723,11 @@ begin
    XMLDoc.Active:= False;
 end;
 
+procedure TFrm_Editor.Mnu_AboutClick(Sender: TObject);
+begin
+   TStyleManager.TrySetStyle('AmaKrits');
+end;
+
 //Sans ça pas de Ctrl+A dans le mémo...(c'est triste en 2017)
 procedure TFrm_Editor.Mmo_DescriptionKeyPress(Sender: TObject; var Key: Char);
 begin
@@ -1743,6 +1785,7 @@ begin
       //Ensuite on supprime la liste
       _Infos.Free;
    end;
+   Lbx_Games.SetFocus;
 end;
 
 //Click sur le menuitem "Quit"
