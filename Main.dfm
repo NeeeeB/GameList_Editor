@@ -6586,6 +6586,7 @@ object Frm_Editor: TFrm_Editor
         end
         object Mnu_RemoveRegion: TMenuItem
           Caption = 'Remove region from games names'
+          OnClick = Mnu_RemoveRegionClick
         end
       end
       object Mnu_Game: TMenuItem
@@ -6621,6 +6622,158 @@ object Frm_Editor: TFrm_Editor
         Caption = 'Auto Hash'
         OnClick = Mnu_AutoHashClick
       end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object Mnu_Genesis: TMenuItem
+        AutoCheck = True
+        Caption = 'Use Genesis logo'
+        OnClick = Mnu_GenesisClick
+      end
+      object N1: TMenuItem
+        Caption = '-'
+      end
+      object Mnu_Theme: TMenuItem
+        Caption = 'Theme'
+        object Mnu_Theme1: TMenuItem
+          AutoCheck = True
+          Caption = 'Amakrits'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme2: TMenuItem
+          Tag = 1
+          AutoCheck = True
+          Caption = 'Aqua Graphite'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme3: TMenuItem
+          Tag = 2
+          AutoCheck = True
+          Caption = 'Aqua Light Slate'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme4: TMenuItem
+          Tag = 3
+          AutoCheck = True
+          Caption = 'Auric'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme5: TMenuItem
+          Tag = 4
+          AutoCheck = True
+          Caption = 'Carbon'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme6: TMenuItem
+          Tag = 5
+          AutoCheck = True
+          Caption = 'Charcoal Dark Slate'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme7: TMenuItem
+          Tag = 6
+          AutoCheck = True
+          Caption = 'Diamond'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme8: TMenuItem
+          Tag = 7
+          AutoCheck = True
+          Caption = 'Emerald'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme9: TMenuItem
+          Tag = 8
+          AutoCheck = True
+          Caption = 'Emerald Light Slate'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme10: TMenuItem
+          Tag = 9
+          AutoCheck = True
+          Caption = 'Glossy'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme11: TMenuItem
+          Tag = 10
+          AutoCheck = True
+          Caption = 'Light'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme12: TMenuItem
+          Tag = 11
+          AutoCheck = True
+          Caption = 'Ruby Graphite'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme13: TMenuItem
+          Tag = 12
+          AutoCheck = True
+          Caption = 'Sky'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme14: TMenuItem
+          Tag = 13
+          AutoCheck = True
+          Caption = 'Vapor'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme15: TMenuItem
+          Tag = 14
+          AutoCheck = True
+          Caption = 'Windows 10'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme16: TMenuItem
+          Tag = 15
+          AutoCheck = True
+          Caption = 'Windows 10 Dark'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = Mnu_ThemeClick
+        end
+        object Mnu_Theme17: TMenuItem
+          Tag = 16
+          AutoCheck = True
+          Caption = 'Windows 10 SlateGray'
+          GroupIndex = 1
+          OnClick = Mnu_ThemeClick
+        end
+      end
+    end
+    object Mnu_Help: TMenuItem
+      Caption = 'Help'
+      OnClick = Mnu_HelpClick
     end
     object Mnu_About: TMenuItem
       Caption = 'About'
@@ -6636,7 +6789,7 @@ object Frm_Editor: TFrm_Editor
     Left = 176
     Top = 208
     Bitmap = {
-      494C010101000800180010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800240010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

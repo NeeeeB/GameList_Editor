@@ -3,13 +3,14 @@ unit Main;
 interface
 
 uses
-   Winapi.Windows, Winapi.Messages,
+   Winapi.Windows, Winapi.Messages, Winapi.msxml,
    System.SysUtils, System.Variants, System.Classes, System.IniFiles, System.Generics.Collections,
-   System.DateUtils, System.RegularExpressions, System.UITypes,
-   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes,
-   Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Vcl.StdCtrls, Xml.Win.msxmldom, Winapi.msxml,
-   Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, MoreInfos,
-   IdHashMessageDigest, IdHashSHA, IdHashCRC, System.ImageList, Vcl.ImgList;
+   System.DateUtils, System.RegularExpressions, System.UITypes, System.ImageList,
+   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes, Vcl.ImgList,
+   Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
+   Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
+   IdHashMessageDigest, IdHashSHA, IdHashCRC,
+   MoreInfos, About, Help;
 
 resourcestring
    Rst_NoValidFolder = 'No folder with gamelist.xml found';
@@ -77,7 +78,27 @@ type
                    skDC,
                    skGC,
                    skPSP,
-                   skWII );
+                   skWII,
+                   skGenesis );
+
+   //enum noms des themes
+   TThemeName = ( tnAmakrits,
+                  tnAquaGraphite,
+                  tnAquaLightSlate,
+                  tnAuric,
+                  tnCarbon,
+                  tnCharcoalDarkSlate,
+                  tnDiamond,
+                  tnEmerald,
+                  tnEmeraldLightSlate,
+                  tnGlossy,
+                  tnLight,
+                  tnRubyGraphite,
+                  tnSky,
+                  tnVapor,
+                  tnWindows10,
+                  tnWindows10Dark,
+                  tnWindows10SlateGray );
 
    //Objet stockant uniquement le type système (enum) pour
    //combobox systems, permet de retrouver facile l'image et le nom du systeme
@@ -113,10 +134,10 @@ type
                       aDeveloper, aPublisher, aGenre, aPlayers, aDate,
                       aRegion, aPlaycount, aLastplayed: string );
 
-      function GetRomName( aRomPath: string ): string;
-      function GetMd5( aFileName: string ): string;
-      function GetSha1( aFileName: string ): string;
-      function GetCrc32( aFileName: string ): string;
+      function GetRomName( const aRomPath: string ): string;
+      function GetMd5( const aFileName: string ): string;
+      function GetSha1( const aFileName: string ): string;
+      function GetCrc32( const aFileName: string ): string;
 
    public
 
@@ -183,6 +204,28 @@ type
       Mnu_DeleteWoPrompt: TMenuItem;
       ProgressBar: TProgressBar;
       Btn_RemovePicture: TButton;
+      Mnu_Theme: TMenuItem;
+      Mnu_Theme1: TMenuItem;
+      Mnu_Theme2: TMenuItem;
+      Mnu_Theme3: TMenuItem;
+      Mnu_Theme4: TMenuItem;
+      Mnu_Theme5: TMenuItem;
+      Mnu_Theme6: TMenuItem;
+      Mnu_Theme7: TMenuItem;
+      Mnu_Theme8: TMenuItem;
+      Mnu_Theme9: TMenuItem;
+      Mnu_Theme10: TMenuItem;
+      Mnu_Theme11: TMenuItem;
+      Mnu_Theme12: TMenuItem;
+      Mnu_Theme13: TMenuItem;
+      Mnu_Theme14: TMenuItem;
+      Mnu_Theme15: TMenuItem;
+      Mnu_Theme16: TMenuItem;
+      Mnu_Theme17: TMenuItem;
+      N1: TMenuItem;
+      Mnu_Help: TMenuItem;
+      N2: TMenuItem;
+      Mnu_Genesis: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -207,23 +250,28 @@ type
       procedure ChangeCaseClick(Sender: TObject);
       procedure ChangeCaseGameClick(Sender: TObject);
       procedure FormShow(Sender: TObject);
-    procedure Btn_RemovePictureClick(Sender: TObject);
-    procedure Mnu_AboutClick(Sender: TObject);
+      procedure Btn_RemovePictureClick(Sender: TObject);
+      procedure Mnu_AboutClick(Sender: TObject);
+      procedure Mnu_RemoveRegionClick(Sender: TObject);
+      procedure Mnu_ThemeClick(Sender: TObject);
+      procedure Mnu_GenesisClick(Sender: TObject);
+      procedure Mnu_HelpClick(Sender: TObject);
 
    private
 
+      FThemeNumber: Integer;
       FRootPath: string;
       FRootRomsPath: string;
       FRootImagesPath: string;
       FXmlImagesPath: string;
       FXmlRomsPath: string;
-      FGodMode, FAutoHash, FDelWoPrompt: Boolean;
+      FGodMode, FAutoHash, FDelWoPrompt, FGenesisLogo: Boolean;
       GSystemList: TObjectDictionary<string,TObjectList<TGame>>;
 
       procedure LoadFromIni;
       procedure SaveToIni;
       procedure BuildSystemsList;
-      procedure LoadGamesList( aSystem: string );
+      procedure LoadGamesList( const aSystem: string );
       procedure LoadGame( aGame: TGame );
       procedure ClearAllFields;
       procedure SaveChangesToGamelist;
@@ -231,17 +279,21 @@ type
       procedure SetCheckBoxes( aValue: Boolean );
       procedure SetFieldsReadOnly( aValue: Boolean );
       procedure CheckIfChangesToSave;
-      procedure ChangeImage( aPath: string; aGame: TGame );
+      procedure ChangeImage( const aPath: string; aGame: TGame );
       procedure LoadSystemLogo( aPictureName: string );
       procedure DeleteGame;
+      procedure DeleteGamePicture;
+      procedure CheckThemeMenuItem( aNumber: Integer );
+      procedure RemoveRegionFromGameName( aGame: TGame; aStartPos: Integer );
       procedure ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False;
                                    aUp: Boolean = False );
 
       function  getSystemKind: TSystemKind;
       function  getCurrentFolderName: string;
       function GetCurrentLogoName: string;
-      function BuildGamesList( aPathToFile: string ): TObjectList<TGame>;
-      function FormatDateFromString( aDate: string; aIso: Boolean = False ): string;
+      function BuildGamesList( const aPathToFile: string ): TObjectList<TGame>;
+      function FormatDateFromString( const aDate: string; aIso: Boolean = False ): string;
+      function GetThemeEnum( aNumber: Integer ): TThemeName;
 
    end;
 
@@ -275,6 +327,10 @@ const
    Cst_IniGodMode = 'GodMode';
    Cst_IniAutoHash = 'AutoHash';
    Cst_IniDelWoPrompt = 'DelWoPrompt';
+   Cst_IniGenesisLogo = 'GenesisLogo';
+   Cst_GenesisLogoName = 'genesis.png';
+   Cst_ThemeNumber = 'ThemeNumber';
+   Cst_MenuTheme = 'Mnu_Theme';
 
 var
    Frm_Editor: TFrm_Editor;
@@ -340,8 +396,29 @@ resourcestring
    Rst_SystemKindGC = 'Gamecube';
    Rst_SystemKindPSP = 'Playstation Portable';
    Rst_SystemKindWII = 'Wii';
+   Rst_SystemKindGenesis = 'Genesis';
 
 const
+   //tableau de liaison enum themes / noms themes
+   Cst_ThemeNameStr: array[TThemeName] of string =
+      ( 'Amakrits',
+        'Aqua Graphite',
+        'Aqua Light Slate',
+        'Auric',
+        'Carbon',
+        'Charcoal Dark Slate',
+        'Diamond',
+        'Emerald',
+        'Emerald Light Slate',
+        'Glossy',
+        'Light',
+        'Ruby Graphite',
+        'Sky',
+        'Vapor',
+        'Windows10',
+        'Windows10 Dark',
+        'Windows10 SlateGray' );
+
    //tableau de liaison enum systemes / noms systems affichés
    Cst_SystemKindStr: array[TSystemKind] of string =
     ( Rst_SystemKindNES,
@@ -398,7 +475,8 @@ const
       Rst_SystemKindDC,
       Rst_SystemKindGC,
       Rst_SystemKindPSP,
-      Rst_SystemKindWII );
+      Rst_SystemKindWII,
+      Rst_SystemKindGenesis );
 
    //tableau de liaison enum systemes/nom des dossiers systeme
    Cst_SystemKindFolderNames: array[TSystemKind] of string =
@@ -456,7 +534,8 @@ const
       'dreamcast',
       'gc',
       'psp',
-      'wii' );
+      'wii',
+      'genesis' );
 
    //tableau de liaison enum systemes/nom image systeme
    Cst_SystemKindImageNames: array[TSystemKind] of string =
@@ -514,7 +593,8 @@ const
       'dreamcast.png',
       'gc.png',
       'psp.png',
-      'wii.png' );
+      'wii.png',
+      'genesis.png' );
 
 
 //Constructeur object SystemKindObject
@@ -563,7 +643,7 @@ begin
 end;
 
 //Fonction permettant de récupérer le nom de la rom avec son extension
-function TGame.GetRomName( aRomPath: string ): string;
+function TGame.GetRomName( const aRomPath: string ): string;
 var
    _Pos: Integer;
 begin
@@ -572,7 +652,7 @@ begin
 end;
 
 //Fonction permettant de récupérer le MD5 des roms
-function TGame.GetMd5( aFileName: string ): string;
+function TGame.GetMd5( const aFileName: string ): string;
 var
    IdMD5: TIdHashMessageDigest5;
    FS: TFileStream;
@@ -590,7 +670,7 @@ begin
 end;
 
 //fonction permettant de récupérer le SHA1 des roms
-function TGame.GetSha1( aFileName: string ): string;
+function TGame.GetSha1( const aFileName: string ): string;
 var
    IdSHA1: TIdHashSHA1;
    FS: TFileStream;
@@ -608,7 +688,7 @@ begin
 end;
 
 //fonction permettant de récupérer le SHA1 des roms
-function TGame.GetCrc32( aFileName: string ): string;
+function TGame.GetCrc32( const aFileName: string ): string;
 var
    IdCRC32: TIdHashCRC32;
    FS: TFileStream;
@@ -627,7 +707,7 @@ end;
 
 //Formate correctement la date depuis la string récupérée du xml
 //ou renvoie une date format Iso pour sauvegarde selon l'appel (aIso)
-function TFrm_Editor.FormatDateFromString( aDate: string; aIso: Boolean = False ): string;
+function TFrm_Editor.FormatDateFromString( const aDate: string; aIso: Boolean = False ): string;
 var
    FullStr, Day, Month, Year: string;
    DayInt, MonthInt, YearInt: Integer;
@@ -692,6 +772,11 @@ begin
 
       FDelWoPrompt:= FileIni.ReadBool( Cst_IniOptions, Cst_IniDelWoPrompt, False );
       Mnu_DeleteWoPrompt.Checked:= FDelWoPrompt;
+
+      FGenesisLogo:= FileIni.ReadBool( Cst_IniOptions, Cst_IniGenesisLogo, False );
+      Mnu_Genesis.Checked:= FGenesisLogo;
+
+      FThemeNumber:= FileIni.ReadInteger( Cst_IniOptions, Cst_ThemeNumber, 5 );
    finally
       FileIni.Free;
    end;
@@ -707,8 +792,24 @@ begin
       FileIni.WriteBool( Cst_IniOptions, Cst_IniGodMode, FGodMode );
       FileIni.WriteBool( Cst_IniOptions, Cst_IniAutoHash, FAutoHash );
       FileIni.WriteBool( Cst_IniOptions, Cst_IniDelWoPrompt, ( FGodMode and FDelWoPrompt ) );
+      FileIni.WriteBool( Cst_IniOptions, Cst_IniGenesisLogo, FGenesisLogo );
+      FileIni.WriteInteger( Cst_IniOptions, Cst_ThemeNumber, FThemeNumber );
    finally
       FileIni.Free;
+   end;
+end;
+
+//Recup l'enum du theme en fonction de l'entier du fichier ini
+function TFrm_Editor.GetThemeEnum( aNumber: Integer ): TThemeName;
+var
+   _ThemeName: TThemeName;
+begin
+   Result:= tnCharcoalDarkSlate;
+   for _ThemeName:= Low( TThemeName )to High( TThemeName ) do begin
+      if ( aNumber = Ord( _ThemeName ) ) then begin
+         Result:= _ThemeName;
+         Break;
+      end;
    end;
 end;
 
@@ -718,12 +819,25 @@ begin
    Lbl_NbGamesFound.Caption:= '';
    GSystemList:= TObjectDictionary<string, TObjectList<TGame>>.Create([doOwnsValues]);
    LoadFromIni;
+   TStyleManager.TrySetStyle( Cst_ThemeNameStr[GetThemeEnum( FThemeNumber )] );
 end;
 
 //Met le focus sur le combo system à l'affichage de la fenêtre
 procedure TFrm_Editor.FormShow(Sender: TObject);
 begin
+   CheckThemeMenuItem( Succ( FThemeNumber ) );
    Lbx_Games.SetFocus;
+end;
+
+//Pour checker le menuitem du numéro de thème récupéré depuis le fichier ini
+procedure TFrm_Editor.CheckThemeMenuItem( aNumber: Integer );
+var
+   _MenuItem: TMenuItem;
+   _CompName: string;
+begin
+   _CompName:= Cst_MenuTheme + IntToStr( aNumber );
+   _MenuItem:= ( FindComponent( _CompName ) as TMenuItem ) ;
+   _MenuItem.Checked:= True;
 end;
 
 //Action au click sur le menuitem "choose folder"
@@ -808,6 +922,9 @@ begin
 
                //On ajoute ensuite le nom du systeme au combobox des systemes trouvés
                _system:= TSystemKindObject.Create( Info.Name );
+               if ( _system.FSystemKind = skMegaDrive ) and FGenesisLogo then
+                  Cbx_Systems.Items.AddObject( Cst_SystemKindStr[skGenesis], _system )
+               else
                Cbx_Systems.Items.AddObject( Cst_SystemKindStr[_system.FSystemKind], _system );
 
                //On incrémente le compteur de dossier système valides
@@ -844,11 +961,11 @@ begin
 end;
 
 //Construction de la liste des jeux (objets) pour un systeme donné
-function TFrm_Editor.BuildGamesList( aPathToFile: string ): TObjectList<TGame>;
+function TFrm_Editor.BuildGamesList( const aPathToFile: string ): TObjectList<TGame>;
 
    //Permet de s'assurer que le noeud cherché existe, et si ce n'est pas le cas
    //renvoie chaine vide, sinon renvoie la valeur texte du noeud
-   function GetNodeValue( aNode: IXMLNode; aNodeName: string ): string;
+   function GetNodeValue( aNode: IXMLNode; const aNodeName: string ): string;
    begin
       Result:= '';
       if Assigned( aNode.ChildNodes.FindNode( aNodeName ) ) then
@@ -1009,7 +1126,7 @@ begin
 end;
 
 //Chargement de la liste des jeux d'un système dans le listbox des jeux
-procedure TFrm_Editor.LoadGamesList( aSystem: string );
+procedure TFrm_Editor.LoadGamesList( const aSystem: string );
 var
    _PathFound: Boolean;
 
@@ -1035,7 +1152,7 @@ var
    //Permet de vérifier si l'image existe "physiquement"
    //car il se peut que le lien soit renseigné mais que l'image
    //n'existe pas dans le dossier des images...
-   function CheckIfImageMissing( aLink: string ): Boolean;
+   function CheckIfImageMissing( const aLink: string ): Boolean;
    var
       Pos: Integer;
       _ImagePath: string;
@@ -1059,7 +1176,11 @@ begin
    if GSystemList.TryGetValue( aSystem, _TmpList ) then begin
 
       //On charge le logo du systeme choisi
-      LoadSystemLogo( GetCurrentLogoName );
+      if ( GetCurrentLogoName = Cst_SystemKindImageNames[skMegaDrive] ) and
+         FGenesisLogo then
+         LoadSystemLogo( Cst_SystemKindImageNames[skGenesis] )
+      else
+         LoadSystemLogo( GetCurrentLogoName );
 
       //On désactive les évènements sur les changements dans les champs
       //Sinon ça pète quand on change de système (indice hors limite)
@@ -1280,7 +1401,7 @@ begin
 end;
 
 //Remplace l'image actuelle du jeu (par autre ou défaut).
-procedure TFrm_Editor.ChangeImage( aPath: string; aGame: TGame );
+procedure TFrm_Editor.ChangeImage( const aPath: string; aGame: TGame );
 var
    _Image: TPngImage;
    _ImageJpg: TJPEGImage;
@@ -1356,7 +1477,58 @@ end;
 //Au click sur le bouton delete picture
 procedure TFrm_Editor.Btn_RemovePictureClick(Sender: TObject);
 begin
+   DeleteGamePicture;
    Lbx_Games.SetFocus;
+end;
+
+//Supprime l'image d'un jeu (dans le xml et physiquement)
+procedure TFrm_Editor.DeleteGamePicture;
+var
+   _Game: TGame;
+   _ImagePath, _GameListPath: string;
+   _Node: IXMLNode;
+begin
+   //on commence par récupérer l'objet TGame correspondant
+   _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
+
+   //on construit le chemin vers le gamelist.xml
+   _GameListPath:= FRootRomsPath + Cst_GameListFileName;
+
+   //on construit le chemin vers l'image
+   _ImagePath:= FRootImagesPath + _Game.FRomNameWoExt;
+
+   //On ouvre le fichier xml
+   XMLDoc.LoadFromFile( _GameListPath );
+
+   //On récupère le premier noeud "game"
+   _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
+
+   //Et on boucle pour trouver le bon noeud
+   repeat
+      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = _Game.FRomPath ) then Break;
+         _Node := _Node.NextSibling;
+   until not Assigned( _Node );
+
+   //on vire le noeud du fichier xml
+   _Node.ChildNodes.FindNode( Cst_ImageLink ).Text:= '';
+   XMLDoc.Active:= True;
+   XMLDoc.SaveToFile( _GameListPath );
+   XMLDoc.Active:= False;
+
+   //On supprime l'image du jeu (on teste les extensions en cascade pour être sur de supprimer)
+   if not DeleteFile( _ImagePath + Cst_ImageSuffixPng ) then begin
+      if not DeleteFile( _ImagePath + Cst_ImageSuffixJpg ) then
+         DeleteFile( _ImagePath + Cst_ImageSuffixJpeg );
+   end;
+
+   //on vide l'image jeu
+   Img_Game.Picture.Graphic:= nil;
+
+   //on update l'objet TGame
+   _Game.FImagePath:= '';
+
+   //on recharge le jeu pour refléter les changements
+   LoadGame( _Game );
 end;
 
 //Récupère le nom d'enum du systeme sélectionné dans le combobox
@@ -1392,7 +1564,7 @@ end;
 procedure TFrm_Editor.SaveChangesToGamelist;
 
    //Permet de s'assurer q'un noeud existe
-   function NodeExists( aNode: IXMLNode; aNodeName: string ): Boolean;
+   function NodeExists( aNode: IXMLNode; const aNodeName: string ): Boolean;
    begin
       Result:= False;
       if Assigned( aNode.ChildNodes.FindNode( aNodeName ) ) then
@@ -1605,6 +1777,29 @@ begin
    end;
 end;
 
+//au click sur le menu item use genesis logo
+procedure TFrm_Editor.Mnu_GenesisClick(Sender: TObject);
+var
+   ii: Integer;
+begin
+   FGenesisLogo:= Mnu_Genesis.Checked;
+
+   //on boucle sur les items du combo pour trouver le bon et changer son nom
+   for ii:= 0 to Pred( Cbx_Systems.Items.Count ) do begin
+      if ( ( Cbx_Systems.Items.Objects[ii] as TSystemKindObject).FSystemKind = skMegadrive ) then begin
+         if FGenesisLogo then
+            Cbx_Systems.Items[ii]:= Cst_SystemKindStr[skGenesis]
+         else if not FGenesisLogo then
+            Cbx_Systems.Items[ii]:= Cst_SystemKindStr[skMegaDrive];
+         Break;
+      end;
+   end;
+
+   //et on recharge la liste
+   Cbx_Systems.ItemIndex:= ii;
+   LoadGamesList( getCurrentFolderName );
+end;
+
 //Au click sur Menuitem autohash
 procedure TFrm_Editor.Mnu_AutoHashClick(Sender: TObject);
 begin
@@ -1674,7 +1869,7 @@ procedure TFrm_Editor.ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False;
    end;
 
    //factorisation de code
-   function ConvertUpOrLow( aNode: IXMLNode; aNodeName: string; aUp: Boolean; aField: string ): string;
+   function ConvertUpOrLow( aNode: IXMLNode; const aNodeName: string; aUp: Boolean; aField: string ): string;
    begin
       if aUp then begin
          Result:= UpperCase( aField );
@@ -1723,9 +1918,32 @@ begin
    XMLDoc.Active:= False;
 end;
 
+//Action au click sur menu item About
 procedure TFrm_Editor.Mnu_AboutClick(Sender: TObject);
+var
+   Frm_About: TFrm_About;
 begin
-   TStyleManager.TrySetStyle('AmaKrits');
+   //Affiche la fenêtre "About"
+   Frm_About:= TFrm_About.Create(nil);
+   try
+      Frm_About.Execute;
+   finally
+      Frm_About.Free;
+   end;
+end;
+
+//au click sur le menu item Help
+procedure TFrm_Editor.Mnu_HelpClick(Sender: TObject);
+var
+   Frm_Help: TFrm_Help;
+begin
+   //Affiche la fenêtre "Help"
+   Frm_Help:= TFrm_Help.Create(nil);
+   try
+      Frm_Help.Execute;
+   finally
+      Frm_Help.Free;
+   end;
 end;
 
 //Sans ça pas de Ctrl+A dans le mémo...(c'est triste en 2017)
@@ -1786,6 +2004,83 @@ begin
       _Infos.Free;
    end;
    Lbx_Games.SetFocus;
+end;
+
+//click sur le menu item remove region from games names
+procedure TFrm_Editor.Mnu_RemoveRegionClick(Sender: TObject);
+var
+   ii, _Pos: Integer;
+   _List: TObjectList<TGame>;
+   _Game: TGame;
+begin
+   //on chope la liste de jeux
+   GSystemList.TryGetValue( getCurrentFolderName, _List );
+
+   Screen.Cursor:= crHourGlass;
+   ProgressBar.Visible:= True;
+   ProgressBar.Max:= Pred( _List.Count );
+   ProgressBar.Position:= 0;
+
+   //on boucle sur les jeux de la liste
+   for ii:= 0 to Pred( _List.Count ) do begin
+      _Game:= ( Lbx_Games.Items.Objects[ii] as TGame );
+      _Pos:= Pos( '[', _Game.FName );
+
+      //si on trouve le caractère, on traite
+      if not ( _Pos = 0 ) then
+         RemoveRegionFromGameName( _Game, Pred( _Pos ) );
+      ProgressBar.Position:= ( ProgressBar.Position + 1 );
+   end;
+   LoadGamesList( getCurrentFolderName );
+   ProgressBar.Visible:= False;
+   Screen.Cursor:= crDefault;
+   Lbx_Games.SetFocus;
+end;
+
+//supprime le tag entre [] de region dans le nom des jeux
+procedure TFrm_Editor.RemoveRegionFromGameName( aGame: TGame; aStartPos: Integer );
+var
+   _Node: IXMLNode;
+   _GameListPath: string;
+   _EndPos: Integer;
+begin
+   //on construit le chemin vers le gamelist.xml
+   _GameListPath:= FRootRomsPath + Cst_GameListFileName;
+
+   //On ouvre le fichier xml
+   XMLDoc.LoadFromFile( _GameListPath );
+
+   //on l'active
+   XMLDoc.Active:= True;
+
+   //On récupère le premier noeud correspondant au jeu
+   _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
+
+   //Et on boucle pour trouver le bon noeud
+   repeat
+      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.FRomPath ) then Break;
+         _Node := _Node.NextSibling;
+   until not Assigned( _Node );
+
+   //on repère la position du caractère ]
+   _EndPos:= Pos( ']', aGame.FName );
+
+    //On met à jour l'objet TGame
+    Delete( aGame.FName, aStartPos,  Succ( _EndPos - aStartPos ) );
+
+   //on change le text dans le xml
+   _Node.ChildNodes.FindNode( Cst_Name ).Text:= aGame.FName;
+
+   //on enregistre le fichier xml
+   XMLDoc.SaveToFile( _GameListPath );
+   XMLDoc.Active:= False;
+end;
+
+//choix du theme
+procedure TFrm_Editor.Mnu_ThemeClick(Sender: TObject);
+begin
+   TStyleManager.TrySetStyle( Cst_ThemeNameStr[GetThemeEnum( ( Sender as TMenuItem).Tag )] );
+   FThemeNumber:= ( Sender as TMenuItem ).Tag;
 end;
 
 //Click sur le menuitem "Quit"

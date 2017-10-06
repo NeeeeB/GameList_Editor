@@ -3,8 +3,9 @@ unit MoreInfos;
 interface
 
 uses
-   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, System.DateUtils;
+   Winapi.Windows, Winapi.Messages,
+   System.SysUtils, System.Variants, System.Classes, System.DateUtils,
+   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
 
 type
    TFrm_MoreInfos = class(TForm)
