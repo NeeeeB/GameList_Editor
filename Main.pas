@@ -3,7 +3,7 @@ unit Main;
 interface
 
 uses
-   Winapi.Windows, Winapi.Messages, Winapi.msxml,
+   Winapi.Windows, Winapi.Messages, Winapi.msxml, Winapi.ShellAPI,
    System.SysUtils, System.Variants, System.Classes, System.IniFiles, System.Generics.Collections,
    System.DateUtils, System.RegularExpressions, System.UITypes, System.ImageList,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes, Vcl.ImgList,
@@ -13,14 +13,24 @@ uses
    MoreInfos, About, Help;
 
 resourcestring
-   Rst_NoValidFolder = 'No folder with gamelist.xml found';
+   Rst_WrongFolder = 'Oops !! It looks like you selected the wrong folder !' + SlineBreak +
+                     'Please select the root folder where your systems folders are stored.';
+
    Rst_GamesFound = ' game(s) found.';
+
    Rst_HashWarning = 'Hashing a file can be extremly slow depending on' + sLineBreak +
                      'the file size, your computer, your HDD...' + sLineBreak +
                      'Do you want to hash anyway ?';
+
    Rst_DeleteWarning = 'This will delete the entry in the gamelist,' + sLinebreak +
                        'the rom itself and the associated image permanently.' + sLineBreak +
                        'Proceed anyway ?';
+
+   Rst_StopES = 'Your systems folder seems to be located on your Pi.' + sLineBreak +
+                'EmulationStation will be stopped for' + sLineBreak +
+                'the gamelist.xml changes to take effect.';
+
+   Rst_RebootRecal = 'Recalbox will be restarted to reflect your changes.';
 
 type
    //enumération pour les différents systèmes
@@ -265,7 +275,7 @@ type
       FRootImagesPath: string;
       FXmlImagesPath: string;
       FXmlRomsPath: string;
-      FGodMode, FAutoHash, FDelWoPrompt, FGenesisLogo: Boolean;
+      FGodMode, FAutoHash, FDelWoPrompt, FGenesisLogo, FFolderIsOnPi: Boolean;
       GSystemList: TObjectDictionary<string,TObjectList<TGame>>;
 
       procedure LoadFromIni;
@@ -294,6 +304,7 @@ type
       function BuildGamesList( const aPathToFile: string ): TObjectList<TGame>;
       function FormatDateFromString( const aDate: string; aIso: Boolean = False ): string;
       function GetThemeEnum( aNumber: Integer ): TThemeName;
+      function StopOrStartES( aStop: Boolean ): Boolean;
 
    end;
 
@@ -323,6 +334,7 @@ const
    Cst_DefaultImageNameSuffix = '-default.png';
    Cst_LogoPicsFolder = 'Resources\SystemsLogos\';
    Cst_IniFilePath = 'Resources\Settings.ini';
+   Cst_ResourcesFolder = 'Resources\';
    Cst_IniOptions = 'Options';
    Cst_IniGodMode = 'GodMode';
    Cst_IniAutoHash = 'AutoHash';
@@ -331,6 +343,9 @@ const
    Cst_GenesisLogoName = 'genesis.png';
    Cst_ThemeNumber = 'ThemeNumber';
    Cst_MenuTheme = 'Mnu_Theme';
+   Cst_PlinkCommandStop = '/C plink -v root@recalbox -pw recalboxroot killall emulationstation';
+   Cst_PlinkCommandStart = '/C plink root@recalbox -pw recalboxroot /sbin/reboot';
+   Cst_PathIsOnPi = '\\RECALBOX';
 
 var
    Frm_Editor: TFrm_Editor;
@@ -843,12 +858,28 @@ end;
 //Action au click sur le menuitem "choose folder"
 procedure TFrm_Editor.Mnu_ChoosefolderClick(Sender: TObject);
 begin
+   Img_BackGround.Visible:= True;
    EnableControls( False );
    ClearAllFields;
    Lbx_Games.Items.Clear;
    BuildSystemsList;
    SetCheckBoxes( False );
    Btn_SaveChanges.Enabled:= False;
+end;
+
+//permet d'éxecuter la ligne de commande qui stop/start Emulation Station
+//utilisé si on accède aux gamelist directement sur le Pi sinon les modifs ne
+//sont pas prises en compte. Utilise le petit utilitaire plink.exe
+function TFrm_Editor.StopOrStartES( aStop: Boolean ): Boolean;
+var
+   _PathToPlink: string;
+begin
+   Result:= False;
+   _PathToPlink:= ExtractFilePath( Application.ExeName ) + Cst_ResourcesFolder;
+   if aStop then
+      Result:= ( ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStop, PChar( _PathToPlink ), SW_HIDE ) > 32 )
+   else
+      Result:= ( ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStart, PChar( _PathToPlink ), SW_HIDE ) > 32 );
 end;
 
 //Construction de la liste des systèmes trouvés (et des listes de jeux associées)
@@ -866,6 +897,7 @@ begin
    FRootRomsPath:= '';
    FRootImagesPath:= '';
    Img_System.Picture.Graphic:= nil;
+   FFolderIsOnPi:= False;
 
    //On vide le combobox des systèmes
    //Et on désactive les Controls non nécessaires
@@ -892,8 +924,10 @@ begin
       IsFound:= ( FindFirst( FRootPath + '*.*', faAnyFile, Info) = 0 );
 
       //Si le dossier est vide : message utilisateur
-      if not IsFound then
-         ShowMessage( Rst_NoValidFolder );
+      if not IsFound then begin
+         ShowMessage( Rst_WrongFolder );
+         Exit;
+      end;
 
       //On boucle sur les dossiers trouvés pour les lister
       while IsFound do begin
@@ -939,13 +973,21 @@ begin
 
       //Si le compteur de dossier valide est à zéro, message utilisateur
       if ( ValidFolderCount = 0 ) then begin
-         ShowMessage( Rst_NoValidFolder );
+         ShowMessage( Rst_WrongFolder );
+         Screen.Cursor:= crDefault;
          Exit;
-      end;
 
-      //On active le Combobox des systemes si au moins un systeme a été trouvé
-      //Idem pour le listbox des jeux du systeme et on charge la liste du premier système
-      if not ( ValidFolderCount = 0 ) then begin
+         //On active le Combobox des systemes si au moins un systeme a été trouvé
+         //Idem pour le listbox des jeux du systeme et on charge la liste du premier système
+      end else begin
+         //si le dossier sélectionné se trouve sur le Pi,
+         //on prévient l'utilisateur qu'on va stopper ES
+         if FRootPath.StartsWith( Cst_PathIsOnPi ) then begin
+            MessageDlg( Rst_StopES, mtInformation, [mbOK], 0, mbOK );
+            StopOrStartES( True );
+            FFolderIsOnPi:= True;
+         end;
+
          Cbx_Systems.Enabled:= True;
          Lbl_SelectSystem.Enabled:= Cbx_Systems.Enabled;
          Cbx_Filter.Enabled:= Cbx_Systems.Enabled;
@@ -953,10 +995,10 @@ begin
          Cbx_Systems.ItemIndex:= 0;
          EnableControls( True );
          LoadGamesList( getCurrentFolderName );
-      end;
 
-      //On remet le curseur par défaut
-      Screen.Cursor:= crDefault;
+         //On remet le curseur par défaut
+         Screen.Cursor:= crDefault;
+      end;
    end;
 end;
 
@@ -1225,7 +1267,11 @@ begin
       end;
 
       //On indique le nombre de jeux trouvés
-      Lbl_NbGamesFound.Caption:= IntToStr( Lbx_Games.Items.Count ) + Rst_GamesFound;
+      if Cbx_Filter.ItemIndex = 0 then
+         Lbl_NbGamesFound.Caption:= IntToStr( _TmpList.Count ) + Rst_GamesFound
+      else
+         Lbl_NbGamesFound.Caption:= IntToStr( Lbx_Games.Items.Count ) + ' / ' +
+                                    IntToStr( _TmpList.Count ) + Rst_GamesFound;
 
       //On met le focus sur le premier jeu de la liste
       ClearAllFields;
@@ -1285,6 +1331,7 @@ var
    _ImageJpg: TJPEGImage;
    _RawGameName, _PathToImage: string;
 begin
+   Img_BackGround.Visible:= True;
    Edt_Name.Text:= aGame.FName;
    Edt_Rating.Text:= aGame.FRating;
    Edt_ReleaseDate.Text:= aGame.FReleaseDate;
@@ -1308,6 +1355,8 @@ begin
          _Image.LoadFromFile( _PathToImage + Cst_ImageSuffixPng );
          Img_Game.Picture.Graphic:= _Image;
          Btn_RemovePicture.Enabled:= True;
+         //on affiche l'image background que si le jeu n'a pas d'image
+         Img_BackGround.Visible:= ( Img_Game.Picture.Graphic = nil );
          Exit;
       finally
          _Image.Free;
@@ -1319,6 +1368,8 @@ begin
          _ImageJpg.LoadFromFile( _PathToImage + Cst_ImageSuffixJpg );
          Img_Game.Picture.Graphic:= _ImageJpg;
          Btn_RemovePicture.Enabled:= True;
+         //on affiche l'image background que si le jeu n'a pas d'image
+         Img_BackGround.Visible:= ( Img_Game.Picture.Graphic = nil );
          Exit;
       finally
          _ImageJpg.Free;
@@ -1330,6 +1381,8 @@ begin
          _ImageJpg.LoadFromFile( _PathToImage + Cst_ImageSuffixJpeg );
          Img_Game.Picture.Graphic:= _ImageJpg;
          Btn_RemovePicture.Enabled:= True;
+         //on affiche l'image background que si le jeu n'a pas d'image
+         Img_BackGround.Visible:= ( Img_Game.Picture.Graphic = nil );
          Exit;
       finally
          _ImageJpg.Free;
@@ -2087,6 +2140,10 @@ end;
 procedure TFrm_Editor.Mnu_QuitClick(Sender: TObject);
 begin
    SaveToIni;
+   if FFolderIsOnPi then begin
+      MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
+      StopOrStartES( False );
+   end;
    Application.Terminate;
 end;
 
@@ -2094,6 +2151,10 @@ end;
 procedure TFrm_Editor.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
    SaveToIni;
+   if FFolderIsOnPi then begin
+      MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
+      StopOrStartES( False );
+   end;
 end;
 
 //Nettoyage mémoire à la fermeture du programme
