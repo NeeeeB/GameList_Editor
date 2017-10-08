@@ -16,6 +16,5 @@ Just unzip and you're good to go !!
 
 This is an alpha version for the moment, many features will be added in the future but it is already pretty fast.
 (It loads my 5 systems with almost 3000 games in less than a second).
-For now, your folder with all your roms folders must be placed on your computer, but I plan to add the possibility to make it access your folder directly on your RaspBerry Pi.
 
 Also, it is Windows only because it relies on VCL in Delphi, but I may consider an FMX version once it's stable, thus it would work under Linux and MacOS.
