@@ -9,8 +9,9 @@ uses
 
 resourcestring
    Rst_Text = sLineBreak + 'GameList Editor is a tool to manage your Gamelist.xml' + sLineBreak +
-              'from a Recalbox installation:' + sLineBreak +
-              'https://www.recalbox.com/' + sLineBreak + sLineBreak +
+              'from a Recalbox or Retropie installation:' + sLineBreak +
+              'https://www.recalbox.com/' + sLineBreak +
+              'https://retropie.org.uk/' + sLineBreak + sLineBreak +
               'It is written in Delphi (Tokyo 10.2.1) by NeeeeB' + sLineBreak +
               'It''s source code is fully available at:' + sLineBreak +
               'https://github.com/NeeeeB/GameList_Editor' + sLineBreak + sLineBreak +
@@ -85,7 +86,7 @@ begin
             tr.chrg := p.chrg;
             tr.lpstrText := PChar(url);
             SendMessage(Handle, EM_GETTEXTRANGE, 0, LPARAM(@tr));
-            ShellExecute(Handle, nil, PChar(url), 0, 0, SW_SHOWNORMAL);
+            ShellExecute(Handle, nil, PChar(url), nil, nil, SW_SHOWNORMAL);
          except
             {ignore}
          end;

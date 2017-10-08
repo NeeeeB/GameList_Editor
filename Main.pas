@@ -280,7 +280,8 @@ type
       FXmlImagesPath: string;
       FXmlRomsPath: string;
       FGodMode, FAutoHash, FDelWoPrompt, FGenesisLogo,
-      FShowTips, FFolderIsOnPi, FPiPrompts: Boolean;
+      FShowTips, FFolderIsOnPi, FPiPrompts, FSysIsRecal,
+      FPiLoadedOnce: Boolean;
       GSystemList: TObjectDictionary<string,TObjectList<TGame>>;
 
       procedure LoadFromIni;
@@ -309,7 +310,7 @@ type
       function BuildGamesList( const aPathToFile: string ): TObjectList<TGame>;
       function FormatDateFromString( const aDate: string; aIso: Boolean = False ): string;
       function GetThemeEnum( aNumber: Integer ): TThemeName;
-      function StopOrStartES( aStop: Boolean ): Boolean;
+      procedure StopOrStartES( aStop, aRecal: Boolean );
 
    end;
 
@@ -351,8 +352,11 @@ const
    Cst_ThemeNumber = 'ThemeNumber';
    Cst_MenuTheme = 'Mnu_Theme';
    Cst_PlinkCommandStop = '/C plink -v root@recalbox -pw recalboxroot killall emulationstation';
+   Cst_PlinkCommandStopRetro = '/C plink -v root@retropie -pw recalboxroot killall emulationstation';
    Cst_PlinkCommandStart = '/C plink root@recalbox -pw recalboxroot /sbin/reboot';
-   Cst_PathIsOnPi = '\\RECALBOX';
+   Cst_PlinkCommandStartRetro = '/C plink root@retropie -pw recalboxroot /sbin/reboot';
+   Cst_Recalbox = '\\RECALBOX';
+   Cst_Retropie = '\\RETROPIE';
 
 var
    Frm_Editor: TFrm_Editor;
@@ -850,6 +854,7 @@ begin
    GSystemList:= TObjectDictionary<string, TObjectList<TGame>>.Create([doOwnsValues]);
    LoadFromIni;
    TStyleManager.TrySetStyle( Cst_ThemeNameStr[GetThemeEnum( FThemeNumber )] );
+   FPiLoadedOnce:= False;
 end;
 
 //Met le focus sur le combo system à l'affichage de la fenêtre
@@ -897,16 +902,22 @@ end;
 //permet d'éxecuter la ligne de commande qui stop/start Emulation Station
 //utilisé si on accède aux gamelist directement sur le Pi sinon les modifs ne
 //sont pas prises en compte. Utilise le petit utilitaire plink.exe
-function TFrm_Editor.StopOrStartES( aStop: Boolean ): Boolean;
+procedure TFrm_Editor.StopOrStartES( aStop, aRecal: Boolean );
 var
    _PathToPlink: string;
 begin
-   Result:= False;
    _PathToPlink:= ExtractFilePath( Application.ExeName ) + Cst_ResourcesFolder;
-   if aStop then
-      Result:= ( ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStop, PChar( _PathToPlink ), SW_HIDE ) > 32 )
-   else
-      Result:= ( ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStart, PChar( _PathToPlink ), SW_HIDE ) > 32 );
+   if aStop then begin
+      if aRecal then
+         ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStop, PChar( _PathToPlink ), SW_HIDE )
+      else
+         ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStopRetro, PChar( _PathToPlink ), SW_HIDE );
+   end else begin
+      if aRecal then
+         ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStart, PChar( _PathToPlink ), SW_HIDE )
+      else
+         ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStartRetro, PChar( _PathToPlink ), SW_HIDE )
+   end;
 end;
 
 //Construction de la liste des systèmes trouvés (et des listes de jeux associées)
@@ -924,7 +935,6 @@ begin
    FRootRomsPath:= '';
    FRootImagesPath:= '';
    Img_System.Picture.Graphic:= nil;
-   FFolderIsOnPi:= False;
 
    //On vide le combobox des systèmes
    //Et on désactive les Controls non nécessaires
@@ -944,6 +954,7 @@ begin
 
    //On sélectionne le dossier parent où se trouvent les dossiers de systèmes
    if ( OpenDialog.Execute ) then begin
+
       //On récupère le chemin vers le dossier parent
       FRootPath:= IncludeTrailingPathDelimiter( OpenDialog.FileName );
 
@@ -1007,13 +1018,23 @@ begin
          //On active le Combobox des systemes si au moins un systeme a été trouvé
          //Idem pour le listbox des jeux du systeme et on charge la liste du premier système
       end else begin
+
          //si le dossier sélectionné se trouve sur le Pi,
          //on prévient l'utilisateur qu'on va stopper ES
-         if FRootPath.StartsWith( Cst_PathIsOnPi ) then begin
-            if FPiPrompts then
+         FFolderIsOnPi:= FRootPath.StartsWith( Cst_Recalbox ) or
+                         FRootPath.StartsWith( Cst_Retropie );
+
+         if FFolderIsOnPi and not FPiLoadedOnce then begin
+            FPiLoadedOnce:= True;
+            if not FPiPrompts then
                MessageDlg( Rst_StopES, mtInformation, [mbOK], 0, mbOK );
-            StopOrStartES( True );
-            FFolderIsOnPi:= True;
+            if FRootPath.StartsWith( Cst_Recalbox ) then begin
+               StopOrStartES( True, True );
+               FSysIsRecal:= True;
+            end else begin
+               StopOrStartES( True, False );
+               FSysIsRecal:= False;
+            end;
          end;
 
          Cbx_Systems.Enabled:= True;
@@ -2180,10 +2201,11 @@ end;
 procedure TFrm_Editor.Mnu_QuitClick(Sender: TObject);
 begin
    SaveToIni;
-   if FFolderIsOnPi then begin
+   if FPiLoadedOnce then begin
       if not FPiPrompts then
          MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
-      StopOrStartES( False );
+      if FSysIsRecal then StopOrStartES( False, True )
+      else StopOrStartES( False, False );
    end;
    Application.Terminate;
 end;
@@ -2192,10 +2214,11 @@ end;
 procedure TFrm_Editor.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
    SaveToIni;
-   if FFolderIsOnPi then begin
+   if FPiLoadedOnce then begin
       if not FPiPrompts then
          MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
-      StopOrStartES( False );
+      if FSysIsRecal then StopOrStartES( False, True )
+      else StopOrStartES( False, False );
    end;
 end;
 

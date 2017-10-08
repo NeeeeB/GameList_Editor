@@ -13,11 +13,11 @@ resourcestring
 
    Rst_Help1 = 'Select the folder where your systems folders are stored.' + SlineBreak +
                'It can be on your PC or on your Raspberry Pi.' + SlineBreak + SlineBreak +
-               'If you choose a folder on the Pi, you will be prompted with a message explaining' +
+               'If you choose a folder on the Pi, you will be prompted with a message explaining ' +
                'that EmulationStation will be stopped in order to save your changes to the gamelist.xml.' + sLineBreak +
                'When you close the application, Recalbox will be rebooted to reflect your changes.' + SlineBreak + SlineBreak +
                'You have to check the box of a field to enable its modification.' + SlineBreak +
-               'It is done on purpose, to avoid accidentally change fields content.';
+               'It is done on purpose, to avoid accidentally changing fields content.';
 
    Rst_Title2 = 'Enable God Mode:';
 
