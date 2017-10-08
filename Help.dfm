@@ -17,7 +17,7 @@ object Frm_Help: TFrm_Help
   PixelsPerInch = 96
   TextHeight = 13
   object Btn_Close: TButton
-    Left = 368
+    Left = 384
     Top = 483
     Width = 75
     Height = 25
@@ -25,11 +25,31 @@ object Frm_Help: TFrm_Help
     TabOrder = 0
     OnClick = Btn_CloseClick
   end
-  object Mmo_Help: TMemo
+  object Chk_ShowTips: TCheckBox
+    Left = 8
+    Top = 483
+    Width = 105
+    Height = 17
+    Caption = 'Don'#39't show again'
+    TabOrder = 1
+  end
+  object Red_Help: TRichEdit
     Left = 8
     Top = 8
     Width = 853
     Height = 469
-    TabOrder = 1
+    Alignment = taCenter
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    Lines.Strings = (
+      '')
+    ParentFont = False
+    ReadOnly = True
+    ScrollBars = ssVertical
+    TabOrder = 2
+    Zoom = 100
   end
 end

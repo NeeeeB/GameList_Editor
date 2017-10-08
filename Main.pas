@@ -236,6 +236,8 @@ type
       Mnu_Help: TMenuItem;
       N2: TMenuItem;
       Mnu_Genesis: TMenuItem;
+      Mnu_ShowTips: TMenuItem;
+      Mnu_PiPrompts: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -266,6 +268,8 @@ type
       procedure Mnu_ThemeClick(Sender: TObject);
       procedure Mnu_GenesisClick(Sender: TObject);
       procedure Mnu_HelpClick(Sender: TObject);
+      procedure Mnu_ShowTipsClick(Sender: TObject);
+      procedure Mnu_PiPromptsClick(Sender: TObject);
 
    private
 
@@ -275,7 +279,8 @@ type
       FRootImagesPath: string;
       FXmlImagesPath: string;
       FXmlRomsPath: string;
-      FGodMode, FAutoHash, FDelWoPrompt, FGenesisLogo, FFolderIsOnPi: Boolean;
+      FGodMode, FAutoHash, FDelWoPrompt, FGenesisLogo,
+      FShowTips, FFolderIsOnPi, FPiPrompts: Boolean;
       GSystemList: TObjectDictionary<string,TObjectList<TGame>>;
 
       procedure LoadFromIni;
@@ -339,6 +344,8 @@ const
    Cst_IniGodMode = 'GodMode';
    Cst_IniAutoHash = 'AutoHash';
    Cst_IniDelWoPrompt = 'DelWoPrompt';
+   Cst_IniPiPrompts = 'PiPrompts';
+   Cst_ShowTips = 'ShowTips';
    Cst_IniGenesisLogo = 'GenesisLogo';
    Cst_GenesisLogoName = 'genesis.png';
    Cst_ThemeNumber = 'ThemeNumber';
@@ -788,8 +795,14 @@ begin
       FDelWoPrompt:= FileIni.ReadBool( Cst_IniOptions, Cst_IniDelWoPrompt, False );
       Mnu_DeleteWoPrompt.Checked:= FDelWoPrompt;
 
+      FPiPrompts:= FileIni.ReadBool( Cst_IniOptions, Cst_IniPiPrompts, False );
+      Mnu_PiPrompts.Checked:= FPiPrompts;
+
       FGenesisLogo:= FileIni.ReadBool( Cst_IniOptions, Cst_IniGenesisLogo, False );
       Mnu_Genesis.Checked:= FGenesisLogo;
+
+      FShowTips:= FileIni.ReadBool(  Cst_IniOptions, Cst_ShowTips, True );
+      Mnu_ShowTips.Checked:= FShowTips;
 
       FThemeNumber:= FileIni.ReadInteger( Cst_IniOptions, Cst_ThemeNumber, 5 );
    finally
@@ -808,6 +821,8 @@ begin
       FileIni.WriteBool( Cst_IniOptions, Cst_IniAutoHash, FAutoHash );
       FileIni.WriteBool( Cst_IniOptions, Cst_IniDelWoPrompt, ( FGodMode and FDelWoPrompt ) );
       FileIni.WriteBool( Cst_IniOptions, Cst_IniGenesisLogo, FGenesisLogo );
+      FileIni.WriteBool( Cst_IniOptions, Cst_ShowTips, FShowTips );
+      FileIni.WriteBool( Cst_IniOptions, Cst_IniPiPrompts, FPiPrompts );
       FileIni.WriteInteger( Cst_IniOptions, Cst_ThemeNumber, FThemeNumber );
    finally
       FileIni.Free;
@@ -839,8 +854,20 @@ end;
 
 //Met le focus sur le combo system à l'affichage de la fenêtre
 procedure TFrm_Editor.FormShow(Sender: TObject);
+var
+   Frm_Help: TFrm_Help;
 begin
    CheckThemeMenuItem( Succ( FThemeNumber ) );
+   if FShowTips then begin
+      //Affiche la fenêtre "Help"
+      Frm_Help:= TFrm_Help.Create(nil);
+      try
+         FShowTips:= Frm_Help.Execute( not FShowTips );
+      finally
+         Frm_Help.Free;
+      end;
+   end;
+   Mnu_ShowTips.Checked:= FShowTips;
    Lbx_Games.SetFocus;
 end;
 
@@ -983,7 +1010,8 @@ begin
          //si le dossier sélectionné se trouve sur le Pi,
          //on prévient l'utilisateur qu'on va stopper ES
          if FRootPath.StartsWith( Cst_PathIsOnPi ) then begin
-            MessageDlg( Rst_StopES, mtInformation, [mbOK], 0, mbOK );
+            if FPiPrompts then
+               MessageDlg( Rst_StopES, mtInformation, [mbOK], 0, mbOK );
             StopOrStartES( True );
             FFolderIsOnPi:= True;
          end;
@@ -1992,11 +2020,17 @@ var
 begin
    //Affiche la fenêtre "Help"
    Frm_Help:= TFrm_Help.Create(nil);
+   Frm_Help.Chk_ShowTips.Visible:= False;
    try
-      Frm_Help.Execute;
+      FShowTips:= Frm_Help.Execute( FShowTips);
    finally
       Frm_Help.Free;
    end;
+end;
+
+procedure TFrm_Editor.Mnu_PiPromptsClick(Sender: TObject);
+begin
+   FPiPrompts:= Mnu_PiPrompts.Checked;
 end;
 
 //Sans ça pas de Ctrl+A dans le mémo...(c'est triste en 2017)
@@ -2090,6 +2124,12 @@ begin
    Lbx_Games.SetFocus;
 end;
 
+//au click sur le menu item ShowTips at start
+procedure TFrm_Editor.Mnu_ShowTipsClick(Sender: TObject);
+begin
+   FShowTips:= Mnu_ShowTips.Checked;
+end;
+
 //supprime le tag entre [] de region dans le nom des jeux
 procedure TFrm_Editor.RemoveRegionFromGameName( aGame: TGame; aStartPos: Integer );
 var
@@ -2141,7 +2181,8 @@ procedure TFrm_Editor.Mnu_QuitClick(Sender: TObject);
 begin
    SaveToIni;
    if FFolderIsOnPi then begin
-      MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
+      if not FPiPrompts then
+         MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
       StopOrStartES( False );
    end;
    Application.Terminate;
@@ -2152,7 +2193,8 @@ procedure TFrm_Editor.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
    SaveToIni;
    if FFolderIsOnPi then begin
-      MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
+      if not FPiPrompts then
+         MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
       StopOrStartES( False );
    end;
 end;

@@ -6868,10 +6868,20 @@ object Frm_Editor: TFrm_Editor
         Enabled = False
         OnClick = Mnu_DeleteWoPromptClick
       end
+      object Mnu_PiPrompts: TMenuItem
+        AutoCheck = True
+        Caption = 'Disable Pi prompts'
+        OnClick = Mnu_PiPromptsClick
+      end
       object Mnu_AutoHash: TMenuItem
         AutoCheck = True
         Caption = 'Auto Hash'
         OnClick = Mnu_AutoHashClick
+      end
+      object Mnu_ShowTips: TMenuItem
+        AutoCheck = True
+        Caption = 'Show tips at start'
+        OnClick = Mnu_ShowTipsClick
       end
       object N2: TMenuItem
         Caption = '-'
@@ -7042,7 +7052,7 @@ object Frm_Editor: TFrm_Editor
     Left = 176
     Top = 208
     Bitmap = {
-      494C0101010008003C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800440010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
