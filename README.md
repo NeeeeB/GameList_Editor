@@ -15,7 +15,8 @@ https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
 All you need is the package available in the release section.
 Just unzip and you're good to go !!
 
-This is an alpha version for the moment, many features will be added in the future but it is already pretty fast.
+This is a beta version for the moment, many features will be added in the future but it is already pretty fast.
 (It loads my 5 systems with almost 3000 games in less than a second).
+You can edit your gamelist.xml on your computer or directly on your Raspberry !!
 
 Also, it is Windows only because it relies on VCL in Delphi, but I may consider an FMX version once it's stable, thus it would work under Linux and MacOS.
