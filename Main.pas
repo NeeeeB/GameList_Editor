@@ -30,7 +30,7 @@ resourcestring
                 'EmulationStation will be stopped for' + sLineBreak +
                 'the gamelist.xml changes to take effect.';
 
-   Rst_RebootRecal = 'Recalbox will be restarted to reflect your changes.';
+   Rst_RebootRecal = 'Recalbox/Retropie will be restarted to reflect your changes.';
 
 type
    //enumération pour les différents systèmes
