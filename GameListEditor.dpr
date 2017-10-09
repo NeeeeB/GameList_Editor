@@ -7,7 +7,8 @@ uses
   Vcl.Styles,
   MoreInfos in 'MoreInfos.pas' {Frm_MoreInfos},
   About in 'About.pas' {Frm_About},
-  Help in 'Help.pas' {Frm_Help};
+  Help in 'Help.pas' {Frm_Help},
+  ConfigureSSH in 'ConfigureSSH.pas' {Frm_ConfigureSSH};
 
 {$R *.res}
 

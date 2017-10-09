@@ -6891,6 +6891,16 @@ object Frm_Editor: TFrm_Editor
         Caption = 'Use Genesis logo'
         OnClick = Mnu_GenesisClick
       end
+      object N3: TMenuItem
+        Caption = '-'
+      end
+      object Mnu_SSH: TMenuItem
+        Caption = 'SSH'
+        object Mnu_ConfigSSH: TMenuItem
+          Caption = 'Configure'
+          OnClick = Mnu_ConfigSSHClick
+        end
+      end
       object N1: TMenuItem
         Caption = '-'
       end
@@ -7023,15 +7033,6 @@ object Frm_Editor: TFrm_Editor
           RadioItem = True
           OnClick = Mnu_ThemeClick
         end
-        object Mnu_Theme17: TMenuItem
-          Tag = 16
-          AutoCheck = True
-          Caption = 'Windows 10 SlateGray'
-          Enabled = False
-          GroupIndex = 1
-          RadioItem = True
-          OnClick = Mnu_ThemeClick
-        end
       end
     end
     object Mnu_Help: TMenuItem
@@ -7052,7 +7053,7 @@ object Frm_Editor: TFrm_Editor
     Left = 176
     Top = 208
     Bitmap = {
-      494C010101000800440010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800480010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -10,7 +10,7 @@ uses
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
    Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
    IdHashMessageDigest, IdHashSHA, IdHashCRC,
-   MoreInfos, About, Help;
+   MoreInfos, About, Help, ConfigureSSH;
 
 resourcestring
    Rst_WrongFolder = 'Oops !! It looks like you selected the wrong folder !' + SlineBreak +
@@ -107,8 +107,7 @@ type
                   tnSky,
                   tnVapor,
                   tnWindows10,
-                  tnWindows10Dark,
-                  tnWindows10SlateGray );
+                  tnWindows10Dark );
 
    //Objet stockant uniquement le type système (enum) pour
    //combobox systems, permet de retrouver facile l'image et le nom du systeme
@@ -231,13 +230,15 @@ type
       Mnu_Theme14: TMenuItem;
       Mnu_Theme15: TMenuItem;
       Mnu_Theme16: TMenuItem;
-      Mnu_Theme17: TMenuItem;
       N1: TMenuItem;
       Mnu_Help: TMenuItem;
       N2: TMenuItem;
       Mnu_Genesis: TMenuItem;
       Mnu_ShowTips: TMenuItem;
       Mnu_PiPrompts: TMenuItem;
+      Mnu_SSH: TMenuItem;
+      Mnu_ConfigSSH: TMenuItem;
+      N3: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -270,6 +271,7 @@ type
       procedure Mnu_HelpClick(Sender: TObject);
       procedure Mnu_ShowTipsClick(Sender: TObject);
       procedure Mnu_PiPromptsClick(Sender: TObject);
+      procedure Mnu_ConfigSSHClick(Sender: TObject);
 
    private
 
@@ -282,6 +284,7 @@ type
       FGodMode, FAutoHash, FDelWoPrompt, FGenesisLogo,
       FShowTips, FFolderIsOnPi, FPiPrompts, FSysIsRecal,
       FPiLoadedOnce: Boolean;
+      FRecalLogin, FRecalPwd, FRetroLogin, FRetroPwd: string;
       GSystemList: TObjectDictionary<string,TObjectList<TGame>>;
 
       procedure LoadFromIni;
@@ -348,13 +351,22 @@ const
    Cst_IniPiPrompts = 'PiPrompts';
    Cst_ShowTips = 'ShowTips';
    Cst_IniGenesisLogo = 'GenesisLogo';
+   Cst_IniRecalLogin = 'SSHRecalLogin';
+   Cst_IniRecalPwd = 'SSHRecalPwd';
+   Cst_IniRetroLogin = 'SSHRetroLogin';
+   Cst_IniRetroPwd = 'SSHRetroPwd';
    Cst_GenesisLogoName = 'genesis.png';
    Cst_ThemeNumber = 'ThemeNumber';
    Cst_MenuTheme = 'Mnu_Theme';
-   Cst_PlinkCommandStop = '/C plink -v root@recalbox -pw recalboxroot killall emulationstation';
-   Cst_PlinkCommandStopRetro = '/C plink -v root@retropie -pw recalboxroot killall emulationstation';
-   Cst_PlinkCommandStart = '/C plink root@recalbox -pw recalboxroot /sbin/reboot';
-   Cst_PlinkCommandStartRetro = '/C plink root@retropie -pw recalboxroot /sbin/reboot';
+   Cst_PlinkCommand = '/C plink -v ';
+   Cst_PlinkCommandRecal = '@recalbox -pw ';
+   Cst_PlinkCommandRetro = '@retropie -pw ';
+   Cst_PlinkCommandStop = ' killall emulationstation';
+   Cst_PlinkCommandStart = ' /sbin/reboot';
+   Cst_RecalLogin = 'root';
+   Cst_RecalPwd = 'recalboxroot';
+   Cst_RetroLogin = 'pi';
+   Cst_RetroPwd = 'raspberry';
    Cst_Recalbox = '\\RECALBOX';
    Cst_Retropie = '\\RETROPIE';
 
@@ -442,8 +454,7 @@ const
         'Sky',
         'Vapor',
         'Windows10',
-        'Windows10 Dark',
-        'Windows10 SlateGray' );
+        'Windows10 Dark' );
 
    //tableau de liaison enum systemes / noms systems affichés
    Cst_SystemKindStr: array[TSystemKind] of string =
@@ -809,6 +820,12 @@ begin
       Mnu_ShowTips.Checked:= FShowTips;
 
       FThemeNumber:= FileIni.ReadInteger( Cst_IniOptions, Cst_ThemeNumber, 5 );
+
+      FRecalLogin:= FileIni.ReadString( Cst_IniOptions, Cst_IniRecalLogin, Cst_RecalLogin);
+      FRecalPwd:= FileIni.ReadString( Cst_IniOptions, Cst_IniRecalPwd, Cst_RecalPwd);
+      FRetroLogin:= FileIni.ReadString( Cst_IniOptions, Cst_IniRetroLogin, Cst_RetroLogin);
+      FRetroPwd:= FileIni.ReadString( Cst_IniOptions, Cst_IniRetroPwd, Cst_RetroPwd);
+
    finally
       FileIni.Free;
    end;
@@ -828,6 +845,10 @@ begin
       FileIni.WriteBool( Cst_IniOptions, Cst_ShowTips, FShowTips );
       FileIni.WriteBool( Cst_IniOptions, Cst_IniPiPrompts, FPiPrompts );
       FileIni.WriteInteger( Cst_IniOptions, Cst_ThemeNumber, FThemeNumber );
+      FileIni.WriteString( Cst_IniOptions, Cst_IniRecalLogin, FRecalLogin);
+      FileIni.WriteString( Cst_IniOptions, Cst_IniRecalPwd, FRecalPwd);
+      FileIni.WriteString( Cst_IniOptions, Cst_IniRetroLogin, FRetroLogin);
+      FileIni.WriteString( Cst_IniOptions, Cst_IniRetroPwd, FRetroPwd);
    finally
       FileIni.Free;
    end;
@@ -909,14 +930,22 @@ begin
    _PathToPlink:= ExtractFilePath( Application.ExeName ) + Cst_ResourcesFolder;
    if aStop then begin
       if aRecal then
-         ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStop, PChar( _PathToPlink ), SW_HIDE )
+         ShellExecute( 0, nil, 'cmd.exe', PChar( Cst_PlinkCommand + FRecalLogin +
+                       Cst_PlinkCommandRecal + FRecalPwd +
+                       Cst_PlinkCommandStop ), PChar( _PathToPlink ), SW_HIDE )
       else
-         ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStopRetro, PChar( _PathToPlink ), SW_HIDE );
+         ShellExecute( 0, nil, 'cmd.exe', PChar( Cst_PlinkCommand + FRetroLogin +
+                       Cst_PlinkCommandRetro + FRetroPwd +
+                       Cst_PlinkCommandStop ), PChar( _PathToPlink ), SW_HIDE );
    end else begin
       if aRecal then
-         ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStart, PChar( _PathToPlink ), SW_HIDE )
+         ShellExecute( 0, nil, 'cmd.exe', PChar( Cst_PlinkCommand + FRecalLogin +
+                       Cst_PlinkCommandRecal + FRecalPwd +
+                       Cst_PlinkCommandStart ), PChar( _PathToPlink ), SW_HIDE )
       else
-         ShellExecute( 0, nil, 'cmd.exe', Cst_PlinkCommandStartRetro, PChar( _PathToPlink ), SW_HIDE )
+         ShellExecute( 0, nil, 'cmd.exe', PChar( Cst_PlinkCommand + FRetroLogin +
+                       Cst_PlinkCommandRetro + FRetroPwd +
+                       Cst_PlinkCommandStart ), PChar( _PathToPlink ), SW_HIDE )
    end;
 end;
 
@@ -1912,6 +1941,20 @@ end;
 procedure TFrm_Editor.Mnu_DeleteWoPromptClick(Sender: TObject);
 begin
    FDelWoPrompt:= Mnu_DeleteWoPrompt.Checked;
+end;
+
+//au click sur le menu item configure SSH
+procedure TFrm_Editor.Mnu_ConfigSSHClick(Sender: TObject);
+var
+   Frm_ConfigSSH: TFrm_ConfigureSSH;
+begin
+   //on affiche la fenêtre pour saisir les id de connexion SSH
+   Frm_ConfigSSH:= TFrm_ConfigureSSH.Create( nil );
+   try
+      Frm_ConfigSSH.Execute( FRecalLogin, FRecalPwd, FRetroLogin, FRetroPwd );
+   finally
+      Frm_ConfigSSH.Free;
+   end;
 end;
 
 //Au click sur le menu item convert to lower ou upper case (system)
