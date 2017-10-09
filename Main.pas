@@ -56,7 +56,6 @@ type
                    skLU,
                    skLYNX,
                    skMAME,
-                   skML,
                    skMSX,
                    skMSX1,
                    skMSX2,
@@ -401,7 +400,6 @@ resourcestring
    Rst_SystemKindLU = 'Lutro';
    Rst_SystemKindLYNX = 'Lynx';
    Rst_SystemKindMAME = 'Mame';
-   Rst_SystemKindML = 'Moonlight';
    Rst_SystemKindMSX = 'MSX 1-2-2+';
    Rst_SystemKindMSX1 = 'MSX 1';
    Rst_SystemKindMSX2 = 'MSX 2+';
@@ -480,7 +478,6 @@ const
       Rst_SystemKindLU,
       Rst_SystemKindLYNX,
       Rst_SystemKindMAME,
-      Rst_SystemKindML,
       Rst_SystemKindMSX,
       Rst_SystemKindMSX1,
       Rst_SystemKindMSX2,
@@ -539,7 +536,6 @@ const
       'lutro',
       'lynx',
       'mame',
-      'moonlight',
       'msx',
       'msx1',
       'msx2',
@@ -598,7 +594,6 @@ const
       'lutro.png',
       'lynx.png',
       'mame.png',
-      'moonlight.png',
       'msx.png',
       'msx1.png',
       'msx2.png',
