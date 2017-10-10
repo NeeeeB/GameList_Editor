@@ -3,12 +3,12 @@ unit Main;
 interface
 
 uses
-   Winapi.Windows, Winapi.Messages, Winapi.msxml, Winapi.ShellAPI,
+   Winapi.Windows, Winapi.Messages, Winapi.ShellAPI,
    System.SysUtils, System.Variants, System.Classes, System.IniFiles, System.Generics.Collections,
-   System.DateUtils, System.RegularExpressions, System.UITypes, System.ImageList,
+   System.RegularExpressions, System.UITypes, System.ImageList,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes, Vcl.ImgList,
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
-   Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
+   Xml.omnixmldom, Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc,
    IdHashMessageDigest, IdHashSHA, IdHashCRC,
    MoreInfos, About, Help, ConfigureSSH;
 
