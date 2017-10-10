@@ -8,7 +8,8 @@ uses
   MoreInfos in 'MoreInfos.pas' {Frm_MoreInfos},
   About in 'About.pas' {Frm_About},
   Help in 'Help.pas' {Frm_Help},
-  ConfigureSSH in 'ConfigureSSH.pas' {Frm_ConfigureSSH};
+  ConfigureSSH in 'ConfigureSSH.pas' {Frm_ConfigureSSH},
+  gnugettext in 'gnugettext.pas';
 
 {$R *.res}
 

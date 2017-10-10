@@ -5,7 +5,8 @@ interface
 uses
    Winapi.Windows, Winapi.Messages,
    System.SysUtils, System.Variants, System.Classes,
-   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+   gnugettext;
 
 type
    TFrm_ConfigureSSH = class(TForm)
@@ -20,6 +21,7 @@ type
       Btn_Save: TButton;
       Btn_Cancel: TButton;
       procedure FormShow(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
    private
     { Déclarations privées }
    public
@@ -50,6 +52,11 @@ begin
       aRetroLogin:= Edt_RetroLogin.Text;
       aRetroPwd:= Edt_RetroPwd.Text;
    end;
+end;
+
+procedure TFrm_ConfigureSSH.FormCreate(Sender: TObject);
+begin
+   TranslateComponent( Self );
 end;
 
 //à lapparition de la fenêtre on met le focus sur cancel

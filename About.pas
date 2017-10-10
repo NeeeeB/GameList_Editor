@@ -5,7 +5,8 @@ interface
 uses
    Winapi.Windows, Winapi.Messages,
    System.SysUtils, System.Variants, System.Classes,
-   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls;
+   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
+   gnugettext;
 
 resourcestring
    Rst_Text = sLineBreak + 'GameList Editor is a tool to manage your Gamelist.xml' + sLineBreak +
@@ -99,6 +100,7 @@ end;
 //au create on ajoute le texte au RichEdit
 procedure TFrm_About.FormCreate(Sender: TObject);
 begin
+   TranslateComponent( Self );
    Red_About.Lines.Add( Rst_Text );
 end;
 

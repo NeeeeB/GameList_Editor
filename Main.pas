@@ -10,7 +10,7 @@ uses
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
    Xml.omnixmldom, Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
    IdHashMessageDigest, IdHashSHA, IdHashCRC,
-   MoreInfos, About, Help, ConfigureSSH;
+   MoreInfos, About, Help, ConfigureSSH, gnugettext;
 
 resourcestring
    Rst_WrongFolder = 'Oops !! It looks like you selected the wrong folder !' + SlineBreak +
@@ -884,6 +884,7 @@ end;
 //A l'ouverture du programme
 procedure TFrm_Editor.FormCreate(Sender: TObject);
 begin
+   TranslateComponent( Self );
    Lbl_NbGamesFound.Caption:= '';
    GSystemList:= TObjectDictionary<string, TObjectList<TGame>>.Create([doOwnsValues]);
    LoadFromIni;

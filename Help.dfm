@@ -14,6 +14,7 @@ object Frm_Help: TFrm_Help
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Btn_Close: TButton

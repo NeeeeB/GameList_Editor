@@ -11580,6 +11580,7 @@ object Frm_MoreInfos: TFrm_MoreInfos
     00000000000000000000000000000000000000000000}
   OldCreateOrder = False
   Position = poScreenCenter
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Lbl_Playcount: TLabel

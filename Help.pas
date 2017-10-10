@@ -5,8 +5,8 @@ interface
 uses
    Winapi.Windows, Winapi.Messages,
    System.SysUtils, System.Variants, System.Classes, System.IniFiles,
-   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-  Vcl.ComCtrls;
+   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
+   gnugettext;
 
 resourcestring
    Rst_Title1 = 'Choose your folder :';
@@ -86,6 +86,7 @@ type
       Chk_ShowTips: TCheckBox;
       Red_Help: TRichEdit;
       procedure Btn_CloseClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
    private
       procedure FormatText;
    public
@@ -241,6 +242,11 @@ begin
       SelText:= sLineBreak;
       SelText:= sLineBreak;
    end;
+end;
+
+procedure TFrm_Help.FormCreate(Sender: TObject);
+begin
+   TranslateComponent( Self );
 end;
 
 //action au click sur le bouton close
