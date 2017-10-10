@@ -33,7 +33,7 @@ Basic features are :
 - *Supprimez l'image d'un jeu.*
 - *Attribuez l'image par défaut pour tous les jeux d'un système qui n'ont pas d'image.*
 - *God Mode : permet de supprimer un jeu (utiliser avec précaution ça supprime **REELLEMENT** le jeu et son entrée dans le gamelist.xml !!)*
-- *D'autres options sont disponibles et sont détaillées dans la fenêtre d'aide (qui s'affiche au premier démarrage de l'outil).**
+- *D'autres options sont disponibles et sont détaillées dans la fenêtre d'aide (qui s'affiche au premier démarrage de l'outil).*
 
 Screenshots :
 
