@@ -70,6 +70,11 @@ Dézippez, et c'est parti !!*
 (Il charge mes 5 systèmes avec quasiment 3000 jeux en moins d'une seconde).
 Le chargement des gamelist.xml sera un peu plus lent depuis votre Pi (dépend essentiellement de votre connexion).*
 
+Support is available here :
+
+*Le support est disponible ici :*
+https://forum.recalbox.com/topic/9265/soft-gamelist-editor
+
 # For Developers (Pour les développeurs) :
 It is developed with Embarcadero 10.2.1 (Tokyo) but it has been tested and builds too on Embarcadero 10.1 (Berlin).
 All you need is the source code, and the Resources folder to be placed in the same directory as your .exe file.
