@@ -106,7 +106,8 @@ type
                   tnSky,
                   tnVapor,
                   tnWindows10,
-                  tnWindows10Dark );
+                  tnWindows10Dark,
+                  tnWindowsBasic );
 
    //Objet stockant uniquement le type système (enum) pour
    //combobox systems, permet de retrouver facile l'image et le nom du systeme
@@ -244,6 +245,7 @@ type
       Chk_Favorite: TCheckBox;
       Cbx_Hidden: TComboBox;
       Cbx_Favorite: TComboBox;
+    Mnu_Theme17: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -463,7 +465,8 @@ const
         'Sky',
         'Vapor',
         'Windows10',
-        'Windows10 Dark' );
+        'Windows10 Dark',
+        'Windows' );
 
    //tableau de liaison enum systemes / noms systems affichés
    Cst_SystemKindStr: array[TSystemKind] of string =
