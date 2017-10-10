@@ -4,7 +4,7 @@ object Frm_MoreInfos: TFrm_MoreInfos
   BorderIcons = []
   BorderStyle = bsDialog
   Caption = 'More Infos'
-  ClientHeight = 280
+  ClientHeight = 283
   ClientWidth = 342
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET

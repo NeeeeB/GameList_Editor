@@ -137,10 +137,12 @@ type
       FCrc32: string;
       FMd5: string;
       FSha1: string;
+      FHidden: Integer;
+      FFavorite: Integer;
 
       procedure Load( aPath, aName, aDescription, aImagePath, aRating,
                       aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                      aRegion, aPlaycount, aLastplayed: string );
+                      aRegion, aPlaycount, aLastplayed, aHidden, aFavorite: string );
 
       function GetRomName( const aRomPath: string ): string;
       function GetMd5( const aFileName: string ): string;
@@ -151,7 +153,7 @@ type
 
       constructor Create( aPath, aName, aDescription, aImagePath, aRating,
                           aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                          aRegion, aPlaycount, aLastplayed: string ); reintroduce;
+                          aRegion, aPlaycount, aLastplayed, aHidden, aFavorite: string ); reintroduce;
    end;
 
    TFrm_Editor = class(TForm)
@@ -238,6 +240,10 @@ type
       Mnu_SSH: TMenuItem;
       Mnu_ConfigSSH: TMenuItem;
       N3: TMenuItem;
+      Chk_Hidden: TCheckBox;
+      Chk_Favorite: TCheckBox;
+      Cbx_Hidden: TComboBox;
+      Cbx_Favorite: TComboBox;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -331,6 +337,8 @@ const
    Cst_Region = 'region';
    Cst_Playcount = 'playcount';
    Cst_LastPlayed = 'lastplayed';
+   Cst_Hidden = 'hidden';
+   Cst_Favorite = 'favorite';
    Cst_GameListFileName = 'gamelist.xml';
    Cst_DateShortFill = '00';
    Cst_DateLongFill = '0000';
@@ -369,6 +377,8 @@ const
    Cst_RetroPwd = 'raspberry';
    Cst_Recalbox = '\\RECALBOX';
    Cst_Retropie = '\\RETROPIE';
+   Cst_True = 'true';
+   Cst_False = 'false';
 
 var
    Frm_Editor: TFrm_Editor;
@@ -646,17 +656,17 @@ end;
 //Constructeur de l'objet TGame
 constructor TGame.Create( aPath, aName, aDescription, aImagePath, aRating,
                           aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                          aRegion, aPlaycount, aLastplayed: string );
+                          aRegion, aPlaycount, aLastplayed, aHidden, aFavorite: string );
 begin
    Load( aPath, aName, aDescription, aImagePath, aRating,
          aDeveloper, aPublisher, aGenre, aPlayers, aDate, aRegion, aPlaycount,
-         aLastplayed );
+         aLastplayed, aHidden, aFavorite );
 end;
 
 //Chargement des attributs dans l'objet TGame
 procedure TGame.Load( aPath, aName, aDescription, aImagePath, aRating,
                       aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                      aRegion, aPlaycount, aLastplayed: string );
+                      aRegion, aPlaycount, aLastplayed, aHidden, aFavorite: string );
 begin
    FRomPath:= aPath;
    FRomName:= GetRomName( aPath );
@@ -673,6 +683,10 @@ begin
    FRegion:= aRegion;
    FPlaycount:= aPlaycount;
    FLastplayed:= aLastplayed;
+   if ( aHidden = Cst_True ) then FHidden:= 1
+   else FHidden:= 0;
+   if ( aFavorite = Cst_True ) then FFavorite:= 1
+   else FFavorite:= 0;
 end;
 
 //Fonction permettant de récupérer le nom de la rom avec son extension
@@ -970,6 +984,8 @@ begin
    Lbl_Filter.Enabled:= False;
    Lbl_NbGamesFound.Caption:= '';
    Btn_ChangeAll.Enabled:= False;
+   Cbx_Hidden.ItemIndex:= -1;
+   Cbx_Favorite.ItemIndex:= -1;
 
     //On vide la liste globale des systèmes (cas 2eme ouverture)
     GSystemList.Clear;
@@ -1131,7 +1147,9 @@ begin
                                FormatDateFromString( GetNodeValue( _Node, Cst_ReleaseDate ) ),
                                GetNodeValue( _Node, Cst_Region ),
                                GetNodeValue( _Node, Cst_Playcount ),
-                               GetNodeValue( _Node, Cst_LastPlayed ) );
+                               GetNodeValue( _Node, Cst_LastPlayed ),
+                               GetNodeValue( _Node, Cst_Hidden ),
+                               GetNodeValue( _Node, Cst_Favorite ) );
 
          //On ajoute à la _Gamelist
          _GameList.Add( _Game );
@@ -1171,6 +1189,8 @@ begin
    Chk_ReleaseDate.Enabled:= aValue;
    Chk_Description.Enabled:= aValue;
    Chk_Region.Enabled:= aValue;
+   Chk_Hidden.Enabled:= aValue;
+   Chk_Favorite.Enabled:= aValue;
    Btn_ChangeImage.Enabled:= aValue;
    Btn_RemovePicture.Enabled:= aValue;
    Btn_SetDefaultPicture.Enabled:= aValue;
@@ -1187,6 +1207,8 @@ begin
    Edt_ReleaseDate.Enabled:= aValue;
    Edt_NbPlayers.Enabled:= aValue;
    Mmo_Description.Enabled:= aValue;
+   Cbx_Hidden.Enabled:= not aValue;
+   Cbx_Favorite.Enabled:= not aValue;
 end;
 
 //Permet de tout cocher ou décocher les checkboxes d'un coup
@@ -1201,6 +1223,8 @@ begin
    Chk_ReleaseDate.Checked:= aValue;
    Chk_Description.Checked:= aValue;
    Chk_Region.Checked:= aValue;
+   Chk_Hidden.Checked:= aValue;
+   Chk_Favorite.Checked:= aValue;
 end;
 
 //Repasse tous les champs en readonly ou non
@@ -1215,6 +1239,8 @@ begin
    Edt_ReleaseDate.ReadOnly:= aValue;
    Edt_Region.ReadOnly:= aValue;
    Mmo_Description.ReadOnly:= aValue;
+   Cbx_Hidden.Enabled:= not aValue;
+   Cbx_Favorite.Enabled:= not aValue;
 end;
 
 //Action lorsqu'on change le contenu d'un des champs
@@ -1238,7 +1264,9 @@ begin
                              not ( _Game.FPublisher.Equals( Edt_Publisher.Text ) ) or
                              not ( _Game.FReleaseDate.Equals( Edt_ReleaseDate.Text ) ) or
                              not ( _Game.FDescription.Equals( Mmo_Description.Text ) ) or
-                             not ( _Game.FRegion.Equals( Edt_Region.Text ) );
+                             not ( _Game.FRegion.Equals( Edt_Region.Text ) ) or
+                             not ( _Game.FHidden = Cbx_Hidden.ItemIndex ) or
+                             not ( _Game.FFavorite = Cbx_Favorite.ItemIndex );
 end;
 
 //Chargement de la liste des jeux d'un système dans le listbox des jeux
@@ -1309,6 +1337,8 @@ begin
       Edt_NbPlayers.OnChange:= nil;
       Edt_Region.OnChange:= nil;
       Mmo_Description.OnChange:= nil;
+      Cbx_Hidden.OnChange:= nil;
+      Cbx_Favorite.OnChange:= nil;
 
       //On commence par vider le listbox
       Lbx_Games.Items.Clear;
@@ -1334,7 +1364,9 @@ begin
             ( ( _FilterIndex = 6 ) and ( _TmpGame.FPublisher.IsEmpty ) ) or
             ( ( _FilterIndex = 7 ) and ( _TmpGame.FDescription.IsEmpty ) ) or
             ( ( _FilterIndex = 8 ) and ( _TmpGame.FGenre.IsEmpty ) ) or
-            ( ( _FilterIndex = 9 ) and ( _TmpGame.FRegion.IsEmpty) ) then begin
+            ( ( _FilterIndex = 9 ) and ( _TmpGame.FRegion.IsEmpty ) ) or
+            ( ( _FilterIndex = 10 ) and ( _TmpGame.FHidden = 1 ) ) or
+            ( ( _FilterIndex = 11 ) and ( _TmpGame.FFavorite = 1 ) ) then begin
 
             Lbx_Games.Items.AddObject( _TmpGame.FName, _TmpGame );
          end
@@ -1372,6 +1404,8 @@ begin
       Edt_NbPlayers.OnChange:= FieldChange;
       Mmo_Description.OnChange:= FieldChange;
       Edt_Region.OnChange:= FieldChange;
+      Cbx_Hidden.OnChange:= FieldChange;
+      Cbx_Favorite.OnChange:= FieldChange;
    end;
 end;
 
@@ -1415,6 +1449,8 @@ begin
    Edt_Genre.Text:= aGame.FGenre;
    Mmo_Description.Text:= aGame.FDescription;
    Edt_Region.Text:= aGame.FRegion;
+   Cbx_Hidden.ItemIndex:= aGame.FHidden;
+   Cbx_Favorite.ItemIndex:= aGame.FFavorite;
 
    //on récupère le nom brut du jeu pour construire le chemin vers l'image
    _RawGameName:= ChangeFileExt( aGame.FRomName, '' );
@@ -1785,6 +1821,22 @@ begin
       _Node.ChildNodes.Nodes[Cst_Region].Text:= Edt_Region.Text;
       _Game.FRegion:= Edt_Region.Text;
    end;
+   if not ( _Game.FHidden = Cbx_Hidden.ItemIndex ) then begin
+      if not ( NodeExists( _Node, Cst_Hidden ) ) then begin
+         _Node.AddChild( Cst_Hidden );
+         _NodeAdded:= True;
+      end;
+      _Node.ChildNodes.Nodes[Cst_Hidden].Text:= LowerCase( Cbx_Hidden.Items[Cbx_Hidden.ItemIndex] );
+      _Game.FHidden:= Cbx_Hidden.ItemIndex;
+   end;
+   if not ( _Game.FFavorite = Cbx_Favorite.ItemIndex ) then begin
+      if not ( NodeExists( _Node, Cst_Favorite ) ) then begin
+         _Node.AddChild( Cst_Favorite );
+         _NodeAdded:= True;
+      end;
+      _Node.ChildNodes.Nodes[Cst_Favorite].Text:= LowerCase( Cbx_Favorite.Items[Cbx_Favorite.ItemIndex] );
+      _Game.FFavorite:= Cbx_Favorite.ItemIndex;
+   end;
 
    //Et enfin on enregistre le fichier (en formatant correctement si on a ajouté un noeud)
    if _NodeAdded then begin
@@ -1881,6 +1933,8 @@ begin
    Edt_Region.Text:= '';
    Mmo_Description.Text:= '';
    Img_Game.Picture.Graphic:= nil;
+   Cbx_Hidden.ItemIndex:= -1;
+   Cbx_Favorite.ItemIndex:= -1;
 end;
 
 //Centralisation de l'évènement click sur checkbox
@@ -1901,6 +1955,8 @@ begin
       7: Edt_Genre.ReadOnly:= not (Sender as TCheckBox).Checked;
       8: Mmo_Description.ReadOnly:= not (Sender as TCheckBox).Checked;
       9: Edt_Region.ReadOnly:= not (Sender as TCheckBox).Checked;
+      10: Cbx_Hidden.Enabled:= (Sender as TCheckBox).Checked;
+      11: Cbx_Favorite.Enabled:= (Sender as TCheckBox).Checked;
    end;
 end;
 

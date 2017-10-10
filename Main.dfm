@@ -6491,9 +6491,9 @@ object Frm_Editor: TFrm_Editor
     OnKeyPress = Mmo_DescriptionKeyPress
   end
   object Edt_Rating: TEdit
-    Left = 997
+    Left = 805
     Top = 423
-    Width = 185
+    Width = 108
     Height = 21
     Enabled = False
     ReadOnly = True
@@ -6503,7 +6503,7 @@ object Frm_Editor: TFrm_Editor
   object Edt_ReleaseDate: TEdit
     Left = 533
     Top = 423
-    Width = 185
+    Width = 108
     Height = 21
     Hint = 
       'Following formats are accepted :'#13#10#13#10'dd/mm/yyyy'#13#10'mm/yyyy'#13#10'yyyy'#13#10#13 +
@@ -6546,9 +6546,9 @@ object Frm_Editor: TFrm_Editor
     OnChange = FieldChange
   end
   object Edt_NbPlayers: TEdit
-    Left = 765
+    Left = 668
     Top = 423
-    Width = 185
+    Width = 108
     Height = 21
     Enabled = False
     ReadOnly = True
@@ -6557,7 +6557,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Chk_Rating: TCheckBox
     Tag = 4
-    Left = 997
+    Left = 805
     Top = 406
     Width = 97
     Height = 17
@@ -6570,7 +6570,7 @@ object Frm_Editor: TFrm_Editor
     Tag = 2
     Left = 533
     Top = 406
-    Width = 185
+    Width = 76
     Height = 17
     Hint = 
       'Following formats are accepted :'#13#10#13#10'dd/mm/yyyy'#13#10'mm/yyyy'#13#10'yyyy'#13#10#13 +
@@ -6617,11 +6617,11 @@ object Frm_Editor: TFrm_Editor
   end
   object Chk_NbPlayers: TCheckBox
     Tag = 3
-    Left = 765
+    Left = 668
     Top = 406
     Width = 121
     Height = 17
-    Caption = 'Number of Players'
+    Caption = 'Players'
     Enabled = False
     TabOrder = 14
     OnClick = ChkClick
@@ -6719,7 +6719,9 @@ object Frm_Editor: TFrm_Editor
       'Missing Publisher'
       'Missing Description'
       'Missing Genre'
-      'Missing Region')
+      'Missing Region'
+      'Hidden'
+      'Favorite')
   end
   object Chk_Region: TCheckBox
     Tag = 9
@@ -6791,6 +6793,54 @@ object Frm_Editor: TFrm_Editor
     Enabled = False
     TabOrder = 28
     OnClick = Btn_RemovePictureClick
+  end
+  object Chk_Hidden: TCheckBox
+    Tag = 10
+    Left = 941
+    Top = 406
+    Width = 97
+    Height = 17
+    Caption = 'Hidden'
+    Enabled = False
+    TabOrder = 29
+    OnClick = ChkClick
+  end
+  object Chk_Favorite: TCheckBox
+    Tag = 11
+    Left = 1074
+    Top = 406
+    Width = 97
+    Height = 17
+    Caption = 'Favorite'
+    Enabled = False
+    TabOrder = 30
+    OnClick = ChkClick
+  end
+  object Cbx_Hidden: TComboBox
+    Left = 941
+    Top = 423
+    Width = 108
+    Height = 21
+    Style = csDropDownList
+    Enabled = False
+    TabOrder = 31
+    OnChange = FieldChange
+    Items.Strings = (
+      'False'
+      'True')
+  end
+  object Cbx_Favorite: TComboBox
+    Left = 1074
+    Top = 423
+    Width = 108
+    Height = 21
+    Style = csDropDownList
+    Enabled = False
+    TabOrder = 32
+    OnChange = FieldChange
+    Items.Strings = (
+      'False'
+      'True')
   end
   object XMLDoc: TXMLDocument
     NodeIndentStr = #9
@@ -7053,7 +7103,7 @@ object Frm_Editor: TFrm_Editor
     Left = 176
     Top = 208
     Bitmap = {
-      494C010101000800500010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800540010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
