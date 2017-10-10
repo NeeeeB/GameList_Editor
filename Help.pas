@@ -15,7 +15,7 @@ resourcestring
                'It can be on your PC or on your Raspberry Pi.' + SlineBreak + SlineBreak +
                'If you choose a folder on the Pi, you will be prompted with a message explaining ' +
                'that EmulationStation will be stopped in order to save your changes to the gamelist.xml.' + sLineBreak +
-               'When you close the application, Recalbox will be rebooted to reflect your changes.' + SlineBreak + SlineBreak +
+               'When you close the application, Recalbox/Retropie will be rebooted to reflect your changes.' + SlineBreak + SlineBreak +
                'You have to check the box of a field to enable its modification.' + SlineBreak +
                'It is done on purpose, to avoid accidentally changing fields content.';
 
@@ -35,7 +35,7 @@ resourcestring
    Rst_Title4 = 'Disable Pi prompts:';
 
    Rst_Help4 = 'Checking this option will disable all the prompts related' +
-               'to the EmulationStation stop and the Recalbox reboot.';
+               'to the EmulationStation stop and the Recalbox/Retropie reboot.';
 
    Rst_Title5 = 'Auto Hash:';
 
@@ -74,6 +74,11 @@ resourcestring
    Rst_Title12 = 'Game - Convert to uppercase:';
 
    Rst_Help12 = 'Will convert all the text to uppercase for the selected game.';
+
+   Rst_Title13 = 'SSH / Configuration:';
+
+   Rst_Help13 = 'Open a new popup window where you can set your Login and Password for Recalbox/Retropie.' + sLineBreak +
+                'Filled with default values at first launch, your settings will be saved afterwards.';
 
 type
    TFrm_Help = class(TForm)
@@ -173,6 +178,16 @@ begin
       SelAttributes.Style:= [];
       SelAttributes.Size:= 8;
       SelText:= Rst_Help7;
+      SelText:= sLineBreak;
+      SelText:= sLineBreak;
+
+      SelAttributes.Style:= [fsUnderline,fsBold];
+      SelAttributes.Size:= 13;
+      SelText:= Rst_Title13;
+      SelText:= sLineBreak;
+      SelAttributes.Style:= [];
+      SelAttributes.Size:= 8;
+      SelText:= Rst_Help13;
       SelText:= sLineBreak;
       SelText:= sLineBreak;
 

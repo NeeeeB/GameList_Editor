@@ -13,7 +13,7 @@ resourcestring
               'https://www.recalbox.com/' + sLineBreak +
               'https://retropie.org.uk/' + sLineBreak + sLineBreak +
               'It is written in Delphi (Tokyo 10.2.1) by NeeeeB' + sLineBreak +
-              'It''s source code is fully available at:' + sLineBreak +
+              'Its source code is fully available at:' + sLineBreak +
               'https://github.com/NeeeeB/GameList_Editor' + sLineBreak + sLineBreak +
               'Your Gamelist.xml should have been created' + sLineBreak +
               'by Universal XML Scraper by Screech:' + sLineBreak +
