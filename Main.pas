@@ -8,7 +8,7 @@ uses
    System.RegularExpressions, System.UITypes, System.ImageList,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes, Vcl.ImgList,
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
-   Xml.omnixmldom, Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc,
+   Xml.omnixmldom, Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
    IdHashMessageDigest, IdHashSHA, IdHashCRC,
    MoreInfos, About, Help, ConfigureSSH;
 
