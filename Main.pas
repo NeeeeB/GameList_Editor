@@ -340,6 +340,7 @@ const
    Cst_ImageSuffixJpeg = '-image.jpeg';
    Cst_DefaultPicsFolderPath = 'Resources\DefaultPictures\';
    Cst_DefaultImageNameSuffix = '-default.png';
+   Cst_DefaultImageName = 'default.png';
    Cst_LogoPicsFolder = 'Resources\SystemsLogos\';
    Cst_IniFilePath = 'Resources\Settings.ini';
    Cst_ResourcesFolder = 'Resources\';
@@ -1493,6 +1494,12 @@ begin
                    getCurrentFolderName +
                    Cst_DefaultImageNameSuffix;
 
+   //si l'image defaut du systeme n'existe pas on prend la générique
+   if not FileExists( PathToDefault ) then
+      PathToDefault:= ExtractFilePath(Application.ExeName) +
+                      Cst_DefaultPicsFolderPath + '\' +
+                      Cst_DefaultImageName;
+
    ChangeImage( PathToDefault, _Game );
    LoadGame( _Game );
    Lbx_Games.SetFocus;
@@ -1511,6 +1518,12 @@ begin
                    Cst_DefaultPicsFolderPath + '\' +
                    getCurrentFolderName +
                    Cst_DefaultImageNameSuffix;
+
+    //si l'image defaut du systeme n'existe pas on prend la générique
+    if not FileExists( PathToDefault ) then
+       PathToDefault:= ExtractFilePath(Application.ExeName) +
+                       Cst_DefaultPicsFolderPath + '\' +
+                       Cst_DefaultImageName;
 
    //et on boucle sur tous les jeux de la liste pour remplacer l'image
    ProgressBar.Visible:= True;
@@ -1978,12 +1991,11 @@ begin
    Screen.Cursor:= crDefault;
 end;
 
-//Au click sur le menu item convert to lower ou upper case (system)
+//Au click sur le menu item convert to lower ou upper case (game)
 procedure TFrm_Editor.ChangeCaseGameClick(Sender: TObject);
 var
    _Game: TGame;
 begin
-
    _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
    if ( ( sender as TMenuItem ).Tag = 12 ) then
       ConvertFieldsCase( _Game, True )
@@ -2238,8 +2250,11 @@ end;
 //Click sur le menuitem "Quit"
 procedure TFrm_Editor.Mnu_QuitClick(Sender: TObject);
 begin
+   //on save les options dans le ini
    SaveToIni;
+   //si on a chargé au moins une fois le dossier depuis le bi, on reboot
    if FPiLoadedOnce then begin
+      //on affiche ou non le prompt d'info reboot
       if not FPiPrompts then
          MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
       if FSysIsRecal then StopOrStartES( False, True )
@@ -2251,8 +2266,11 @@ end;
 //Juste avant la fermeture du programme, on sauvegarde les options dansle .INI
 procedure TFrm_Editor.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+   //on save les options dans le ini
    SaveToIni;
+   //si on a chargé au moins une fois le dossier depuis le bi, on reboot
    if FPiLoadedOnce then begin
+      //on affiche ou non le prompt d'info reboot
       if not FPiPrompts then
          MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
       if FSysIsRecal then StopOrStartES( False, True )
