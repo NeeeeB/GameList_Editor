@@ -109,6 +109,10 @@ type
                   tnWindows10Dark,
                   tnWindowsBasic );
 
+   //enum pour les langues
+   TLangName = ( lnEnglish,
+                 lnFrench );
+
    //Objet stockant uniquement le type système (enum) pour
    //combobox systems, permet de retrouver facile l'image et le nom du systeme
    TSystemKindObject = class
@@ -245,7 +249,11 @@ type
       Chk_Favorite: TCheckBox;
       Cbx_Hidden: TComboBox;
       Cbx_Favorite: TComboBox;
-    Mnu_Theme17: TMenuItem;
+      Mnu_Theme17: TMenuItem;
+      N4: TMenuItem;
+      Mnu_Language: TMenuItem;
+      Mnu_Lang1: TMenuItem;
+      Mnu_Lang2: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -279,10 +287,11 @@ type
       procedure Mnu_ShowTipsClick(Sender: TObject);
       procedure Mnu_PiPromptsClick(Sender: TObject);
       procedure Mnu_ConfigSSHClick(Sender: TObject);
+      procedure Mnu_LangClick(Sender: TObject);
 
    private
 
-      FThemeNumber: Integer;
+      FThemeNumber, FLanguage: Integer;
       FRootPath: string;
       FRootRomsPath: string;
       FRootImagesPath: string;
@@ -309,18 +318,19 @@ type
       procedure LoadSystemLogo( aPictureName: string );
       procedure DeleteGame;
       procedure DeleteGamePicture;
-      procedure CheckThemeMenuItem( aNumber: Integer );
+      procedure CheckMenuItem( aNumber: Integer; aLang: Boolean = False );
       procedure RemoveRegionFromGameName( aGame: TGame; aStartPos: Integer );
       procedure ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False;
                                    aUp: Boolean = False );
+      procedure StopOrStartES( aStop, aRecal: Boolean );
 
-      function  getSystemKind: TSystemKind;
-      function  getCurrentFolderName: string;
+      function getSystemKind: TSystemKind;
+      function getCurrentFolderName: string;
       function GetCurrentLogoName: string;
       function BuildGamesList( const aPathToFile: string ): TObjectList<TGame>;
       function FormatDateFromString( const aDate: string; aIso: Boolean = False ): string;
       function GetThemeEnum( aNumber: Integer ): TThemeName;
-      procedure StopOrStartES( aStop, aRecal: Boolean );
+      function GetLangEnum( aNumber: Integer ): TLangName;
 
    end;
 
@@ -365,9 +375,11 @@ const
    Cst_IniRecalPwd = 'SSHRecalPwd';
    Cst_IniRetroLogin = 'SSHRetroLogin';
    Cst_IniRetroPwd = 'SSHRetroPwd';
+   Cst_IniLanguage = 'Language';
    Cst_GenesisLogoName = 'genesis.png';
    Cst_ThemeNumber = 'ThemeNumber';
    Cst_MenuTheme = 'Mnu_Theme';
+   Cst_MenuLang = 'Mnu_Lang';
    Cst_PlinkCommand = '/C plink -v ';
    Cst_PlinkCommandRecal = '@recalbox -pw ';
    Cst_PlinkCommandRetro = '@retropie -pw ';
@@ -467,6 +479,11 @@ const
         'Windows10',
         'Windows10 Dark',
         'Windows' );
+
+   //tableau de liaison enum langues / noms langues
+   Cst_LangNameStr: array[TLangName] of string =
+      ( 'en',
+        'fr' );
 
    //tableau de liaison enum systemes / noms systems affichés
    Cst_SystemKindStr: array[TSystemKind] of string =
@@ -833,12 +850,12 @@ begin
       Mnu_ShowTips.Checked:= FShowTips;
 
       FThemeNumber:= FileIni.ReadInteger( Cst_IniOptions, Cst_ThemeNumber, 5 );
+      FLanguage:= FileIni.ReadInteger( Cst_IniOptions, Cst_IniLanguage, 0 );
 
       FRecalLogin:= FileIni.ReadString( Cst_IniOptions, Cst_IniRecalLogin, Cst_RecalLogin);
       FRecalPwd:= FileIni.ReadString( Cst_IniOptions, Cst_IniRecalPwd, Cst_RecalPwd);
       FRetroLogin:= FileIni.ReadString( Cst_IniOptions, Cst_IniRetroLogin, Cst_RetroLogin);
       FRetroPwd:= FileIni.ReadString( Cst_IniOptions, Cst_IniRetroPwd, Cst_RetroPwd);
-
    finally
       FileIni.Free;
    end;
@@ -858,6 +875,7 @@ begin
       FileIni.WriteBool( Cst_IniOptions, Cst_ShowTips, FShowTips );
       FileIni.WriteBool( Cst_IniOptions, Cst_IniPiPrompts, FPiPrompts );
       FileIni.WriteInteger( Cst_IniOptions, Cst_ThemeNumber, FThemeNumber );
+      FileIni.WriteInteger( Cst_IniOptions, Cst_IniLanguage, FLanguage );
       FileIni.WriteString( Cst_IniOptions, Cst_IniRecalLogin, FRecalLogin);
       FileIni.WriteString( Cst_IniOptions, Cst_IniRecalPwd, FRecalPwd);
       FileIni.WriteString( Cst_IniOptions, Cst_IniRetroLogin, FRetroLogin);
@@ -881,6 +899,20 @@ begin
    end;
 end;
 
+//Recup de l'enum de la langue en fonction de l'entier du fichier ini
+function TFrm_Editor.GetLangEnum( aNumber: Integer ): TLangName;
+var
+   _LangName: TLangName;
+begin
+   Result:= lnEnglish;
+   for _LangName:= Low( TLangName ) to High( TLangName ) do begin
+      if ( aNumber = Ord( _LangName ) ) then begin
+         Result:= _LangName;
+         Break;
+      end;
+   end;
+end;
+
 //A l'ouverture du programme
 procedure TFrm_Editor.FormCreate(Sender: TObject);
 begin
@@ -897,7 +929,10 @@ procedure TFrm_Editor.FormShow(Sender: TObject);
 var
    Frm_Help: TFrm_Help;
 begin
-   CheckThemeMenuItem( Succ( FThemeNumber ) );
+   UseLanguage( Cst_LangNameStr[GetLangEnum( FLanguage )] );
+   RetranslateComponent( Self );
+   CheckMenuItem( Succ( FThemeNumber ) );
+   CheckMenuItem( Succ( FLanguage ), True );
    if FShowTips then begin
       //Affiche la fenêtre "Help"
       Frm_Help:= TFrm_Help.Create(nil);
@@ -911,13 +946,14 @@ begin
    Lbx_Games.SetFocus;
 end;
 
-//Pour checker le menuitem du numéro de thème récupéré depuis le fichier ini
-procedure TFrm_Editor.CheckThemeMenuItem( aNumber: Integer );
+//Pour checker le menuitem du numéro de thème ou langue récupéré depuis le fichier ini
+procedure TFrm_Editor.CheckMenuItem( aNumber: Integer; aLang: Boolean = False );
 var
    _MenuItem: TMenuItem;
    _CompName: string;
 begin
-   _CompName:= Cst_MenuTheme + IntToStr( aNumber );
+   if aLang then _CompName:= Cst_MenuLang + IntToStr( aNumber )
+   else _CompName:= Cst_MenuTheme + IntToStr( aNumber );
    _MenuItem:= ( FindComponent( _CompName ) as TMenuItem ) ;
    _MenuItem.Checked:= True;
 end;
@@ -1088,6 +1124,7 @@ begin
          Lbl_Filter.Enabled:= Cbx_Systems.Enabled;
          Cbx_Systems.ItemIndex:= 0;
          EnableControls( True );
+         Cbx_Filter.ItemIndex:= 0;
          LoadGamesList( getCurrentFolderName );
 
          //On remet le curseur par défaut
@@ -1830,7 +1867,8 @@ begin
          _Node.AddChild( Cst_Hidden );
          _NodeAdded:= True;
       end;
-      _Node.ChildNodes.Nodes[Cst_Hidden].Text:= LowerCase( Cbx_Hidden.Items[Cbx_Hidden.ItemIndex] );
+      if ( Cbx_Hidden.ItemIndex = 0 ) then _Node.ChildNodes.Nodes[Cst_Hidden].Text:= Cst_False
+      else _Node.ChildNodes.Nodes[Cst_Hidden].Text:= Cst_True;
       _Game.FHidden:= Cbx_Hidden.ItemIndex;
    end;
    if not ( _Game.FFavorite = Cbx_Favorite.ItemIndex ) then begin
@@ -1838,7 +1876,8 @@ begin
          _Node.AddChild( Cst_Favorite );
          _NodeAdded:= True;
       end;
-      _Node.ChildNodes.Nodes[Cst_Favorite].Text:= LowerCase( Cbx_Favorite.Items[Cbx_Favorite.ItemIndex] );
+      if ( Cbx_Favorite.ItemIndex = 0 ) then _Node.ChildNodes.Nodes[Cst_Favorite].Text:= Cst_False
+      else _Node.ChildNodes.Nodes[Cst_Favorite].Text:= Cst_True;
       _Game.FFavorite:= Cbx_Favorite.ItemIndex;
    end;
 
@@ -2159,6 +2198,7 @@ begin
    end;
 end;
 
+//au click sur le menu item disable pi prompts
 procedure TFrm_Editor.Mnu_PiPromptsClick(Sender: TObject);
 begin
    FPiPrompts:= Mnu_PiPrompts.Checked;
@@ -2305,6 +2345,18 @@ procedure TFrm_Editor.Mnu_ThemeClick(Sender: TObject);
 begin
    TStyleManager.TrySetStyle( Cst_ThemeNameStr[GetThemeEnum( ( Sender as TMenuItem).Tag )] );
    FThemeNumber:= ( Sender as TMenuItem ).Tag;
+end;
+
+//Choix de la langue
+procedure TFrm_Editor.Mnu_LangClick(Sender: TObject);
+var
+   index: Integer;
+begin
+   index:= Cbx_Filter.ItemIndex;
+   UseLanguage( Cst_LangNameStr[GetLangEnum( ( Sender as TMenuItem).Tag )] );
+   FLanguage:= ( Sender as TMenuItem ).Tag;
+   RetranslateComponent( Self );
+   Cbx_Filter.ItemIndex:= index;
 end;
 
 //Click sur le menuitem "Quit"

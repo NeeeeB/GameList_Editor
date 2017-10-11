@@ -4,7 +4,7 @@ object Frm_Editor: TFrm_Editor
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'GameList Editor'
-  ClientHeight = 667
+  ClientHeight = 688
   ClientWidth = 1210
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -5319,10 +5319,9 @@ object Frm_Editor: TFrm_Editor
   object Lbl_NbGamesFound: TLabel
     Left = 626
     Top = 197
-    Width = 87
+    Width = 3
     Height = 13
     Alignment = taCenter
-    Caption = 'xxx games found.'
   end
   object Lbl_SelectSystem: TLabel
     Left = 32
@@ -6679,9 +6678,9 @@ object Frm_Editor: TFrm_Editor
     OnClick = Btn_ChangeImageClick
   end
   object Btn_SetDefaultPicture: TButton
-    Left = 600
+    Left = 584
     Top = 286
-    Width = 139
+    Width = 169
     Height = 25
     Caption = 'Change Picture to default'
     Enabled = False
@@ -6689,9 +6688,9 @@ object Frm_Editor: TFrm_Editor
     OnClick = Btn_SetDefaultPictureClick
   end
   object Btn_ChangeAll: TButton
-    Left = 571
+    Left = 547
     Top = 315
-    Width = 193
+    Width = 241
     Height = 25
     Caption = 'Change all missing pictures to default'
     Enabled = False
@@ -6857,6 +6856,7 @@ object Frm_Editor: TFrm_Editor
     Top = 208
   end
   object MainMenu: TMainMenu
+    AutoHotkeys = maManual
     Left = 104
     Top = 264
     object Mnu_File: TMenuItem
@@ -7092,6 +7092,25 @@ object Frm_Editor: TFrm_Editor
           OnClick = Mnu_ThemeClick
         end
       end
+      object N4: TMenuItem
+        Caption = '-'
+      end
+      object Mnu_Language: TMenuItem
+        Caption = 'Language'
+        object Mnu_Lang1: TMenuItem
+          AutoCheck = True
+          Caption = 'English'
+          RadioItem = True
+          OnClick = Mnu_LangClick
+        end
+        object Mnu_Lang2: TMenuItem
+          Tag = 1
+          AutoCheck = True
+          Caption = 'French'
+          RadioItem = True
+          OnClick = Mnu_LangClick
+        end
+      end
     end
     object Mnu_Help: TMenuItem
       Caption = 'Help'
@@ -7111,7 +7130,7 @@ object Frm_Editor: TFrm_Editor
     Left = 176
     Top = 208
     Bitmap = {
-      494C010101000800640010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800700010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
