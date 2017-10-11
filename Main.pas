@@ -254,6 +254,7 @@ type
       Mnu_Language: TMenuItem;
       Mnu_Lang1: TMenuItem;
       Mnu_Lang2: TMenuItem;
+      Edt_RomPath: TEdit;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -1492,6 +1493,7 @@ begin
    Edt_Region.Text:= aGame.FRegion;
    Cbx_Hidden.ItemIndex:= aGame.FHidden;
    Cbx_Favorite.ItemIndex:= aGame.FFavorite;
+   Edt_RomPath.Text:= aGame.FRomPath;
 
    //on récupère le nom brut du jeu pour construire le chemin vers l'image
    _RawGameName:= ChangeFileExt( aGame.FRomName, '' );
@@ -1974,6 +1976,7 @@ begin
    Edt_NbPlayers.Text:= '';
    Edt_Genre.Text:= '';
    Edt_Region.Text:= '';
+   Edt_RomPath.Text:= '';
    Mmo_Description.Text:= '';
    Img_Game.Picture.Graphic:= nil;
    Cbx_Hidden.ItemIndex:= -1;

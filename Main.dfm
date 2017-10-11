@@ -6470,7 +6470,7 @@ object Frm_Editor: TFrm_Editor
     Left = 29
     Top = 192
     Width = 473
-    Height = 473
+    Height = 437
     DoubleBuffered = True
     ItemHeight = 13
     ParentDoubleBuffered = False
@@ -6841,6 +6841,15 @@ object Frm_Editor: TFrm_Editor
       'False'
       'True')
   end
+  object Edt_RomPath: TEdit
+    Left = 29
+    Top = 642
+    Width = 473
+    Height = 21
+    Enabled = False
+    ReadOnly = True
+    TabOrder = 33
+  end
   object XMLDoc: TXMLDocument
     NodeIndentStr = #9
     Options = [doAttrNull, doAutoPrefix, doNamespaceDecl]
@@ -7130,7 +7139,7 @@ object Frm_Editor: TFrm_Editor
     Left = 176
     Top = 208
     Bitmap = {
-      494C010101000800700010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800740010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
