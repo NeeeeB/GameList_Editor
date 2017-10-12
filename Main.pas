@@ -111,7 +111,8 @@ type
 
    //enum pour les langues
    TLangName = ( lnEnglish,
-                 lnFrench );
+                 lnFrench,
+                 lnGerman );
 
    //Objet stockant uniquement le type système (enum) pour
    //combobox systems, permet de retrouver facile l'image et le nom du systeme
@@ -127,9 +128,11 @@ type
       FRomPath: string;
       FRomName: string;
       FRomNameWoExt: string;
+      FPhysicalRomPath: string;
+      FImagePath: string;
+      FPhysicalImagePath: string;
       FName: string;
       FDescription: string;
-      FImagePath: string;
       FRating: string;
       FReleaseDate: string;
       FDeveloper: string;
@@ -255,6 +258,7 @@ type
       Mnu_Lang1: TMenuItem;
       Mnu_Lang2: TMenuItem;
       Edt_RomPath: TEdit;
+    Mnu_Lang3: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -294,10 +298,10 @@ type
 
       FThemeNumber, FLanguage: Integer;
       FRootPath: string;
-      FRootRomsPath: string;
-      FRootImagesPath: string;
-      FXmlImagesPath: string;
-      FXmlRomsPath: string;
+      FCurrentFolder: string;
+      FImageFolder: string;
+      FXmlImageFolderPath: string;
+      FIsLoading: Boolean;
       FGodMode, FAutoHash, FDelWoPrompt, FGenesisLogo,
       FShowTips, FFolderIsOnPi, FPiPrompts, FSysIsRecal,
       FPiLoadedOnce: Boolean;
@@ -332,6 +336,8 @@ type
       function FormatDateFromString( const aDate: string; aIso: Boolean = False ): string;
       function GetThemeEnum( aNumber: Integer ): TThemeName;
       function GetLangEnum( aNumber: Integer ): TLangName;
+      function GetPhysicalRomPath( const aRomPath: string ): string;
+      function GetPhysicalImagePath( const aImagePath: string ): string;
 
    end;
 
@@ -484,7 +490,8 @@ const
    //tableau de liaison enum langues / noms langues
    Cst_LangNameStr: array[TLangName] of string =
       ( 'en',
-        'fr' );
+        'fr',
+        'de' );
 
    //tableau de liaison enum systemes / noms systems affichés
    Cst_SystemKindStr: array[TSystemKind] of string =
@@ -692,9 +699,11 @@ begin
    FRomPath:= aPath;
    FRomName:= GetRomName( aPath );
    FRomNameWoExt:= ChangeFileExt( FRomName, '' );
+   FPhysicalRomPath:= Frm_Editor.GetPhysicalRomPath( aPath );
+   FImagePath:= aImagePath;
+   FPhysicalImagePath:= Frm_Editor.GetPhysicalImagePath( aImagePath );
    FName:= aName;
    FDescription:= aDescription;
-   FImagePath:= aImagePath;
    FRating:= aRating;
    FReleaseDate:= aDate;
    FDeveloper:= aDeveloper;
@@ -717,6 +726,27 @@ var
 begin
    _Pos:= LastDelimiter( '/', aRomPath );
    Result:= Copy( aRomPath, Succ( _Pos ), ( aRomPath.Length - _Pos ) );
+end;
+
+function TFrm_Editor.GetPhysicalRomPath( const aRomPath: string ): string;
+var
+   _Pos: Integer;
+begin
+   _Pos:= Pos( '/', aRomPath );
+   Result:= FRootPath + FCurrentFolder + Copy( aRomPath, Succ( _Pos ), ( aRomPath.Length - _Pos ) );
+   Result:= StringReplace( Result, '/', '\', [rfReplaceAll] );
+end;
+
+function TFrm_Editor.GetPhysicalImagePath( const aImagePath: string ): string;
+var
+   _Pos: Integer;
+begin
+   if aImagePath.IsEmpty then Result:= ''
+   else begin
+      _Pos:= Pos( '/', aImagePath );
+      Result:= FRootPath + FCurrentFolder + Copy( aImagePath, Succ( _Pos ), ( aImagePath.Length - _Pos ) );
+      Result:= StringReplace( Result, '/', '\', [rfReplaceAll] );
+   end;
 end;
 
 //Fonction permettant de récupérer le MD5 des roms
@@ -1010,10 +1040,8 @@ var
    TmpList: TObjectList<TGame>;
    _system: TSystemKindObject;
 begin
-   //on met à vide tous les chemins et le logo systeme
+   //on met à vide le chemin de base et le logo systeme
    FRootPath:= '';
-   FRootRomsPath:= '';
-   FRootImagesPath:= '';
    Img_System.Picture.Graphic:= nil;
 
    //On vide le combobox des systèmes
@@ -1059,10 +1087,11 @@ begin
             ( FileExists( FRootPath + IncludeTrailingPathDelimiter( Info.Name ) +
                           Cst_GameListFileName ) ) then begin
 
+            //on chope le nom du dossier en cours pour construire les chemins
+            FCurrentFolder:= IncludeTrailingPathDelimiter( Info.Name );
+
             //Ici on récupère le chemin vers le fichier gamelist.xml
-            _GameListPath:= FRootPath +
-                            IncludeTrailingPathDelimiter( Info.Name ) +
-                            Cst_GameListFileName;
+            _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
 
             //On tente de construire la liste des jeux depuis le .xml
             TmpList:= BuildGamesList( _GameListPath );
@@ -1297,6 +1326,8 @@ procedure TFrm_Editor.CheckIfChangesToSave;
 var
    _Game: TGame;
 begin
+   if FIsLoading then Exit;
+
    _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
    Btn_SaveChanges.Enabled:= not ( _Game.FName.Equals( Edt_Name.Text ) ) or
                              not ( _Game.FGenre.Equals( Edt_Genre.Text ) ) or
@@ -1313,50 +1344,36 @@ end;
 
 //Chargement de la liste des jeux d'un système dans le listbox des jeux
 procedure TFrm_Editor.LoadGamesList( const aSystem: string );
-var
-   _PathFound: Boolean;
 
    //permet de récupérer le chemin vers les images (du xml)
-   //et roms pour le système sélectionné
-   procedure GetPaths( aGame: TGame );
+   procedure GetImageFolder( aGame: TGame );
    var
-      Pos: Integer;
-      tmpStr: string;
+      StartPos, EndPos: Integer;
    begin
-      Pos:= LastDelimiter( '/', aGame.FImagePath );
-      FXmlImagesPath:= Copy( aGame.FImagePath, 1, Pos );
-      Pos:= LastDelimiter( '/', aGame.FRomPath );
-      FXmlRomsPath:= Copy( aGame.FImagePath, 1, Pos );
-      FRootRomsPath:= IncludeTrailingPathDelimiter( FRootPath +
-                                                    getCurrentFolderName );
-      tmpStr:= Copy( FXmlImagesPath, 1, Pred( FXmlImagesPath.Length ) );
-      Pos:= LastDelimiter( '/', tmpStr );
-      tmpStr:= Copy( FXmlImagesPath, Succ( Pos ), ( FXmlImagesPath.Length - Succ( Pos ) ) );
-      FRootImagesPath:= IncludeTrailingPathDelimiter( FRootRomsPath + tmpStr );
+      StartPos:= Succ( Pos( '/', aGame.FImagePath ) );
+      EndPos:= LastDelimiter( '/', aGame.FImagePath );
+      FImageFolder:= Copy( aGame.FImagePath, StartPos, ( EndPos - StartPos ) );
+
+      FXmlImageFolderPath:= Copy( aGame.FImagePath, 1, EndPos );
    end;
 
    //Permet de vérifier si l'image existe "physiquement"
    //car il se peut que le lien soit renseigné mais que l'image
    //n'existe pas dans le dossier des images...
    function CheckIfImageMissing( const aLink: string ): Boolean;
-   var
-      Pos: Integer;
-      _ImagePath: string;
    begin
-      Result:= True;
-      Pos:= LastDelimiter( '/', aLink );
-      _ImagePath:= FRootImagesPath + Copy( aLink, Succ( Pos ), ( aLink.Length - Pos ) );
-      if FileExists( _ImagePath ) then Result:= False;
+      Result:= aLink.IsEmpty or not ( FileExists( aLink ) );
    end;
 
 var
    _TmpList: TObjectList<TGame>;
    _TmpGame: TGame;
    _FilterIndex: Integer;
+   _FolderFound: Boolean;
 begin
    //on stocke le "numero" de filtre.
    _FilterIndex:= Cbx_Filter.ItemIndex;
-   _PathFound:= False;
+   _FolderFound:= False;
 
    //On essaye de récupérer la liste de jeux du système choisi
    if GSystemList.TryGetValue( aSystem, _TmpList ) then begin
@@ -1368,19 +1385,12 @@ begin
       else
          LoadSystemLogo( GetCurrentLogoName );
 
+      //on récupère le nom du dossier de roms chargé
+      FCurrentFolder:= IncludeTrailingPathDelimiter( getCurrentFolderName );
+
       //On désactive les évènements sur les changements dans les champs
       //Sinon ça pète quand on change de système (indice hors limite)
-      Edt_Name.OnChange:= nil;
-      Edt_Rating.OnChange:= nil;
-      Edt_ReleaseDate.OnChange:= nil;
-      Edt_Genre.OnChange:= nil;
-      Edt_Developer.OnChange:= nil;
-      Edt_Publisher.OnChange:= nil;
-      Edt_NbPlayers.OnChange:= nil;
-      Edt_Region.OnChange:= nil;
-      Mmo_Description.OnChange:= nil;
-      Cbx_Hidden.OnChange:= nil;
-      Cbx_Favorite.OnChange:= nil;
+      FIsLoading:= True;
 
       //On commence par vider le listbox
       Lbx_Games.Items.Clear;
@@ -1391,14 +1401,14 @@ begin
 
          //Récup du lien vers les images pour ce système (lien xml)
          if not ( _TmpGame.FImagePath.IsEmpty ) and
-            not _PathFound then begin
-            GetPaths( _TmpGame );
-            _PathFound:= True;
+            not _FolderFound then begin
+            GetImageFolder( _TmpGame );
+            _FolderFound:= True;
          end;
 
          //Attention usine à gaz booléenne pour gérer les filtres ^^
          if ( _FilterIndex = 0 ) or
-            ( ( _FilterIndex = 1 ) and ( CheckIfImageMissing( _TmpGame.FImagePath ) ) ) or
+            ( ( _FilterIndex = 1 ) and ( CheckIfImageMissing( _TmpGame.FPhysicalImagePath ) ) ) or
             ( ( _FilterIndex = 2 ) and ( _TmpGame.FReleaseDate.IsEmpty ) ) or
             ( ( _FilterIndex = 3 ) and ( _TmpGame.FPlayers.IsEmpty ) ) or
             ( ( _FilterIndex = 4 ) and ( _TmpGame.FRating.IsEmpty ) ) or
@@ -1437,17 +1447,7 @@ begin
       end;
 
       //on remet les évènements sur les champs
-      Edt_Name.OnChange:= FieldChange;
-      Edt_Rating.OnChange:= FieldChange;
-      Edt_ReleaseDate.OnChange:= FieldChange;
-      Edt_Genre.OnChange:= FieldChange;
-      Edt_Developer.OnChange:= FieldChange;
-      Edt_Publisher.OnChange:= FieldChange;
-      Edt_NbPlayers.OnChange:= FieldChange;
-      Mmo_Description.OnChange:= FieldChange;
-      Edt_Region.OnChange:= FieldChange;
-      Cbx_Hidden.OnChange:= FieldChange;
-      Cbx_Favorite.OnChange:= FieldChange;
+      FIsLoading:= False;
    end;
 end;
 
@@ -1479,8 +1479,10 @@ procedure TFrm_Editor.LoadGame( aGame: TGame );
 var
    _Image: TPngImage;
    _ImageJpg: TJPEGImage;
-   _RawGameName, _PathToImage: string;
 begin
+   //on remet les évènements sur les champs
+   FIsLoading:= True;
+
    Img_BackGround.Visible:= True;
    Edt_Name.Text:= aGame.FName;
    Edt_Rating.Text:= aGame.FRating;
@@ -1495,50 +1497,36 @@ begin
    Cbx_Favorite.ItemIndex:= aGame.FFavorite;
    Edt_RomPath.Text:= aGame.FRomPath;
 
-   //on récupère le nom brut du jeu pour construire le chemin vers l'image
-   _RawGameName:= ChangeFileExt( aGame.FRomName, '' );
-   _PathToImage:= FRootImagesPath + _RawGameName;
+   //on remet les évènements sur les champs
+   FIsLoading:= False;
 
-   //si l'image existe (et chemin existe dans xml)
-   //on la charge pour affichage (détection du format) sinon on laisse l'image par défaut
-   if FileExists( _PathToImage + Cst_ImageSuffixPng ) and
-      not ( aGame.FImagePath.IsEmpty ) then begin
-      _Image:= TPngImage.Create;
-      try
-         _Image.LoadFromFile( _PathToImage + Cst_ImageSuffixPng );
-         Img_Game.Picture.Graphic:= _Image;
-         Btn_RemovePicture.Enabled:= True;
-         //on affiche l'image background que si le jeu n'a pas d'image
-         Img_BackGround.Visible:= ( Img_Game.Picture.Graphic = nil );
-         Exit;
-      finally
-         _Image.Free;
-      end;
-   end else if FileExists( _PathToImage + Cst_ImageSuffixJpg ) and
-               not ( aGame.FImagePath.IsEmpty ) then begin
-      _ImageJpg:= TJPEGImage.Create;
-      try
-         _ImageJpg.LoadFromFile( _PathToImage + Cst_ImageSuffixJpg );
-         Img_Game.Picture.Graphic:= _ImageJpg;
-         Btn_RemovePicture.Enabled:= True;
-         //on affiche l'image background que si le jeu n'a pas d'image
-         Img_BackGround.Visible:= ( Img_Game.Picture.Graphic = nil );
-         Exit;
-      finally
-         _ImageJpg.Free;
-      end;
-   end else if FileExists( _PathToImage + Cst_ImageSuffixJpeg ) and
-               not ( aGame.FImagePath.IsEmpty ) then begin
-      _ImageJpg:= TJPEGImage.Create;
-      try
-         _ImageJpg.LoadFromFile( _PathToImage + Cst_ImageSuffixJpeg );
-         Img_Game.Picture.Graphic:= _ImageJpg;
-         Btn_RemovePicture.Enabled:= True;
-         //on affiche l'image background que si le jeu n'a pas d'image
-         Img_BackGround.Visible:= ( Img_Game.Picture.Graphic = nil );
-         Exit;
-      finally
-         _ImageJpg.Free;
+   if not ( aGame.FImagePath.IsEmpty ) and
+          FileExists( aGame.FPhysicalImagePath ) then begin
+      if ( ExtractFileExt( aGame.FPhysicalImagePath ) = '.png' ) then begin
+         _Image:= TPngImage.Create;
+         try
+            _Image.LoadFromFile( aGame.FPhysicalImagePath );
+            Img_Game.Picture.Graphic:= _Image;
+            Btn_RemovePicture.Enabled:= True;
+            //on affiche l'image background que si le jeu n'a pas d'image
+            Img_BackGround.Visible:= ( Img_Game.Picture.Graphic = nil );
+            Exit;
+         finally
+            _Image.Free;
+         end;
+      end else if ( ExtractFileExt( aGame.FPhysicalImagePath ) = '.jpg' ) or
+                  ( ExtractFileExt( aGame.FPhysicalImagePath ) = '.jpeg' ) then begin
+         _ImageJpg:= TJPEGImage.Create;
+         try
+            _ImageJpg.LoadFromFile( aGame.FPhysicalImagePath );
+            Img_Game.Picture.Graphic:= _ImageJpg;
+            Btn_RemovePicture.Enabled:= True;
+            //on affiche l'image background que si le jeu n'a pas d'image
+            Img_BackGround.Visible:= ( Img_Game.Picture.Graphic = nil );
+            Exit;
+         finally
+            _ImageJpg.Free;
+         end;
       end;
    end else
       Btn_RemovePicture.Enabled:= False;
@@ -1569,14 +1557,14 @@ begin
 
    //On construit le lien vers l'image défaut selon le système
    PathToDefault:= ExtractFilePath(Application.ExeName) +
-                   Cst_DefaultPicsFolderPath + '\' +
+                   Cst_DefaultPicsFolderPath +
                    getCurrentFolderName +
                    Cst_DefaultImageNameSuffix;
 
    //si l'image defaut du systeme n'existe pas on prend la générique
    if not FileExists( PathToDefault ) then
       PathToDefault:= ExtractFilePath(Application.ExeName) +
-                      Cst_DefaultPicsFolderPath + '\' +
+                      Cst_DefaultPicsFolderPath +
                       Cst_DefaultImageName;
 
    ChangeImage( PathToDefault, _Game );
@@ -1623,16 +1611,12 @@ procedure TFrm_Editor.ChangeImage( const aPath: string; aGame: TGame );
 var
    _Image: TPngImage;
    _ImageJpg: TJPEGImage;
-   _GameName, _ImageLink: string;
+   _ImageLink: string;
    _Node: IXMLNode;
    _NodeAdded: Boolean;
-
 begin
    _NodeAdded:= False;
    Screen.Cursor:= crHourGlass;
-
-   //on récupère le nom du jeu pour construire le nom de l'image
-   _GameName:= ChangeFileExt( aGame.FRomName, '' );
 
    //on détermine ensuite l'extension du fichier chargé et
    //on crée l'objet qui va bien pour affecter au TImage
@@ -1656,10 +1640,11 @@ begin
 
    //on sauvegarde l'image dans le dossier avec les autres !!
    // et on ajoute le chemin dans le xml
-   Img_Game.Picture.SaveToFile( FRootImagesPath + _GameName + Cst_ImageSuffixPng );
+   Img_Game.Picture.SaveToFile( FRootPath + FCurrentFolder + FImageFolder +
+                                '\' + aGame.FRomNameWoExt + Cst_ImageSuffixPng );
 
    //On ouvre le fichier xml
-   XMLDoc.LoadFromFile( FRootRomsPath + Cst_GameListFileName );
+   XMLDoc.LoadFromFile( FRootPath + FCurrentFolder + Cst_GameListFileName );
 
    //On récupère le premier noeud "game"
    _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
@@ -1671,7 +1656,8 @@ begin
    until not Assigned( _Node );
 
    //on écrit le chemin vers l'image
-   _ImageLink:= FXmlImagesPath + _GameName + Cst_ImageSuffixPng;
+   _ImageLink:= FXmlImageFolderPath + aGame.FRomNameWoExt + Cst_ImageSuffixPng;
+
    if not Assigned( _Node.ChildNodes.FindNode( Cst_ImageLink ) ) then begin
       _Node.AddChild( Cst_ImageLink );
       _NodeAdded:= True;
@@ -1683,11 +1669,14 @@ begin
       XMLDoc.XML.Text:= Xml.Xmldoc.FormatXMLData( XMLDoc.XML.Text );
       XMLDoc.Active:= True;
    end;
-   XMLDoc.SaveToFile( FRootRomsPath + Cst_GameListFileName );
+   XMLDoc.SaveToFile( FRootPath + FCurrentFolder + Cst_GameListFileName );
    XMLDoc.Active:= False;
 
    //Et enfin on met à jour l'objet TGame associé
    aGame.FImagePath:= _ImageLink;
+   aGame.FPhysicalImagePath:= FRootPath + FCurrentFolder +
+                              IncludeTrailingPathDelimiter( FImageFolder ) +
+                              aGame.FRomNameWoExt + Cst_ImageSuffixPng;
 
    Screen.Cursor:= crDefault;
 end;
@@ -1703,17 +1692,14 @@ end;
 procedure TFrm_Editor.DeleteGamePicture;
 var
    _Game: TGame;
-   _ImagePath, _GameListPath: string;
+   _GameListPath: string;
    _Node: IXMLNode;
 begin
    //on commence par récupérer l'objet TGame correspondant
    _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
 
    //on construit le chemin vers le gamelist.xml
-   _GameListPath:= FRootRomsPath + Cst_GameListFileName;
-
-   //on construit le chemin vers l'image
-   _ImagePath:= FRootImagesPath + _Game.FRomNameWoExt;
+   _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
 
    //On ouvre le fichier xml
    XMLDoc.LoadFromFile( _GameListPath );
@@ -1733,11 +1719,8 @@ begin
    XMLDoc.SaveToFile( _GameListPath );
    XMLDoc.Active:= False;
 
-   //On supprime l'image du jeu (on teste les extensions en cascade pour être sur de supprimer)
-   if not DeleteFile( _ImagePath + Cst_ImageSuffixPng ) then begin
-      if not DeleteFile( _ImagePath + Cst_ImageSuffixJpg ) then
-         DeleteFile( _ImagePath + Cst_ImageSuffixJpeg );
-   end;
+   //On supprime l'image du jeu
+   DeleteFile( _Game.FPhysicalImagePath );
 
    //on vide l'image jeu
    Img_Game.Picture.Graphic:= nil;
@@ -1798,7 +1781,7 @@ begin
    _NodeAdded:= False;
    _NameChanged:= False;
    //On récupère le chemin du fichier gamelist.xml
-   _GameListPath:= FRootRomsPath + Cst_GameListFileName;
+   _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
 
    //On récupère l'objet TGame qu'on souhaite modifier
    _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
@@ -1913,20 +1896,14 @@ procedure TFrm_Editor.DeleteGame;
 var
    _Game: TGame;
    _Node: IXMLNode;
-   _RomPath, _GameListPath, _ImagePath: string;
+   _GameListPath: string;
    _List: TObjectList<TGame>;
 begin
    //on récupère le jeu sélectionné
    _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
 
-   //on construit le chemin vers la rom à supprimer
-   _RomPath:= FRootRomsPath + _Game.FRomName;
-
    //on construit le chemin vers le gamelist.xml
-   _GameListPath:= FRootRomsPath + Cst_GameListFileName;
-
-   //on construit le chemin vers l'image
-   _ImagePath:= FRootImagesPath + _Game.FRomNameWoExt;
+   _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
 
    //on chope la liste de jeux correspondante
    GSystemList.TryGetValue( getCurrentFolderName, _List );
@@ -1949,14 +1926,11 @@ begin
     XMLDoc.SaveToFile( _GameListPath );
     XMLDoc.Active:= False;
 
-    //On supprime l'image du jeu (on teste les extensions en cascade pour être sur de supprimer)
-    if not DeleteFile( _ImagePath + Cst_ImageSuffixPng ) then begin
-       if not DeleteFile( _ImagePath + Cst_ImageSuffixJpg ) then
-          DeleteFile( _ImagePath + Cst_ImageSuffixJpeg );
-    end;
+    //On supprime l'image du jeu
+    DeleteFile( _Game.FPhysicalImagePath );
 
     //suppression du jeu physiquement
-    DeleteFile( _RomPath );
+    DeleteFile( _Game.FPhysicalRomPath );
 
     //Suppression du jeu dans sa liste mère
     _List.Remove( _Game );
@@ -1968,6 +1942,9 @@ end;
 //Vidage de tous les champs et de l'image
 procedure TFrm_Editor.ClearAllFields;
 begin
+   //On désactive les évènements sur les changements dans les champs
+   FIsLoading:= True;
+
    Edt_Name.Text:= '';
    Edt_Rating.Text:= '';
    Edt_ReleaseDate.Text:= '';
@@ -1981,6 +1958,9 @@ begin
    Img_Game.Picture.Graphic:= nil;
    Cbx_Hidden.ItemIndex:= -1;
    Cbx_Favorite.ItemIndex:= -1;
+
+   //on remet les évènements sur les champs
+   FIsLoading:= False;
 end;
 
 //Centralisation de l'évènement click sur checkbox
@@ -2139,7 +2119,7 @@ var
    _GameListPath: string;
 begin
    //on construit le chemin vers le gamelist.xml
-   _GameListPath:= FRootRomsPath + Cst_GameListFileName;
+   _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
 
    //On ouvre le fichier xml
    XMLDoc.LoadFromFile( _GameListPath );
@@ -2312,7 +2292,7 @@ var
    _EndPos: Integer;
 begin
    //on construit le chemin vers le gamelist.xml
-   _GameListPath:= FRootRomsPath + Cst_GameListFileName;
+   _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
 
    //On ouvre le fichier xml
    XMLDoc.LoadFromFile( _GameListPath );
@@ -2353,13 +2333,17 @@ end;
 //Choix de la langue
 procedure TFrm_Editor.Mnu_LangClick(Sender: TObject);
 var
-   index: Integer;
+   index, index2, index3: Integer;
 begin
    index:= Cbx_Filter.ItemIndex;
+   index2:= Cbx_Hidden.ItemIndex;
+   index3:= Cbx_Favorite.ItemIndex;
    UseLanguage( Cst_LangNameStr[GetLangEnum( ( Sender as TMenuItem).Tag )] );
    FLanguage:= ( Sender as TMenuItem ).Tag;
    RetranslateComponent( Self );
    Cbx_Filter.ItemIndex:= index;
+   Cbx_Hidden.ItemIndex:= index2;
+   Cbx_Favorite.ItemIndex:= index3;
 end;
 
 //Click sur le menuitem "Quit"

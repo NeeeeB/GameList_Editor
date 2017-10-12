@@ -6825,8 +6825,8 @@ object Frm_Editor: TFrm_Editor
     TabOrder = 31
     OnChange = FieldChange
     Items.Strings = (
-      'False'
-      'True')
+      'No'
+      'Yes')
   end
   object Cbx_Favorite: TComboBox
     Left = 1074
@@ -6838,8 +6838,8 @@ object Frm_Editor: TFrm_Editor
     TabOrder = 32
     OnChange = FieldChange
     Items.Strings = (
-      'False'
-      'True')
+      'No'
+      'Yes')
   end
   object Edt_RomPath: TEdit
     Left = 29
@@ -7119,6 +7119,13 @@ object Frm_Editor: TFrm_Editor
           RadioItem = True
           OnClick = Mnu_LangClick
         end
+        object Mnu_Lang3: TMenuItem
+          Tag = 2
+          AutoCheck = True
+          Caption = 'German'
+          RadioItem = True
+          OnClick = Mnu_LangClick
+        end
       end
     end
     object Mnu_Help: TMenuItem
@@ -7139,7 +7146,7 @@ object Frm_Editor: TFrm_Editor
     Left = 176
     Top = 208
     Bitmap = {
-      494C010101000800740010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101010008007C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
