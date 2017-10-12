@@ -5,7 +5,7 @@ interface
 uses
    Winapi.Windows, Winapi.Messages, Winapi.ShellAPI,
    System.SysUtils, System.Variants, System.Classes, System.IniFiles, System.Generics.Collections,
-   System.RegularExpressions, System.UITypes, System.ImageList,
+   System.RegularExpressions, System.UITypes, System.ImageList, System.StrUtils,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes, Vcl.ImgList,
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
    Xml.omnixmldom, Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
@@ -258,7 +258,9 @@ type
       Mnu_Lang1: TMenuItem;
       Mnu_Lang2: TMenuItem;
       Edt_RomPath: TEdit;
-    Mnu_Lang3: TMenuItem;
+      Mnu_Lang3: TMenuItem;
+      Edt_Search: TEdit;
+      Lbl_Search: TLabel;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -293,6 +295,7 @@ type
       procedure Mnu_PiPromptsClick(Sender: TObject);
       procedure Mnu_ConfigSSHClick(Sender: TObject);
       procedure Mnu_LangClick(Sender: TObject);
+      procedure Edt_SearchChange(Sender: TObject);
 
    private
 
@@ -994,6 +997,8 @@ procedure TFrm_Editor.Mnu_ChoosefolderClick(Sender: TObject);
 begin
    Img_BackGround.Visible:= True;
    EnableControls( False );
+   Edt_Search.Enabled:= False;
+   Lbl_Search.Enabled:= False;
    ClearAllFields;
    Lbx_Games.Items.Clear;
    BuildSystemsList;
@@ -1055,6 +1060,7 @@ begin
    Btn_ChangeAll.Enabled:= False;
    Cbx_Hidden.ItemIndex:= -1;
    Cbx_Favorite.ItemIndex:= -1;
+   Edt_Search.Text:= '';
 
     //On vide la liste globale des systèmes (cas 2eme ouverture)
     GSystemList.Clear;
@@ -1155,6 +1161,8 @@ begin
          Cbx_Systems.ItemIndex:= 0;
          EnableControls( True );
          Cbx_Filter.ItemIndex:= 0;
+         Edt_Search.Enabled:= True;
+         Lbl_Search.Enabled:= True;
          LoadGamesList( getCurrentFolderName );
 
          //On remet le curseur par défaut
@@ -1243,6 +1251,13 @@ end;
 
 //Action à la sélection d'un item du combobox systemes
 procedure TFrm_Editor.Cbx_SystemsChange(Sender: TObject);
+begin
+   Edt_Search.Text:= '';
+   LoadGamesList( getCurrentFolderName );
+end;
+
+//quand on tape du texte dans le champ de recherche
+procedure TFrm_Editor.Edt_SearchChange(Sender: TObject);
 begin
    LoadGamesList( getCurrentFolderName );
 end;
@@ -1420,7 +1435,9 @@ begin
             ( ( _FilterIndex = 10 ) and ( _TmpGame.FHidden = 1 ) ) or
             ( ( _FilterIndex = 11 ) and ( _TmpGame.FFavorite = 1 ) ) then begin
 
-            Lbx_Games.Items.AddObject( _TmpGame.FName, _TmpGame );
+            if ( Edt_Search.Text = '' ) or
+               ContainsText( _TmpGame.FName, Edt_Search.Text ) then
+               Lbx_Games.Items.AddObject( _TmpGame.FName, _TmpGame );
          end
       end;
 
@@ -1433,7 +1450,6 @@ begin
 
       //On met le focus sur le premier jeu de la liste
       ClearAllFields;
-      Lbx_Games.SetFocus;
 
       //Si il y a des jeux dans la liste on affiche auto le premier
       if ( Lbx_Games.Items.Count > 0 ) then begin

@@ -5325,7 +5325,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Lbl_SelectSystem: TLabel
     Left = 32
-    Top = 136
+    Top = 133
     Width = 91
     Height = 13
     Caption = 'Select your system'
@@ -5341,7 +5341,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Lbl_Filter: TLabel
     Left = 308
-    Top = 136
+    Top = 133
     Width = 79
     Height = 13
     Caption = 'Select your filter'
@@ -6456,9 +6456,17 @@ object Frm_Editor: TFrm_Editor
     Center = True
     Proportional = True
   end
+  object Lbl_Search: TLabel
+    Left = 32
+    Top = 176
+    Width = 33
+    Height = 13
+    Caption = 'Search'
+    Enabled = False
+  end
   object Cbx_Systems: TComboBox
     Left = 29
-    Top = 155
+    Top = 149
     Width = 196
     Height = 21
     Style = csDropDownList
@@ -6468,9 +6476,9 @@ object Frm_Editor: TFrm_Editor
   end
   object Lbx_Games: TListBox
     Left = 29
-    Top = 192
+    Top = 221
     Width = 473
-    Height = 437
+    Height = 408
     DoubleBuffered = True
     ItemHeight = 13
     ParentDoubleBuffered = False
@@ -6699,7 +6707,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Cbx_Filter: TComboBox
     Left = 306
-    Top = 155
+    Top = 149
     Width = 196
     Height = 21
     Style = csDropDownList
@@ -6850,24 +6858,33 @@ object Frm_Editor: TFrm_Editor
     ReadOnly = True
     TabOrder = 33
   end
+  object Edt_Search: TEdit
+    Left = 29
+    Top = 192
+    Width = 473
+    Height = 21
+    Enabled = False
+    TabOrder = 34
+    OnChange = Edt_SearchChange
+  end
   object XMLDoc: TXMLDocument
     NodeIndentStr = #9
     Options = [doAttrNull, doAutoPrefix, doNamespaceDecl]
-    Left = 45
-    Top = 264
+    Left = 53
+    Top = 376
     DOMVendorDesc = 'MSXML'
   end
   object OpenDialog: TFileOpenDialog
     FavoriteLinks = <>
     FileTypes = <>
     Options = [fdoPickFolders]
-    Left = 45
-    Top = 208
+    Left = 269
+    Top = 376
   end
   object MainMenu: TMainMenu
     AutoHotkeys = maManual
     Left = 104
-    Top = 264
+    Top = 376
     object Mnu_File: TMenuItem
       Caption = 'File'
       object Mnu_Choosefolder: TMenuItem
@@ -7139,14 +7156,14 @@ object Frm_Editor: TFrm_Editor
   end
   object OpenFile: TOpenDialog
     Filter = 'Images|*.png;*.jpg;*.jpeg'
-    Left = 112
-    Top = 208
+    Left = 160
+    Top = 376
   end
   object Img_List: TImageList
-    Left = 176
-    Top = 208
+    Left = 216
+    Top = 376
     Bitmap = {
-      494C0101010008007C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800800010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
