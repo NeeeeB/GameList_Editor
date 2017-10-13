@@ -6470,6 +6470,7 @@ object Frm_Editor: TFrm_Editor
     Width = 196
     Height = 21
     Style = csDropDownList
+    DropDownCount = 15
     Enabled = False
     TabOrder = 0
     OnChange = Cbx_SystemsChange
@@ -6711,6 +6712,7 @@ object Frm_Editor: TFrm_Editor
     Width = 196
     Height = 21
     Style = csDropDownList
+    DropDownCount = 15
     Enabled = False
     ItemIndex = 0
     TabOrder = 22
@@ -6728,7 +6730,8 @@ object Frm_Editor: TFrm_Editor
       'Missing Genre'
       'Missing Region'
       'Hidden'
-      'Favorite')
+      'Favorite'
+      'Orphan')
   end
   object Chk_Region: TCheckBox
     Tag = 9
@@ -6914,6 +6917,10 @@ object Frm_Editor: TFrm_Editor
         object Mnu_RemoveRegion: TMenuItem
           Caption = 'Remove region from games names'
           OnClick = Mnu_RemoveRegionClick
+        end
+        object Mnu_DeleteOrphans: TMenuItem
+          Caption = 'Delete orphan entries'
+          OnClick = Mnu_DeleteOrphansClick
         end
       end
       object Mnu_Game: TMenuItem
@@ -7163,7 +7170,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800800010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800880010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

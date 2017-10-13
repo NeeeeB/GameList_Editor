@@ -147,6 +147,7 @@ type
       FSha1: string;
       FHidden: Integer;
       FFavorite: Integer;
+      FIsOrphan: Boolean;
 
       procedure Load( aPath, aName, aDescription, aImagePath, aRating,
                       aDeveloper, aPublisher, aGenre, aPlayers, aDate,
@@ -261,6 +262,7 @@ type
       Mnu_Lang3: TMenuItem;
       Edt_Search: TEdit;
       Lbl_Search: TLabel;
+      Mnu_DeleteOrphans: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -296,6 +298,7 @@ type
       procedure Mnu_ConfigSSHClick(Sender: TObject);
       procedure Mnu_LangClick(Sender: TObject);
       procedure Edt_SearchChange(Sender: TObject);
+      procedure Mnu_DeleteOrphansClick(Sender: TObject);
 
    private
 
@@ -324,7 +327,7 @@ type
       procedure CheckIfChangesToSave;
       procedure ChangeImage( const aPath: string; aGame: TGame );
       procedure LoadSystemLogo( aPictureName: string );
-      procedure DeleteGame;
+      procedure DeleteGame( aGame: TGame );
       procedure DeleteGamePicture;
       procedure CheckMenuItem( aNumber: Integer; aLang: Boolean = False );
       procedure RemoveRegionFromGameName( aGame: TGame; aStartPos: Integer );
@@ -720,6 +723,7 @@ begin
    else FHidden:= 0;
    if ( aFavorite = Cst_True ) then FFavorite:= 1
    else FFavorite:= 0;
+   FIsOrphan:= not FileExists( FPhysicalRomPath );
 end;
 
 //Fonction permettant de récupérer le nom de la rom avec son extension
@@ -1433,7 +1437,8 @@ begin
             ( ( _FilterIndex = 8 ) and ( _TmpGame.FGenre.IsEmpty ) ) or
             ( ( _FilterIndex = 9 ) and ( _TmpGame.FRegion.IsEmpty ) ) or
             ( ( _FilterIndex = 10 ) and ( _TmpGame.FHidden = 1 ) ) or
-            ( ( _FilterIndex = 11 ) and ( _TmpGame.FFavorite = 1 ) ) then begin
+            ( ( _FilterIndex = 11 ) and ( _TmpGame.FFavorite = 1 ) ) or
+            ( ( _FilterIndex = 12 ) and ( _TmpGame.FIsOrphan ) ) then begin
 
             if ( Edt_Search.Text = '' ) or
                ContainsText( _TmpGame.FName, Edt_Search.Text ) then
@@ -1903,21 +1908,38 @@ begin
    if FDelWoPrompt or
       ( MessageDlg( Rst_DeleteWarning, mtInformation,
                     [mbYes, mbNo], 0, mbNo ) = mrYes ) then
-      DeleteGame;
+      DeleteGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
    Lbx_Games.SetFocus;
 end;
 
-//Supprime un jeu du gamelist et physiquement sur le disque (ou carte SD ou clé...)
-procedure TFrm_Editor.DeleteGame;
+//Au click sur le menu item delete orphans
+procedure TFrm_Editor.Mnu_DeleteOrphansClick(Sender: TObject);
 var
-   _Game: TGame;
+   _List: TObjectList<TGame>;
+   ii: Integer;
+begin
+   //on boucle sur les jeux de la liste pour supprimer les orphelins.
+   GSystemList.TryGetValue( getCurrentFolderName, _List );
+   Screen.Cursor:= crHourGlass;
+   ProgressBar.Visible:= True;
+   ProgressBar.Max:= Pred( _List.Count );
+   ProgressBar.Position:= 0;
+   for ii:= Pred( _List.Count ) downto 0 do begin
+      if _List.Items[ii].FIsOrphan then
+         DeleteGame( _List.Items[ii] );
+      ProgressBar.Position:= ( ProgressBar.Position + 1);
+   end;
+   ProgressBar.Visible:= False;
+   Screen.Cursor:= crDefault;
+end;
+
+//Supprime un jeu du gamelist et physiquement sur le disque (ou carte SD ou clé...)
+procedure TFrm_Editor.DeleteGame( aGame: TGame );
+var
    _Node: IXMLNode;
    _GameListPath: string;
    _List: TObjectList<TGame>;
 begin
-   //on récupère le jeu sélectionné
-   _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
-
    //on construit le chemin vers le gamelist.xml
    _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
 
@@ -1932,7 +1954,7 @@ begin
 
     //Et on boucle pour trouver le bon noeud
     repeat
-       if ( _Node.ChildNodes.Nodes[Cst_Path].Text = _Game.FRomPath ) then Break;
+       if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.FRomPath ) then Break;
        _Node := _Node.NextSibling;
     until not Assigned( _Node );
 
@@ -1943,13 +1965,13 @@ begin
     XMLDoc.Active:= False;
 
     //On supprime l'image du jeu
-    DeleteFile( _Game.FPhysicalImagePath );
+    DeleteFile( aGame.FPhysicalImagePath );
 
     //suppression du jeu physiquement
-    DeleteFile( _Game.FPhysicalRomPath );
+    DeleteFile( aGame.FPhysicalRomPath );
 
     //Suppression du jeu dans sa liste mère
-    _List.Remove( _Game );
+    _List.Remove( aGame );
 
     //et mise à jour de l'affichage du listbox pour prendre en compte la suppression
     LoadGamesList( getCurrentFolderName );
