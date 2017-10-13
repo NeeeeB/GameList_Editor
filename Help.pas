@@ -34,7 +34,7 @@ resourcestring
 
    Rst_Title4 = 'Disable Pi prompts:';
 
-   Rst_Help4 = 'Checking this option will disable all the prompts related' +
+   Rst_Help4 = 'Checking this option will disable all the prompts related ' +
                'to the EmulationStation stop and the Recalbox/Retropie reboot.';
 
    Rst_Title5 = 'Auto Hash:';
@@ -42,13 +42,13 @@ resourcestring
    Rst_Help5 = 'Enabling this option will Auto hash the files when you click on More Infos.' + sLineBreak +
                'Do this if you have a powerful computer or if your systems only contain small roms.' + sLineBreak +
                'Hashing files can be very slow so use it with caution.' + sLineBreak +
-               'If you do not enable this option, you will be prompted to hash' +
+               'If you do not enable this option, you will be prompted to hash ' +
                'or not the file when you click on More Infos.';
 
    Rst_Title6 = 'Show tips at start:';
 
-   Rst_Help6 = 'Enabling this option will the show the help windows on application start.' + sLineBreak +
-               'You can disable the help window for the next launches, by disabling this' +
+   Rst_Help6 = 'Enabling this option will show the help window on application start.' + sLineBreak +
+               'You can disable the help window for the next launches, by disabling this ' +
                'option or by checking the box "Don''t show again" in the help window, before closing it.';
 
    Rst_Title7 = 'Use Genesis logo:';

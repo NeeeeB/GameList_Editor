@@ -18,7 +18,10 @@ resourcestring
               'https://github.com/NeeeeB/GameList_Editor' + sLineBreak + sLineBreak +
               'Your Gamelist.xml should have been created' + sLineBreak +
               'by Universal XML Scraper by Screech:' + sLineBreak +
-              'https://github.com/Universal-Rom-Tools/Universal-XML-Scraper';
+              'https://github.com/Universal-Rom-Tools/Universal-XML-Scraper' + sLineBreak + sLineBreak +
+              'Translators (Thx to them !!):' + sLineBreak +
+              'German = Gmgman and Lackyluuk' + sLineBreak +
+              'Spanish = Uzanto';
 
 type
    TRichEdit = class(Vcl.ComCtrls.TRichEdit)

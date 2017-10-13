@@ -6667,9 +6667,9 @@ object Frm_Editor: TFrm_Editor
     OnClick = ChkClick
   end
   object Btn_SaveChanges: TButton
-    Left = 779
+    Left = 752
     Top = 640
-    Width = 158
+    Width = 209
     Height = 25
     Caption = 'Save Changes for this game'
     Enabled = False
@@ -6940,39 +6940,39 @@ object Frm_Editor: TFrm_Editor
     end
     object Mnu_Options: TMenuItem
       Caption = 'Options'
-      object Mnu_GodMode: TMenuItem
-        AutoCheck = True
-        Caption = 'Enable God Mode'
-        OnClick = Mnu_GodModeClick
-      end
-      object Mnu_DeleteWoPrompt: TMenuItem
-        AutoCheck = True
-        Caption = 'Delete without prompt'
-        Enabled = False
-        OnClick = Mnu_DeleteWoPromptClick
-      end
-      object Mnu_PiPrompts: TMenuItem
-        AutoCheck = True
-        Caption = 'Disable Pi prompts'
-        OnClick = Mnu_PiPromptsClick
-      end
-      object Mnu_AutoHash: TMenuItem
-        AutoCheck = True
-        Caption = 'Auto Hash'
-        OnClick = Mnu_AutoHashClick
-      end
-      object Mnu_ShowTips: TMenuItem
-        AutoCheck = True
-        Caption = 'Show tips at start'
-        OnClick = Mnu_ShowTipsClick
-      end
-      object N2: TMenuItem
-        Caption = '-'
-      end
-      object Mnu_Genesis: TMenuItem
-        AutoCheck = True
-        Caption = 'Use Genesis logo'
-        OnClick = Mnu_GenesisClick
+      object Mnu_General: TMenuItem
+        Caption = 'General'
+        object Mnu_GodMode: TMenuItem
+          AutoCheck = True
+          Caption = 'Enable God Mode'
+          OnClick = Mnu_GodModeClick
+        end
+        object Mnu_DeleteWoPrompt: TMenuItem
+          AutoCheck = True
+          Caption = 'Delete without prompt'
+          Enabled = False
+          OnClick = Mnu_DeleteWoPromptClick
+        end
+        object Mnu_AutoHash: TMenuItem
+          AutoCheck = True
+          Caption = 'Auto Hash'
+          OnClick = Mnu_AutoHashClick
+        end
+        object Mnu_PiPrompts: TMenuItem
+          AutoCheck = True
+          Caption = 'Disable Pi prompts'
+          OnClick = Mnu_PiPromptsClick
+        end
+        object Mnu_ShowTips: TMenuItem
+          AutoCheck = True
+          Caption = 'Show tips at start'
+          OnClick = Mnu_ShowTipsClick
+        end
+        object Mnu_Genesis: TMenuItem
+          AutoCheck = True
+          Caption = 'Use Genesis logo'
+          OnClick = Mnu_GenesisClick
+        end
       end
       object N3: TMenuItem
         Caption = '-'
@@ -7150,6 +7150,27 @@ object Frm_Editor: TFrm_Editor
           RadioItem = True
           OnClick = Mnu_LangClick
         end
+        object Mnu_Lang4: TMenuItem
+          Tag = 3
+          AutoCheck = True
+          Caption = 'Spanish'
+          RadioItem = True
+          OnClick = Mnu_LangClick
+        end
+        object Mnu_Lang5: TMenuItem
+          Tag = 4
+          AutoCheck = True
+          Caption = 'Italian'
+          RadioItem = True
+          OnClick = Mnu_LangClick
+        end
+        object Mnu_Lang6: TMenuItem
+          Tag = 5
+          AutoCheck = True
+          Caption = 'Portuguese'
+          RadioItem = True
+          OnClick = Mnu_LangClick
+        end
       end
     end
     object Mnu_Help: TMenuItem
@@ -7170,7 +7191,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800880010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800900010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

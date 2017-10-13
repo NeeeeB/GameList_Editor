@@ -112,7 +112,10 @@ type
    //enum pour les langues
    TLangName = ( lnEnglish,
                  lnFrench,
-                 lnGerman );
+                 lnGerman,
+                 lnSpanish,
+                 lnItalian,
+                 lnPortuguese );
 
    //Objet stockant uniquement le type système (enum) pour
    //combobox systems, permet de retrouver facile l'image et le nom du systeme
@@ -242,7 +245,6 @@ type
       Mnu_Theme16: TMenuItem;
       N1: TMenuItem;
       Mnu_Help: TMenuItem;
-      N2: TMenuItem;
       Mnu_Genesis: TMenuItem;
       Mnu_ShowTips: TMenuItem;
       Mnu_PiPrompts: TMenuItem;
@@ -263,6 +265,10 @@ type
       Edt_Search: TEdit;
       Lbl_Search: TLabel;
       Mnu_DeleteOrphans: TMenuItem;
+    Mnu_Lang4: TMenuItem;
+    Mnu_Lang5: TMenuItem;
+    Mnu_Lang6: TMenuItem;
+    Mnu_General: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -497,7 +503,10 @@ const
    Cst_LangNameStr: array[TLangName] of string =
       ( 'en',
         'fr',
-        'de' );
+        'de',
+        'es',
+        'it',
+        'pt' );
 
    //tableau de liaison enum systemes / noms systems affichés
    Cst_SystemKindStr: array[TSystemKind] of string =
@@ -1448,7 +1457,7 @@ begin
 
       //On indique le nombre de jeux trouvés
       if Cbx_Filter.ItemIndex = 0 then
-         Lbl_NbGamesFound.Caption:= IntToStr( _TmpList.Count ) + Rst_GamesFound
+         Lbl_NbGamesFound.Caption:= IntToStr( Lbx_Games.Items.Count ) + Rst_GamesFound
       else
          Lbl_NbGamesFound.Caption:= IntToStr( Lbx_Games.Items.Count ) + ' / ' +
                                     IntToStr( _TmpList.Count ) + Rst_GamesFound;
@@ -2372,6 +2381,7 @@ end;
 procedure TFrm_Editor.Mnu_LangClick(Sender: TObject);
 var
    index, index2, index3: Integer;
+   _TmpList: TObjectList<TGame>;
 begin
    index:= Cbx_Filter.ItemIndex;
    index2:= Cbx_Hidden.ItemIndex;
@@ -2382,6 +2392,19 @@ begin
    Cbx_Filter.ItemIndex:= index;
    Cbx_Hidden.ItemIndex:= index2;
    Cbx_Favorite.ItemIndex:= index3;
+
+   //On indique le nombre de jeux trouvés
+   //Je suis obligé de refaire ça ici sinon le label reste sur l'ancienne langue
+   //tant qu'on a pas changé de système (pas trouvé d'autre moyen)
+   if ( Cbx_Systems.ItemIndex <> -1 ) then begin
+      Lbl_NbGamesFound.Caption:= '';
+      GSystemList.TryGetValue( getCurrentFolderName, _TmpList );
+      if Cbx_Filter.ItemIndex = 0 then
+         Lbl_NbGamesFound.Caption:= IntToStr( Lbx_Games.Items.Count ) + Rst_GamesFound
+      else
+         Lbl_NbGamesFound.Caption:= IntToStr( Lbx_Games.Items.Count ) + ' / ' +
+                                    IntToStr( _TmpList.Count ) + Rst_GamesFound;
+   end;
 end;
 
 //Click sur le menuitem "Quit"
