@@ -80,10 +80,14 @@ resourcestring
    Rst_Help13 = 'Open a new popup window where you can set your Login and Password for Recalbox/Retropie.' + sLineBreak +
                 'Filled with default values at first launch, your settings will be saved afterwards.';
 
-   Rst_Title14 = 'System - Delete orphan entries :';
+   Rst_Title14 = 'System - Delete orphans from gamelist :';
 
    Rst_Help14 = 'Will remove from the gamelist.xml all the games that are not "physically" present on your drive.' + sLineBreak +
                 'Orphan means the game is listed in the gamelist.xml, but the associated rom no longer exists.';
+
+   Rst_Title15 = 'System - Delete duplicates from gamelist :';
+
+   Rst_Help15 = 'Will remove all duplicates (same games that are listed 2 times or more) from the gamelist.xml';
 
 type
    TFrm_Help = class(TForm)
@@ -234,6 +238,16 @@ begin
       SelAttributes.Style:= [];
       SelAttributes.Size:= 8;
       SelText:= Rst_Help14;
+      SelText:= sLineBreak;
+      SelText:= sLineBreak;
+
+      SelAttributes.Style:= [fsUnderline,fsBold];
+      SelAttributes.Size:= 13;
+      SelText:= Rst_Title15;
+      SelText:= sLineBreak;
+      SelAttributes.Style:= [];
+      SelAttributes.Size:= 8;
+      SelText:= Rst_Help15;
       SelText:= sLineBreak;
       SelText:= sLineBreak;
 

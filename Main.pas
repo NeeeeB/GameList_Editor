@@ -265,10 +265,11 @@ type
       Edt_Search: TEdit;
       Lbl_Search: TLabel;
       Mnu_DeleteOrphans: TMenuItem;
-    Mnu_Lang4: TMenuItem;
-    Mnu_Lang5: TMenuItem;
-    Mnu_Lang6: TMenuItem;
-    Mnu_General: TMenuItem;
+      Mnu_Lang4: TMenuItem;
+      Mnu_Lang5: TMenuItem;
+      Mnu_Lang6: TMenuItem;
+      Mnu_General: TMenuItem;
+      Mnu_DeleteDuplicates: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -305,6 +306,7 @@ type
       procedure Mnu_LangClick(Sender: TObject);
       procedure Edt_SearchChange(Sender: TObject);
       procedure Mnu_DeleteOrphansClick(Sender: TObject);
+    procedure Mnu_DeleteDuplicatesClick(Sender: TObject);
 
    private
 
@@ -340,6 +342,7 @@ type
       procedure ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False;
                                    aUp: Boolean = False );
       procedure StopOrStartES( aStop, aRecal: Boolean );
+      procedure DeleteDuplicates( aSystem: string );
 
       function getSystemKind: TSystemKind;
       function getCurrentFolderName: string;
@@ -1913,12 +1916,26 @@ end;
 
 //Action au click sur le bouton delete this game
 procedure TFrm_Editor.Btn_DeleteClick(Sender: TObject);
+var
+   _Index: Integer;
 begin
    if FDelWoPrompt or
       ( MessageDlg( Rst_DeleteWarning, mtInformation,
-                    [mbYes, mbNo], 0, mbNo ) = mrYes ) then
+                    [mbYes, mbNo], 0, mbNo ) = mrYes ) then begin
+      //on mémorise l'index du listbox pour remettre à la fin
+      _Index:= Lbx_Games.ItemIndex;
+      //on supprime le jeu
       DeleteGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
-   Lbx_Games.SetFocus;
+      //et on remet la sélection sur le jeu précédent le supprimé( si possible )
+      if ( ( _Index = 0 ) and ( Lbx_Games.Count = 0 ) ) or
+         ( ( _Index > 1 ) and ( Lbx_Games.Count > 1 ) ) then
+         Lbx_Games.ItemIndex:= Pred( _Index )
+      else Lbx_Games.ItemIndex:= _Index;
+      //et on charge les infos du jeu (si liste non vide)
+      if ( Lbx_Games.Count > 0 ) then
+         LoadGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
+      Lbx_Games.SetFocus;
+   end;
 end;
 
 //Au click sur le menu item delete orphans
@@ -1984,6 +2001,79 @@ begin
 
     //et mise à jour de l'affichage du listbox pour prendre en compte la suppression
     LoadGamesList( getCurrentFolderName );
+end;
+
+//au click sur le menu itzm delete duplicates
+procedure TFrm_Editor.Mnu_DeleteDuplicatesClick(Sender: TObject);
+begin
+   DeleteDuplicates( getCurrentFolderName );
+end;
+
+//Delete duplicates in the gamelist.xml
+procedure TFrm_Editor.DeleteDuplicates( aSystem: string );
+var
+   _NodeList: IXMLNodeList;
+   _Node1, _Node2: IXMLNode;
+   ii, jj, Count: Integer;
+   _List: TObjectList<TGame>;
+   _GameListPath: string;
+begin
+   //on commence par vider les champs
+   Lbx_Games.Clear;
+   SetFieldsReadOnly( False );
+   ClearAllFields;
+
+   //on construit le chemin vers le gamelist.xml
+   _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
+
+   //On ouvre le fichier xml
+   XMLDoc.LoadFromFile( _GameListPath );
+
+   //on l'active
+   XMLDoc.Active:= True;
+
+   //On récupère la liste de noeuds "game"
+   _NodeList:= XMLDoc.DocumentElement.ChildNodes;
+   Count:= _NodeList.Count;
+
+   //on active la progressbar
+   Screen.Cursor:= crHourGlass;
+   ProgressBar.Visible:= True;
+   ProgressBar.Max:= Pred( Count );
+   ProgressBar.Position:= 0;
+
+   //on boucle sur tous les noeuds pour check si doublon
+   //si c'est le cas on supprime
+   for ii:= Pred( Count ) downto 0 do begin
+      _Node1:= _NodeList.Nodes[ii];
+      for jj:= 0 to Pred( ii ) do begin
+         _Node2:= _NodeList.Nodes[jj];
+         if ( _Node1.ChildNodes.FindNode( Cst_Path ).Text =
+              _Node2.ChildNodes.FindNode( Cst_Path ).Text ) then begin
+            _NodeList.Remove( _Node1 );
+            Break;
+         end;
+      end;
+      ProgressBar.Position:= ( ProgressBar.Position + 1 );
+   end;
+
+   //on désactive la progressbar
+   ProgressBar.Visible:= False;
+
+   //ensuite on sauvegarde le gamelist nettoyé
+   XMLDoc.SaveToFile( _GameListPath );
+   XMLDoc.Active:= False;
+
+   //on supprime la liste de jeu de la liste générale des sytèmes
+   //et on la reconstruit et ajoute
+   GSystemList.Remove( aSystem );
+   _List:= BuildGamesList( _GameListPath );
+   GSystemList.Add( aSystem, _List );
+
+   //on recharge la liste des jeux
+   LoadGamesList( aSystem );
+   SetFieldsReadOnly( True );
+   Screen.Cursor:= crDefault;
 end;
 
 //Vidage de tous les champs et de l'image

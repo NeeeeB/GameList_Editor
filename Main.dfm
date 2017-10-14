@@ -4,7 +4,7 @@ object Frm_Editor: TFrm_Editor
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'GameList Editor'
-  ClientHeight = 688
+  ClientHeight = 689
   ClientWidth = 1210
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -6919,8 +6919,12 @@ object Frm_Editor: TFrm_Editor
           OnClick = Mnu_RemoveRegionClick
         end
         object Mnu_DeleteOrphans: TMenuItem
-          Caption = 'Delete orphan entries'
+          Caption = 'Delete orphans from gamelist'
           OnClick = Mnu_DeleteOrphansClick
+        end
+        object Mnu_DeleteDuplicates: TMenuItem
+          Caption = 'Delete duplicates from gamelist'
+          OnClick = Mnu_DeleteDuplicatesClick
         end
       end
       object Mnu_Game: TMenuItem
@@ -7191,7 +7195,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800900010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800940010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
