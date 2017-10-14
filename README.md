@@ -76,10 +76,11 @@ Support is available here :
 https://forum.recalbox.com/topic/9265/soft-gamelist-editor
 
 Prérequis/Prerequisites Wine :
-WineHQ 2.0.2
-Configured as Vista (needed for the folder selector...)
-Lib MSXML6
-GameList Editor theme set to "windows basic"
+
+- WineHQ 2.0.2
+- Configured as Vista (needed for the folder selector...)
+- Lib MSXML6
+- GameList Editor theme set to "windows basic"
 
 
 # For Developers (Pour les développeurs) :
