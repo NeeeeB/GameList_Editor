@@ -32,6 +32,11 @@ resourcestring
 
    Rst_RebootRecal = 'Recalbox/Retropie will be restarted to reflect your changes.';
 
+   Rst_Yes = 'Yes';
+   Rst_No = 'No';
+   Rst_Ok = 'Ok';
+   Rst_Info = 'Information';
+
 type
    //enumération pour les différents systèmes
    TSystemKind = ( skNES,
@@ -306,7 +311,7 @@ type
       procedure Mnu_LangClick(Sender: TObject);
       procedure Edt_SearchChange(Sender: TObject);
       procedure Mnu_DeleteOrphansClick(Sender: TObject);
-    procedure Mnu_DeleteDuplicatesClick(Sender: TObject);
+      procedure Mnu_DeleteDuplicatesClick(Sender: TObject);
 
    private
 
@@ -353,6 +358,8 @@ type
       function GetLangEnum( aNumber: Integer ): TLangName;
       function GetPhysicalRomPath( const aRomPath: string ): string;
       function GetPhysicalImagePath( const aImagePath: string ): string;
+      function MyMessageDlg( const Msg: string; DlgTypt: TmsgDlgType; button: TMsgDlgButtons;
+                            Caption: array of string; dlgcaption: string ): Integer;
 
    end;
 
@@ -871,6 +878,30 @@ begin
    end;
 end;
 
+//Construction d'une messagedlg custom (pour pouvoir traduire les boutons)
+function TFrm_Editor.MyMessageDlg(const Msg: string; DlgTypt: TmsgDlgType; button: TMsgDlgButtons;
+                      Caption: array of string; dlgcaption: string ): Integer;
+var
+   aMsgdlg: TForm;
+   ii: Integer;
+   Dlgbutton: Tbutton;
+   Captionindex: Integer;
+begin
+   aMsgdlg := CreateMessageDialog(  Msg, DlgTypt, button   );
+   aMsgdlg.Caption := dlgcaption;
+   aMsgdlg.BiDiMode := bdLeftToRight;
+   Captionindex := 0;
+   for ii:= 0 to Pred( aMsgdlg.ComponentCount ) do begin
+      if (aMsgdlg.components[ii] is Tbutton) then Begin
+         Dlgbutton:= Tbutton( aMsgdlg.Components[ii]   );
+         if ( Captionindex <= High( Caption ) ) then
+            Dlgbutton.Caption:= Caption[Captionindex];
+         Inc( Captionindex );
+      end;
+   end;
+   Result:= aMsgdlg.Showmodal;
+end;
+
 //Chargement des paramètres depuis le fichier INI
 procedure TFrm_Editor.LoadFromIni;
 var
@@ -1160,7 +1191,7 @@ begin
          if FFolderIsOnPi and not FPiLoadedOnce then begin
             FPiLoadedOnce:= True;
             if not FPiPrompts then
-               MessageDlg( Rst_StopES, mtInformation, [mbOK], 0, mbOK );
+               MyMessageDlg( Rst_StopES, mtInformation, [mbOK], [Rst_Ok], Rst_Info );
             if FRootPath.StartsWith( Cst_Recalbox ) then begin
                StopOrStartES( True, True );
                FSysIsRecal:= True;
@@ -1920,8 +1951,8 @@ var
    _Index: Integer;
 begin
    if FDelWoPrompt or
-      ( MessageDlg( Rst_DeleteWarning, mtInformation,
-                    [mbYes, mbNo], 0, mbNo ) = mrYes ) then begin
+      ( MyMessageDlg( Rst_DeleteWarning, mtInformation,
+                    [mbYes, mbNo], [Rst_Yes, Rst_No], Rst_Info ) = mrYes ) then begin
       //on mémorise l'index du listbox pour remettre à la fin
       _Index:= Lbx_Games.ItemIndex;
       //on supprime le jeu
@@ -1993,8 +2024,12 @@ begin
     //On supprime l'image du jeu
     DeleteFile( aGame.FPhysicalImagePath );
 
-    //suppression du jeu physiquement
-    DeleteFile( aGame.FPhysicalRomPath );
+    //suppression du jeu physiquement (action spéciale pour PSX)
+    if ( getSystemKind = skPS ) then begin
+       DeleteFile( StringReplace( aGame.FPhysicalRomPath, '.cue', '.bin', [rfReplaceAll] ) );
+       DeleteFile( StringReplace( aGame.FPhysicalRomPath, '.bin', '.cue', [rfReplaceAll] ) );
+    end else
+       DeleteFile( aGame.FPhysicalRomPath );
 
     //Suppression du jeu dans sa liste mère
     _List.Remove( aGame );
@@ -2354,8 +2389,8 @@ begin
            ( _Game.FSha1.IsEmpty ) or
            ( _Game.FCrc32.IsEmpty ) ) then begin
          if FAutoHash or
-            ( ( not FAutoHash ) and ( MessageDlg( Rst_HashWarning, mtInformation,
-            [mbYes, mbNo], 0, mbNo ) = mrYes ) ) then begin
+            ( ( not FAutoHash ) and ( MyMessageDlg( Rst_HashWarning, mtInformation,
+            [mbYes, mbNo], [Rst_Yes, Rst_No], Rst_Info ) = mrYes ) ) then begin
 
             _Game.FMd5:= _Game.GetMd5( _PathToRom );
             _Game.FSha1:= _Game.GetSha1( _PathToRom );
@@ -2506,7 +2541,7 @@ begin
    if FPiLoadedOnce then begin
       //on affiche ou non le prompt d'info reboot
       if not FPiPrompts then
-         MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
+         MyMessageDlg( Rst_RebootRecal, mtInformation, [mbOK], [Rst_Ok], Rst_Info );
       if FSysIsRecal then StopOrStartES( False, True )
       else StopOrStartES( False, False );
    end;
@@ -2522,7 +2557,7 @@ begin
    if FPiLoadedOnce then begin
       //on affiche ou non le prompt d'info reboot
       if not FPiPrompts then
-         MessageDlg( Rst_RebootRecal, mtInformation, [mbOK], 0, mbOK );
+         MyMessageDlg( Rst_RebootRecal, mtInformation, [mbOK], [Rst_Ok], Rst_Info );
       if FSysIsRecal then StopOrStartES( False, True )
       else StopOrStartES( False, False );
    end;
