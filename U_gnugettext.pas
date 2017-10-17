@@ -6,7 +6,7 @@
   @version $LastChangedRevision: 220 $
   @see http://dybdahl.dk/dxgettext/
 -------------------------------------------------------------------------------}
-unit gnugettext;
+unit U_GnuGetText;
 (**************************************************************)
 (*                                                            *)
 (*  (C) Copyright by Lars B. Dybdahl and others               *)

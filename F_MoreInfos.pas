@@ -1,4 +1,4 @@
-unit MoreInfos;
+unit F_MoreInfos;
 
 interface
 
@@ -6,7 +6,7 @@ uses
    Winapi.Windows, Winapi.Messages,
    System.SysUtils, System.Variants, System.Classes, System.DateUtils,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-   gnugettext;
+   U_gnugettext, U_Game;
 
 type
    TFrm_MoreInfos = class(TForm)
@@ -22,26 +22,25 @@ type
       Lbl_Md5: TLabel;
       Lbl_Sha1: TLabel;
       procedure Btn_CloseClick(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
+      procedure FormCreate(Sender: TObject);
    public
-      procedure Execute( aInfos: TStringList );
+      procedure Execute( aGame: TGame );
    end;
 
 implementation
 
 {$R *.dfm}
 
-procedure TFrm_MoreInfos.Execute( aInfos: TStringList );
+procedure TFrm_MoreInfos.Execute( aGame: TGame );
 begin
-   //on remplit les champs avec les chaines de la stringlist
-   Edt_Playcount.Text:= aInfos.Strings[0];
-   if not aInfos.Strings[1].IsEmpty then
-      Edt_LastPlayed.Text:= FormatDateTime('dd/mm/yyyy hh:mm:ss' , ISO8601ToDate( aInfos.Strings[1] ) )
-   else
-      Edt_LastPlayed.Text:= '';
-   Edt_Crc32.Text:= aInfos.Strings[2];
-   Edt_Md5.Text:= aInfos.Strings[3];
-   Edt_Sha1.Text:= aInfos.Strings[4];
+   //on remplit les champs
+   Edt_Playcount.Text:= aGame.PlayCount;
+   if not aGame.Lastplayed.IsEmpty then
+      Edt_LastPlayed.Text:= FormatDateTime('dd/mm/yyyy hh:mm:ss' , ISO8601ToDate( aGame.ReleaseDate ) )
+   else Edt_LastPlayed.Text:= '';
+   Edt_Crc32.Text:= aGame.Crc32;
+   Edt_Md5.Text:= aGame.Md5;
+   Edt_Sha1.Text:= aGame.Sha1;
 
    //affichage en modal de la fenêtre
    ShowModal;

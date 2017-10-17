@@ -4,7 +4,7 @@ object Frm_About: TFrm_About
   BorderIcons = []
   BorderStyle = bsDialog
   Caption = 'About...'
-  ClientHeight = 283
+  ClientHeight = 314
   ClientWidth = 355
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -19,7 +19,7 @@ object Frm_About: TFrm_About
   TextHeight = 13
   object Btn_Close: TButton
     Left = 136
-    Top = 250
+    Top = 282
     Width = 75
     Height = 25
     Caption = 'Close'
@@ -30,7 +30,7 @@ object Frm_About: TFrm_About
     Left = 8
     Top = 8
     Width = 337
-    Height = 236
+    Height = 267
     Alignment = taCenter
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText

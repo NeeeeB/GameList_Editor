@@ -1,4 +1,4 @@
-unit ConfigureSSH;
+unit F_ConfigureSSH;
 
 interface
 
@@ -6,7 +6,7 @@ uses
    Winapi.Windows, Winapi.Messages,
    System.SysUtils, System.Variants, System.Classes,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-   gnugettext;
+   U_gnugettext;
 
 type
    TFrm_ConfigureSSH = class(TForm)
@@ -21,7 +21,7 @@ type
       Btn_Save: TButton;
       Btn_Cancel: TButton;
       procedure FormShow(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
+      procedure FormCreate(Sender: TObject);
    private
     { Déclarations privées }
    public

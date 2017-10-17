@@ -1,4 +1,4 @@
-unit About;
+unit F_About;
 
 interface
 
@@ -6,22 +6,7 @@ uses
    Winapi.Windows, Winapi.Messages,
    System.SysUtils, System.Variants, System.Classes,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
-   gnugettext;
-
-resourcestring
-   Rst_Text = sLineBreak + 'GameList Editor is a tool to manage your Gamelist.xml' + sLineBreak +
-              'from a Recalbox or Retropie installation:' + sLineBreak +
-              'https://www.recalbox.com/' + sLineBreak +
-              'https://retropie.org.uk/' + sLineBreak + sLineBreak +
-              'It is written in Delphi (Tokyo 10.2.1) by NeeeeB' + sLineBreak +
-              'Its source code is fully available at:' + sLineBreak +
-              'https://github.com/NeeeeB/GameList_Editor' + sLineBreak + sLineBreak +
-              'Your Gamelist.xml should have been created' + sLineBreak +
-              'by Universal XML Scraper by Screech:' + sLineBreak +
-              'https://github.com/Universal-Rom-Tools/Universal-XML-Scraper' + sLineBreak + sLineBreak +
-              'Translators (Thx to them !!):' + sLineBreak +
-              'German = Gmgman and Lackyluuk' + sLineBreak +
-              'Spanish = Uzanto';
+   U_gnugettext, U_Resources;
 
 type
    TRichEdit = class(Vcl.ComCtrls.TRichEdit)

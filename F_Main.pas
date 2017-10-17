@@ -1,4 +1,4 @@
-unit Main;
+unit F_Main;
 
 interface
 
@@ -9,170 +9,9 @@ uses
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes, Vcl.ImgList,
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
    Xml.omnixmldom, Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
-   IdHashMessageDigest, IdHashSHA, IdHashCRC,
-   MoreInfos, About, Help, ConfigureSSH, gnugettext;
-
-resourcestring
-   Rst_WrongFolder = 'Oops !! It looks like you selected the wrong folder !' + SlineBreak +
-                     'Please select the root folder where your systems folders are stored.';
-
-   Rst_GamesFound = ' game(s) found.';
-
-   Rst_HashWarning = 'Hashing a file can be extremly slow depending on' + sLineBreak +
-                     'the file size, your computer, your HDD...' + sLineBreak +
-                     'Do you want to hash anyway ?';
-
-   Rst_DeleteWarning = 'This will delete the entry in the gamelist,' + sLinebreak +
-                       'the rom itself and the associated image permanently.' + sLineBreak +
-                       'Proceed anyway ?';
-
-   Rst_StopES = 'Your systems folder seems to be located on your Pi.' + sLineBreak +
-                'EmulationStation will be stopped for' + sLineBreak +
-                'the gamelist.xml changes to take effect.';
-
-   Rst_RebootRecal = 'Recalbox/Retropie will be restarted to reflect your changes.';
-
-   Rst_Yes = 'Yes';
-   Rst_No = 'No';
-   Rst_Ok = 'Ok';
-   Rst_Info = 'Information';
+   F_MoreInfos, F_About, F_Help, F_ConfigureSSH, U_gnugettext, U_Resources, U_Game;
 
 type
-   //enumération pour les différents systèmes
-   TSystemKind = ( skNES,
-                   skSNES,
-                   skMasterSystem,
-                   skMegaDrive,
-                   skNeoGeo,
-                   skCPC,
-                   skAT2600,
-                   skAT7800,
-                   skATST,
-                   skCS,
-                   skFCD,
-                   skFBA,
-                   skFBALib,
-                   skGW,
-                   skGBC,
-                   skGG,
-                   skGB,
-                   skGBA,
-                   skIV,
-                   skLU,
-                   skLYNX,
-                   skMAME,
-                   skMSX,
-                   skMSX1,
-                   skMSX2,
-                   skNGP,
-                   skNGPC,
-                   skN64,
-                   skODY,
-                   skPCE,
-                   skPCECD,
-                   skPS,
-                   skPRB,
-                   skSVM,
-                   skS32X,
-                   skSCD,
-                   skSG1000,
-                   skSGFX,
-                   skVCX,
-                   skVB,
-                   skWS,
-                   skWSC,
-                   skZXS,
-                   skZX81,
-                   skAM1200,
-                   skAM600,
-                   skAPPLE,
-                   skCV,
-                   skC64,
-                   skDB,
-                   skDC,
-                   skGC,
-                   skPSP,
-                   skWII,
-                   skGenesis );
-
-   //enum noms des themes
-   TThemeName = ( tnAmakrits,
-                  tnAquaGraphite,
-                  tnAquaLightSlate,
-                  tnAuric,
-                  tnCarbon,
-                  tnCharcoalDarkSlate,
-                  tnDiamond,
-                  tnEmerald,
-                  tnEmeraldLightSlate,
-                  tnGlossy,
-                  tnLight,
-                  tnRubyGraphite,
-                  tnSky,
-                  tnVapor,
-                  tnWindows10,
-                  tnWindows10Dark,
-                  tnWindowsBasic );
-
-   //enum pour les langues
-   TLangName = ( lnEnglish,
-                 lnFrench,
-                 lnGerman,
-                 lnSpanish,
-                 lnItalian,
-                 lnPortuguese );
-
-   //Objet stockant uniquement le type système (enum) pour
-   //combobox systems, permet de retrouver facile l'image et le nom du systeme
-   TSystemKindObject = class
-   public
-      FSystemKind: TSystemKind;
-      constructor Create( const aName: string );
-   end;
-
-   TGame = class
-   private
-
-      FRomPath: string;
-      FRomName: string;
-      FRomNameWoExt: string;
-      FPhysicalRomPath: string;
-      FImagePath: string;
-      FPhysicalImagePath: string;
-      FName: string;
-      FDescription: string;
-      FRating: string;
-      FReleaseDate: string;
-      FDeveloper: string;
-      FPublisher: string;
-      FGenre: string;
-      FPlayers: string;
-      FRegion: string;
-      FPlaycount: string;
-      FLastplayed: string;
-      FCrc32: string;
-      FMd5: string;
-      FSha1: string;
-      FHidden: Integer;
-      FFavorite: Integer;
-      FIsOrphan: Boolean;
-
-      procedure Load( aPath, aName, aDescription, aImagePath, aRating,
-                      aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                      aRegion, aPlaycount, aLastplayed, aHidden, aFavorite: string );
-
-      function GetRomName( const aRomPath: string ): string;
-      function GetMd5( const aFileName: string ): string;
-      function GetSha1( const aFileName: string ): string;
-      function GetCrc32( const aFileName: string ): string;
-
-   public
-
-      constructor Create( aPath, aName, aDescription, aImagePath, aRating,
-                          aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                          aRegion, aPlaycount, aLastplayed, aHidden, aFavorite: string ); reintroduce;
-   end;
-
    TFrm_Editor = class(TForm)
       XMLDoc: TXMLDocument;
       OpenDialog: TFileOpenDialog;
@@ -363,396 +202,12 @@ type
 
    end;
 
-const
-   Cst_Path = 'path';
-   Cst_Game = 'game';
-   Cst_Name = 'name';
-   Cst_Description = 'desc';
-   Cst_ImageLink = 'image';
-   Cst_Rating = 'rating';
-   Cst_ReleaseDate = 'releasedate';
-   Cst_Developer = 'developer';
-   Cst_Publisher = 'publisher';
-   Cst_Genre = 'genre';
-   Cst_Players = 'players';
-   Cst_Region = 'region';
-   Cst_Playcount = 'playcount';
-   Cst_LastPlayed = 'lastplayed';
-   Cst_Hidden = 'hidden';
-   Cst_Favorite = 'favorite';
-   Cst_GameListFileName = 'gamelist.xml';
-   Cst_DateShortFill = '00';
-   Cst_DateLongFill = '0000';
-   Cst_DateSuffix = 'T000000';
-   Cst_ImageSuffixPng = '-image.png';
-   Cst_ImageSuffixJpg = '-image.jpg';
-   Cst_ImageSuffixJpeg = '-image.jpeg';
-   Cst_DefaultPicsFolderPath = 'Resources\DefaultPictures\';
-   Cst_DefaultImageNameSuffix = '-default.png';
-   Cst_DefaultImageName = 'default.png';
-   Cst_LogoPicsFolder = 'Resources\SystemsLogos\';
-   Cst_IniFilePath = 'Resources\Settings.ini';
-   Cst_ResourcesFolder = 'Resources\';
-   Cst_IniOptions = 'Options';
-   Cst_IniGodMode = 'GodMode';
-   Cst_IniAutoHash = 'AutoHash';
-   Cst_IniDelWoPrompt = 'DelWoPrompt';
-   Cst_IniPiPrompts = 'PiPrompts';
-   Cst_ShowTips = 'ShowTips';
-   Cst_IniGenesisLogo = 'GenesisLogo';
-   Cst_IniRecalLogin = 'SSHRecalLogin';
-   Cst_IniRecalPwd = 'SSHRecalPwd';
-   Cst_IniRetroLogin = 'SSHRetroLogin';
-   Cst_IniRetroPwd = 'SSHRetroPwd';
-   Cst_IniLanguage = 'Language';
-   Cst_GenesisLogoName = 'genesis.png';
-   Cst_ThemeNumber = 'ThemeNumber';
-   Cst_MenuTheme = 'Mnu_Theme';
-   Cst_MenuLang = 'Mnu_Lang';
-   Cst_PlinkCommand = '/C plink -v ';
-   Cst_PlinkCommandRecal = '@recalbox -pw ';
-   Cst_PlinkCommandRetro = '@retropie -pw ';
-   Cst_PlinkCommandStop = ' killall emulationstation';
-   Cst_PlinkCommandStart = ' /sbin/reboot';
-   Cst_RecalLogin = 'root';
-   Cst_RecalPwd = 'recalboxroot';
-   Cst_RetroLogin = 'pi';
-   Cst_RetroPwd = 'raspberry';
-   Cst_Recalbox = '\\RECALBOX';
-   Cst_Retropie = '\\RETROPIE';
-   Cst_True = 'true';
-   Cst_False = 'false';
-
 var
    Frm_Editor: TFrm_Editor;
 
 implementation
 
 {$R *.dfm}
-
-resourcestring
-   //noms des systemes tels qu'ils seront affichés dans la combobox
-   Rst_SystemKindNES = 'Nintendo';
-   Rst_SystemKindSNES = 'Super Nintendo';
-   Rst_SystemKindMS = 'Master System';
-   Rst_SystemKindMD = 'MegaDrive';
-   Rst_SystemKindNEOGEO = 'Neo Geo';
-   Rst_SystemKindCPC = 'Amstrad CPC';
-   Rst_SystemKindAT2600 = 'Atari 2600';
-   Rst_SystemKindAT7800 = 'Atari 7800';
-   Rst_SystemKindATST = 'Atari ST';
-   Rst_SystemKindCS = 'CaveStory';
-   Rst_SystemKindFCD = 'Family Computer Disk';
-   Rst_SystemKindFBA = 'Final Burn Alpha';
-   Rst_SystemKindFBALib = 'Final Burn Alpha Libretro';
-   Rst_SystemKindGW = 'Game & Watch';
-   Rst_SystemKindGBC = 'Gameboy Color';
-   Rst_SystemKindGG = 'Game Gear';
-   Rst_SystemKindGB = 'Gameboy';
-   Rst_SystemKindGBA = 'Gameboy Advance';
-   Rst_SystemKindIV = 'Image Viewer';
-   Rst_SystemKindLU = 'Lutro';
-   Rst_SystemKindLYNX = 'Lynx';
-   Rst_SystemKindMAME = 'Mame';
-   Rst_SystemKindMSX = 'MSX 1-2-2+';
-   Rst_SystemKindMSX1 = 'MSX 1';
-   Rst_SystemKindMSX2 = 'MSX 2+';
-   Rst_SystemKindNGP = 'Neo Geo Pocket B&W';
-   Rst_SystemKindNGPC = 'Neo Geo Pocket Color';
-   Rst_SystemKindN64 = 'Nintendo 64';
-   Rst_SystemKindODY = 'Odyssey 2';
-   Rst_SystemKindPCE = 'PC Engine';
-   Rst_SystemKindPCECD = 'PC Engine CD';
-   Rst_SystemKindPS = 'Playstation';
-   Rst_SystemKindPRB = 'PR Boom';
-   Rst_SystemKindSVM = 'Scumm VM';
-   Rst_SystemKindS32X = 'Sega 32X';
-   Rst_SystemKindSCD = 'Sega CD';
-   Rst_SystemKindSG1000 = 'Sega SG 1000';
-   Rst_SystemKindSGFX = 'Supergrafx';
-   Rst_SystemKindVCX = 'Vectrex';
-   Rst_SystemKindVB = 'Virtual Boy';
-   Rst_SystemKindWS = 'Wonderswan B&W';
-   Rst_SystemKindWSC = 'Wonderswan Color';
-   Rst_SystemKindZXS = 'ZX Spectrum';
-   Rst_SystemKindZX81 = 'ZX81';
-   Rst_SystemKindAM1200 = 'Amiga 1200';
-   Rst_SystemKindAM600 = 'Amiga 600';
-   Rst_SystemKindAPPLE = 'Apple II';
-   Rst_SystemKindCV = 'Colecovision';
-   Rst_SystemKindC64 = 'Commodore 64';
-   Rst_SystemKindDB = 'DosBox';
-   Rst_SystemKindDC = 'Dreamcast';
-   Rst_SystemKindGC = 'Gamecube';
-   Rst_SystemKindPSP = 'Playstation Portable';
-   Rst_SystemKindWII = 'Wii';
-   Rst_SystemKindGenesis = 'Genesis';
-
-const
-   //tableau de liaison enum themes / noms themes
-   Cst_ThemeNameStr: array[TThemeName] of string =
-      ( 'Amakrits',
-        'Aqua Graphite',
-        'Aqua Light Slate',
-        'Auric',
-        'Carbon',
-        'Charcoal Dark Slate',
-        'Diamond',
-        'Emerald',
-        'Emerald Light Slate',
-        'Glossy',
-        'Light',
-        'Ruby Graphite',
-        'Sky',
-        'Vapor',
-        'Windows10',
-        'Windows10 Dark',
-        'Windows' );
-
-   //tableau de liaison enum langues / noms langues
-   Cst_LangNameStr: array[TLangName] of string =
-      ( 'en',
-        'fr',
-        'de',
-        'es',
-        'it',
-        'pt' );
-
-   //tableau de liaison enum systemes / noms systems affichés
-   Cst_SystemKindStr: array[TSystemKind] of string =
-    ( Rst_SystemKindNES,
-      Rst_SystemKindSNES,
-      Rst_SystemKindMS,
-      Rst_SystemKindMD,
-      Rst_SystemKindNEOGEO,
-      Rst_SystemKindCPC,
-      Rst_SystemKindAT2600,
-      Rst_SystemKindAT7800,
-      Rst_SystemKindATST,
-      Rst_SystemKindCS,
-      Rst_SystemKindFCD,
-      Rst_SystemKindFBA,
-      Rst_SystemKindFBALib,
-      Rst_SystemKindGW,
-      Rst_SystemKindGBC,
-      Rst_SystemKindGG,
-      Rst_SystemKindGB,
-      Rst_SystemKindGBA,
-      Rst_SystemKindIV,
-      Rst_SystemKindLU,
-      Rst_SystemKindLYNX,
-      Rst_SystemKindMAME,
-      Rst_SystemKindMSX,
-      Rst_SystemKindMSX1,
-      Rst_SystemKindMSX2,
-      Rst_SystemKindNGP,
-      Rst_SystemKindNGPC,
-      Rst_SystemKindN64,
-      Rst_SystemKindODY,
-      Rst_SystemKindPCE,
-      Rst_SystemKindPCECD,
-      Rst_SystemKindPS,
-      Rst_SystemKindPRB,
-      Rst_SystemKindSVM,
-      Rst_SystemKindS32X,
-      Rst_SystemKindSCD,
-      Rst_SystemKindSG1000,
-      Rst_SystemKindSGFX,
-      Rst_SystemKindVCX,
-      Rst_SystemKindVB,
-      Rst_SystemKindWS,
-      Rst_SystemKindWSC,
-      Rst_SystemKindZXS,
-      Rst_SystemKindZX81,
-      Rst_SystemKindAM1200,
-      Rst_SystemKindAM600,
-      Rst_SystemKindAPPLE,
-      Rst_SystemKindCV,
-      Rst_SystemKindC64,
-      Rst_SystemKindDB,
-      Rst_SystemKindDC,
-      Rst_SystemKindGC,
-      Rst_SystemKindPSP,
-      Rst_SystemKindWII,
-      Rst_SystemKindGenesis );
-
-   //tableau de liaison enum systemes/nom des dossiers systeme
-   Cst_SystemKindFolderNames: array[TSystemKind] of string =
-    ( 'nes',
-      'snes',
-      'mastersystem',
-      'megadrive',
-      'neogeo',
-      'amstradcpc',
-      'atari2600',
-      'atari7800',
-      'atarist',
-      'cavestory',
-      'fds',
-      'fba',
-      'fba_libretro',
-      'gw',
-      'gbc',
-      'gamegear',
-      'gb',
-      'gba',
-      'imageviewer',
-      'lutro',
-      'lynx',
-      'mame',
-      'msx',
-      'msx1',
-      'msx2',
-      'ngp',
-      'ngpc',
-      'n64',
-      'odyssey2',
-      'pcengine',
-      'pcenginecd',
-      'psx',
-      'prboom',
-      'scummvm',
-      'sega32x',
-      'segacd',
-      'sg1000',
-      'supergrafx',
-      'vectrex',
-      'virtualboy',
-      'wonderswan',
-      'wonderswancolor',
-      'zxspectrum',
-      'z81',
-      'amiga1200',
-      'amiga600',
-      'apple2',
-      'colecovision',
-      'c64',
-      'pc',
-      'dreamcast',
-      'gc',
-      'psp',
-      'wii',
-      'genesis' );
-
-   //tableau de liaison enum systemes/nom image systeme
-   Cst_SystemKindImageNames: array[TSystemKind] of string =
-    ( 'nes.png',
-      'snes.png',
-      'mastersystem.png',
-      'megadrive.png',
-      'neogeo.png',
-      'amstradcpc.png',
-      'atari2600.png',
-      'atari7800.png',
-      'atarist.png',
-      'cavestory.png',
-      'fds.png',
-      'fba.png',
-      'fba_libretro.png',
-      'gw.png',
-      'gbc.png',
-      'gamegear.png',
-      'gb.png',
-      'gba.png',
-      'imageviewer.png',
-      'lutro.png',
-      'lynx.png',
-      'mame.png',
-      'msx.png',
-      'msx1.png',
-      'msx2.png',
-      'ngp.png',
-      'ngpc.png',
-      'n64.png',
-      'odyssey2.png',
-      'pcengine.png',
-      'pcenginecd.png',
-      'psx.png',
-      'prboom.png',
-      'scummvm.png',
-      'sega32x.png',
-      'segacd.png',
-      'sg1000.png',
-      'supergrafx.png',
-      'vectrex.png',
-      'virtualboy.png',
-      'wonderswan.png',
-      'wonderswancolor.png',
-      'zxspectrum.png',
-      'z81.png',
-      'amiga1200.png',
-      'amiga600.png',
-      'apple2.png',
-      'colecovision.png',
-      'c64.png',
-      'pc.png',
-      'dreamcast.png',
-      'gc.png',
-      'psp.png',
-      'wii.png',
-      'genesis.png' );
-
-
-//Constructeur object SystemKindObject
-constructor TSystemKindObject.Create( const aName: string );
-var
- _systemKind: TSystemKind;
-begin
-   for _systemKind:= Low( TSystemKind )to High( _systemKind ) do begin
-      if ( Cst_SystemKindFolderNames[_systemKind] = aName ) then begin
-         FSystemKind:= _systemKind;
-         Break;
-      end;
-   end;
-end;
-
-//Constructeur de l'objet TGame
-constructor TGame.Create( aPath, aName, aDescription, aImagePath, aRating,
-                          aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                          aRegion, aPlaycount, aLastplayed, aHidden, aFavorite: string );
-begin
-   Load( aPath, aName, aDescription, aImagePath, aRating,
-         aDeveloper, aPublisher, aGenre, aPlayers, aDate, aRegion, aPlaycount,
-         aLastplayed, aHidden, aFavorite );
-end;
-
-//Chargement des attributs dans l'objet TGame
-procedure TGame.Load( aPath, aName, aDescription, aImagePath, aRating,
-                      aDeveloper, aPublisher, aGenre, aPlayers, aDate,
-                      aRegion, aPlaycount, aLastplayed, aHidden, aFavorite: string );
-begin
-   FRomPath:= aPath;
-   FRomName:= GetRomName( aPath );
-   FRomNameWoExt:= ChangeFileExt( FRomName, '' );
-   FPhysicalRomPath:= Frm_Editor.GetPhysicalRomPath( aPath );
-   FImagePath:= aImagePath;
-   FPhysicalImagePath:= Frm_Editor.GetPhysicalImagePath( aImagePath );
-   FName:= aName;
-   FDescription:= aDescription;
-   FRating:= aRating;
-   FReleaseDate:= aDate;
-   FDeveloper:= aDeveloper;
-   FPublisher:= aPublisher;
-   FGenre:= aGenre;
-   FPlayers:= aPlayers;
-   FRegion:= aRegion;
-   FPlaycount:= aPlaycount;
-   FLastplayed:= aLastplayed;
-   if ( aHidden = Cst_True ) then FHidden:= 1
-   else FHidden:= 0;
-   if ( aFavorite = Cst_True ) then FFavorite:= 1
-   else FFavorite:= 0;
-   FIsOrphan:= not FileExists( FPhysicalRomPath );
-end;
-
-//Fonction permettant de récupérer le nom de la rom avec son extension
-function TGame.GetRomName( const aRomPath: string ): string;
-var
-   _Pos: Integer;
-begin
-   _Pos:= LastDelimiter( '/', aRomPath );
-   Result:= Copy( aRomPath, Succ( _Pos ), ( aRomPath.Length - _Pos ) );
-end;
 
 function TFrm_Editor.GetPhysicalRomPath( const aRomPath: string ): string;
 var
@@ -772,60 +227,6 @@ begin
       _Pos:= Pos( '/', aImagePath );
       Result:= FRootPath + FCurrentFolder + Copy( aImagePath, Succ( _Pos ), ( aImagePath.Length - _Pos ) );
       Result:= StringReplace( Result, '/', '\', [rfReplaceAll] );
-   end;
-end;
-
-//Fonction permettant de récupérer le MD5 des roms
-function TGame.GetMd5( const aFileName: string ): string;
-var
-   IdMD5: TIdHashMessageDigest5;
-   FS: TFileStream;
-begin
-   if FileExists( aFileName ) then begin
-      IdMD5:= TIdHashMessageDigest5.Create;
-      FS:= TFileStream.Create( aFileName, fmOpenRead or fmShareDenyWrite );
-      try
-         Result:= IdMD5.HashStreamAsHex(FS)
-      finally
-         FS.Free;
-         IdMD5.Free;
-      end;
-   end;
-end;
-
-//fonction permettant de récupérer le SHA1 des roms
-function TGame.GetSha1( const aFileName: string ): string;
-var
-   IdSHA1: TIdHashSHA1;
-   FS: TFileStream;
-begin
-   if FileExists( aFileName ) then begin
-      IdSHA1:= TIdHashSHA1.Create;
-      FS:= TFileStream.Create( aFileName, fmOpenRead or fmShareDenyWrite );
-      try
-         Result:= IdSHA1.HashStreamAsHex(FS)
-      finally
-         FS.Free;
-         IdSHA1.Free;
-      end;
-   end;
-end;
-
-//fonction permettant de récupérer le SHA1 des roms
-function TGame.GetCrc32( const aFileName: string ): string;
-var
-   IdCRC32: TIdHashCRC32;
-   FS: TFileStream;
-begin
-   if FileExists( aFileName ) then begin
-      IdCRC32:= TIdHashCRC32.Create;
-      FS:= TFileStream.Create( aFileName, fmOpenRead or fmShareDenyWrite );
-      try
-         Result:= IdCRC32.HashStreamAsHex(FS)
-      finally
-         FS.Free;
-         IdCRC32.Free;
-      end;
    end;
 end;
 
@@ -1277,6 +678,10 @@ begin
                                GetNodeValue( _Node, Cst_Hidden ),
                                GetNodeValue( _Node, Cst_Favorite ) );
 
+         _Game.PhysicalRomPath:= GetPhysicalRomPath( _Game.RomPath );
+         _Game.PhysicalImagePath:= GetPhysicalImagePath( _Game.ImagePath );
+         _Game.IsOrphan:= not FileExists( _Game.PhysicalRomPath );
+
          //On ajoute à la _Gamelist
          _GameList.Add( _Game );
       end;
@@ -1391,17 +796,17 @@ begin
    if FIsLoading then Exit;
 
    _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
-   Btn_SaveChanges.Enabled:= not ( _Game.FName.Equals( Edt_Name.Text ) ) or
-                             not ( _Game.FGenre.Equals( Edt_Genre.Text ) ) or
-                             not ( _Game.FRating.Equals( Edt_Rating.Text ) ) or
-                             not ( _Game.FPlayers.Equals( Edt_NbPlayers.Text ) ) or
-                             not ( _Game.FDeveloper.Equals( Edt_Developer.Text ) ) or
-                             not ( _Game.FPublisher.Equals( Edt_Publisher.Text ) ) or
-                             not ( _Game.FReleaseDate.Equals( Edt_ReleaseDate.Text ) ) or
-                             not ( _Game.FDescription.Equals( Mmo_Description.Text ) ) or
-                             not ( _Game.FRegion.Equals( Edt_Region.Text ) ) or
-                             not ( _Game.FHidden = Cbx_Hidden.ItemIndex ) or
-                             not ( _Game.FFavorite = Cbx_Favorite.ItemIndex );
+   Btn_SaveChanges.Enabled:= not ( _Game.Name.Equals( Edt_Name.Text ) ) or
+                             not ( _Game.Genre.Equals( Edt_Genre.Text ) ) or
+                             not ( _Game.Rating.Equals( Edt_Rating.Text ) ) or
+                             not ( _Game.Players.Equals( Edt_NbPlayers.Text ) ) or
+                             not ( _Game.Developer.Equals( Edt_Developer.Text ) ) or
+                             not ( _Game.Publisher.Equals( Edt_Publisher.Text ) ) or
+                             not ( _Game.ReleaseDate.Equals( Edt_ReleaseDate.Text ) ) or
+                             not ( _Game.Description.Equals( Mmo_Description.Text ) ) or
+                             not ( _Game.Region.Equals( Edt_Region.Text ) ) or
+                             not ( _Game.Hidden = Cbx_Hidden.ItemIndex ) or
+                             not ( _Game.Favorite = Cbx_Favorite.ItemIndex );
 end;
 
 //Chargement de la liste des jeux d'un système dans le listbox des jeux
@@ -1412,11 +817,11 @@ procedure TFrm_Editor.LoadGamesList( const aSystem: string );
    var
       StartPos, EndPos: Integer;
    begin
-      StartPos:= Succ( Pos( '/', aGame.FImagePath ) );
-      EndPos:= LastDelimiter( '/', aGame.FImagePath );
-      FImageFolder:= Copy( aGame.FImagePath, StartPos, ( EndPos - StartPos ) );
+      StartPos:= Succ( Pos( '/', aGame.ImagePath ) );
+      EndPos:= LastDelimiter( '/', aGame.ImagePath );
+      FImageFolder:= Copy( aGame.ImagePath, StartPos, ( EndPos - StartPos ) );
 
-      FXmlImageFolderPath:= Copy( aGame.FImagePath, 1, EndPos );
+      FXmlImageFolderPath:= Copy( aGame.ImagePath, 1, EndPos );
    end;
 
    //Permet de vérifier si l'image existe "physiquement"
@@ -1462,7 +867,7 @@ begin
       for _TmpGame in _TmpList do begin
 
          //Récup du lien vers les images pour ce système (lien xml)
-         if not ( _TmpGame.FImagePath.IsEmpty ) and
+         if not ( _TmpGame.ImagePath.IsEmpty ) and
             not _FolderFound then begin
             GetImageFolder( _TmpGame );
             _FolderFound:= True;
@@ -1470,22 +875,22 @@ begin
 
          //Attention usine à gaz booléenne pour gérer les filtres ^^
          if ( _FilterIndex = 0 ) or
-            ( ( _FilterIndex = 1 ) and ( CheckIfImageMissing( _TmpGame.FPhysicalImagePath ) ) ) or
-            ( ( _FilterIndex = 2 ) and ( _TmpGame.FReleaseDate.IsEmpty ) ) or
-            ( ( _FilterIndex = 3 ) and ( _TmpGame.FPlayers.IsEmpty ) ) or
-            ( ( _FilterIndex = 4 ) and ( _TmpGame.FRating.IsEmpty ) ) or
-            ( ( _FilterIndex = 5 ) and ( _TmpGame.FDeveloper.IsEmpty ) ) or
-            ( ( _FilterIndex = 6 ) and ( _TmpGame.FPublisher.IsEmpty ) ) or
-            ( ( _FilterIndex = 7 ) and ( _TmpGame.FDescription.IsEmpty ) ) or
-            ( ( _FilterIndex = 8 ) and ( _TmpGame.FGenre.IsEmpty ) ) or
-            ( ( _FilterIndex = 9 ) and ( _TmpGame.FRegion.IsEmpty ) ) or
-            ( ( _FilterIndex = 10 ) and ( _TmpGame.FHidden = 1 ) ) or
-            ( ( _FilterIndex = 11 ) and ( _TmpGame.FFavorite = 1 ) ) or
-            ( ( _FilterIndex = 12 ) and ( _TmpGame.FIsOrphan ) ) then begin
+            ( ( _FilterIndex = 1 ) and ( CheckIfImageMissing( _TmpGame.PhysicalImagePath ) ) ) or
+            ( ( _FilterIndex = 2 ) and ( _TmpGame.ReleaseDate.IsEmpty ) ) or
+            ( ( _FilterIndex = 3 ) and ( _TmpGame.Players.IsEmpty ) ) or
+            ( ( _FilterIndex = 4 ) and ( _TmpGame.Rating.IsEmpty ) ) or
+            ( ( _FilterIndex = 5 ) and ( _TmpGame.Developer.IsEmpty ) ) or
+            ( ( _FilterIndex = 6 ) and ( _TmpGame.Publisher.IsEmpty ) ) or
+            ( ( _FilterIndex = 7 ) and ( _TmpGame.Description.IsEmpty ) ) or
+            ( ( _FilterIndex = 8 ) and ( _TmpGame.Genre.IsEmpty ) ) or
+            ( ( _FilterIndex = 9 ) and ( _TmpGame.Region.IsEmpty ) ) or
+            ( ( _FilterIndex = 10 ) and ( _TmpGame.Hidden = 1 ) ) or
+            ( ( _FilterIndex = 11 ) and ( _TmpGame.Favorite = 1 ) ) or
+            ( ( _FilterIndex = 12 ) and ( _TmpGame.IsOrphan ) ) then begin
 
             if ( Edt_Search.Text = '' ) or
-               ContainsText( _TmpGame.FName, Edt_Search.Text ) then
-               Lbx_Games.Items.AddObject( _TmpGame.FName, _TmpGame );
+               ContainsText( _TmpGame.Name, Edt_Search.Text ) then
+               Lbx_Games.Items.AddObject( _TmpGame.Name, _TmpGame );
          end
       end;
 
@@ -1548,28 +953,28 @@ begin
    FIsLoading:= True;
 
    Img_BackGround.Visible:= True;
-   Edt_Name.Text:= aGame.FName;
-   Edt_Rating.Text:= aGame.FRating;
-   Edt_ReleaseDate.Text:= aGame.FReleaseDate;
-   Edt_Publisher.Text:= aGame.FPublisher;
-   Edt_Developer.Text:= aGame.FDeveloper;
-   Edt_NbPlayers.Text:= aGame.FPlayers;
-   Edt_Genre.Text:= aGame.FGenre;
-   Mmo_Description.Text:= aGame.FDescription;
-   Edt_Region.Text:= aGame.FRegion;
-   Cbx_Hidden.ItemIndex:= aGame.FHidden;
-   Cbx_Favorite.ItemIndex:= aGame.FFavorite;
-   Edt_RomPath.Text:= aGame.FRomPath;
+   Edt_Name.Text:= aGame.Name;
+   Edt_Rating.Text:= aGame.Rating;
+   Edt_ReleaseDate.Text:= aGame.ReleaseDate;
+   Edt_Publisher.Text:= aGame.Publisher;
+   Edt_Developer.Text:= aGame.Developer;
+   Edt_NbPlayers.Text:= aGame.Players;
+   Edt_Genre.Text:= aGame.Genre;
+   Mmo_Description.Text:= aGame.Description;
+   Edt_Region.Text:= aGame.Region;
+   Cbx_Hidden.ItemIndex:= aGame.Hidden;
+   Cbx_Favorite.ItemIndex:= aGame.Favorite;
+   Edt_RomPath.Text:= aGame.RomPath;
 
    //on remet les évènements sur les champs
    FIsLoading:= False;
 
-   if not ( aGame.FImagePath.IsEmpty ) and
-          FileExists( aGame.FPhysicalImagePath ) then begin
-      if ( ExtractFileExt( aGame.FPhysicalImagePath ) = '.png' ) then begin
+   if not ( aGame.ImagePath.IsEmpty ) and
+          FileExists( aGame.PhysicalImagePath ) then begin
+      if ( ExtractFileExt( aGame.PhysicalImagePath ) = '.png' ) then begin
          _Image:= TPngImage.Create;
          try
-            _Image.LoadFromFile( aGame.FPhysicalImagePath );
+            _Image.LoadFromFile( aGame.PhysicalImagePath );
             Img_Game.Picture.Graphic:= _Image;
             Btn_RemovePicture.Enabled:= True;
             //on affiche l'image background que si le jeu n'a pas d'image
@@ -1578,11 +983,11 @@ begin
          finally
             _Image.Free;
          end;
-      end else if ( ExtractFileExt( aGame.FPhysicalImagePath ) = '.jpg' ) or
-                  ( ExtractFileExt( aGame.FPhysicalImagePath ) = '.jpeg' ) then begin
+      end else if ( ExtractFileExt( aGame.PhysicalImagePath ) = '.jpg' ) or
+                  ( ExtractFileExt( aGame.PhysicalImagePath ) = '.jpeg' ) then begin
          _ImageJpg:= TJPEGImage.Create;
          try
-            _ImageJpg.LoadFromFile( aGame.FPhysicalImagePath );
+            _ImageJpg.LoadFromFile( aGame.PhysicalImagePath );
             Img_Game.Picture.Graphic:= _ImageJpg;
             Btn_RemovePicture.Enabled:= True;
             //on affiche l'image background que si le jeu n'a pas d'image
@@ -1705,7 +1110,7 @@ begin
    //on sauvegarde l'image dans le dossier avec les autres !!
    // et on ajoute le chemin dans le xml
    Img_Game.Picture.SaveToFile( FRootPath + FCurrentFolder + FImageFolder +
-                                '\' + aGame.FRomNameWoExt + Cst_ImageSuffixPng );
+                                '\' + aGame.RomNameWoExt + Cst_ImageSuffixPng );
 
    //On ouvre le fichier xml
    XMLDoc.LoadFromFile( FRootPath + FCurrentFolder + Cst_GameListFileName );
@@ -1715,12 +1120,12 @@ begin
 
    //Et on boucle pour trouver le noeud avec le bon Id
    repeat
-      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.FRomPath ) then Break;
+      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.RomPath ) then Break;
       _Node := _Node.NextSibling;
    until not Assigned( _Node );
 
    //on écrit le chemin vers l'image
-   _ImageLink:= FXmlImageFolderPath + aGame.FRomNameWoExt + Cst_ImageSuffixPng;
+   _ImageLink:= FXmlImageFolderPath + aGame.RomNameWoExt + Cst_ImageSuffixPng;
 
    if not Assigned( _Node.ChildNodes.FindNode( Cst_ImageLink ) ) then begin
       _Node.AddChild( Cst_ImageLink );
@@ -1737,10 +1142,10 @@ begin
    XMLDoc.Active:= False;
 
    //Et enfin on met à jour l'objet TGame associé
-   aGame.FImagePath:= _ImageLink;
-   aGame.FPhysicalImagePath:= FRootPath + FCurrentFolder +
-                              IncludeTrailingPathDelimiter( FImageFolder ) +
-                              aGame.FRomNameWoExt + Cst_ImageSuffixPng;
+   aGame.ImagePath:= _ImageLink;
+   aGame.PhysicalImagePath:= FRootPath + FCurrentFolder +
+                             IncludeTrailingPathDelimiter( FImageFolder ) +
+                             aGame.RomNameWoExt + Cst_ImageSuffixPng;
 
    Screen.Cursor:= crDefault;
 end;
@@ -1773,7 +1178,7 @@ begin
 
    //Et on boucle pour trouver le bon noeud
    repeat
-      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = _Game.FRomPath ) then Break;
+      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = _Game.RomPath ) then Break;
          _Node := _Node.NextSibling;
    until not Assigned( _Node );
 
@@ -1784,13 +1189,13 @@ begin
    XMLDoc.Active:= False;
 
    //On supprime l'image du jeu
-   DeleteFile( _Game.FPhysicalImagePath );
+   DeleteFile( _Game.PhysicalImagePath );
 
    //on vide l'image jeu
    Img_Game.Picture.Graphic:= nil;
 
    //on update l'objet TGame
-   _Game.FImagePath:= '';
+   _Game.ImagePath:= '';
 
    //on recharge le jeu pour refléter les changements
    LoadGame( _Game );
@@ -1858,76 +1263,76 @@ begin
 
    //Et on boucle pour trouver le bon noeud
    repeat
-      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = _Game.FRomPath ) then Break;
+      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = _Game.RomPath ) then Break;
       _Node := _Node.NextSibling;
    until not Assigned( _Node );
 
    //On peut maintenant mettre les infos à jour dans le xml si besoin
-   if not ( _Game.FName.Equals( Edt_Name.Text ) ) then begin
+   if not ( _Game.Name.Equals( Edt_Name.Text ) ) then begin
       _Node.ChildNodes.Nodes[Cst_Name].Text:= Edt_Name.Text;
-      _Game.FName:= Edt_Name.Text;
+      _Game.Name:= Edt_Name.Text;
       Lbx_Games.Items[Lbx_Games.ItemIndex]:= Edt_Name.Text;
       _NameChanged:= True;
    end;
-   if not ( _Game.FGenre.Equals( Edt_Genre.Text ) ) then begin
+   if not ( _Game.Genre.Equals( Edt_Genre.Text ) ) then begin
       _Node.ChildNodes.Nodes[Cst_Genre].Text:= Edt_Genre.Text;
-      _Game.FGenre:= Edt_Genre.Text;
+      _Game.Genre:= Edt_Genre.Text;
    end;
-   if not ( _Game.FRating.Equals( Edt_Rating.Text ) ) then begin
+   if not ( _Game.Rating.Equals( Edt_Rating.Text ) ) then begin
       _Node.ChildNodes.Nodes[Cst_Rating].Text:= Edt_Rating.Text;
-      _Game.FRating:= Edt_Rating.Text;
+      _Game.Rating:= Edt_Rating.Text;
    end;
-   if not ( _Game.FPlayers.Equals( Edt_NbPlayers.Text ) ) then begin
+   if not ( _Game.Players.Equals( Edt_NbPlayers.Text ) ) then begin
       _Node.ChildNodes.Nodes[Cst_Players].Text:= Edt_NbPlayers.Text;
-      _Game.FPlayers:= Edt_NbPlayers.Text;
+      _Game.Players:= Edt_NbPlayers.Text;
    end;
-   if not ( _Game.FDeveloper.Equals( Edt_Developer.Text ) ) then begin
+   if not ( _Game.Developer.Equals( Edt_Developer.Text ) ) then begin
       _Node.ChildNodes.Nodes[Cst_Developer].Text:= Edt_Developer.Text;
-      _Game.FDeveloper:= Edt_Developer.Text;
+      _Game.Developer:= Edt_Developer.Text;
    end;
-   if not ( _Game.FReleaseDate.Equals( Edt_ReleaseDate.Text ) ) then begin
+   if not ( _Game.ReleaseDate.Equals( Edt_ReleaseDate.Text ) ) then begin
       _Date:= FormatDateFromString( Edt_ReleaseDate.Text, True );
       if not _Date.IsEmpty then
-         _Game.FReleaseDate:= Edt_ReleaseDate.Text
+         _Game.ReleaseDate:= Edt_ReleaseDate.Text
       else begin
-         _Game.FReleaseDate:= '';
+         _Game.ReleaseDate:= '';
          Edt_ReleaseDate.Text:= '';
       end;
       _Node.ChildNodes.Nodes[Cst_ReleaseDate].Text:= _Date;
    end;
-   if not ( _Game.FPublisher.Equals( Edt_Publisher.Text ) ) then begin
+   if not ( _Game.Publisher.Equals( Edt_Publisher.Text ) ) then begin
       _Node.ChildNodes.Nodes[Cst_Publisher].Text:= Edt_Publisher.Text;
-      _Game.FPublisher:= Edt_Publisher.Text;
+      _Game.Publisher:= Edt_Publisher.Text;
    end;
-   if not ( _Game.FDescription.Equals( Mmo_Description.Text ) ) then begin
+   if not ( _Game.Description.Equals( Mmo_Description.Text ) ) then begin
       _Node.ChildNodes.Nodes[Cst_Description].Text:= Mmo_Description.Text;
-      _Game.FDescription:= Mmo_Description.Text;
+      _Game.Description:= Mmo_Description.Text;
    end;
-   if not ( _Game.FRegion.Equals( Edt_Region.Text ) ) then begin
+   if not ( _Game.Region.Equals( Edt_Region.Text ) ) then begin
       if not ( NodeExists( _Node, Cst_Region ) ) then begin
          _Node.AddChild( Cst_Region );
          _NodeAdded:= True;
       end;
       _Node.ChildNodes.Nodes[Cst_Region].Text:= Edt_Region.Text;
-      _Game.FRegion:= Edt_Region.Text;
+      _Game.Region:= Edt_Region.Text;
    end;
-   if not ( _Game.FHidden = Cbx_Hidden.ItemIndex ) then begin
+   if not ( _Game.Hidden = Cbx_Hidden.ItemIndex ) then begin
       if not ( NodeExists( _Node, Cst_Hidden ) ) then begin
          _Node.AddChild( Cst_Hidden );
          _NodeAdded:= True;
       end;
       if ( Cbx_Hidden.ItemIndex = 0 ) then _Node.ChildNodes.Nodes[Cst_Hidden].Text:= Cst_False
       else _Node.ChildNodes.Nodes[Cst_Hidden].Text:= Cst_True;
-      _Game.FHidden:= Cbx_Hidden.ItemIndex;
+      _Game.Hidden:= Cbx_Hidden.ItemIndex;
    end;
-   if not ( _Game.FFavorite = Cbx_Favorite.ItemIndex ) then begin
+   if not ( _Game.Favorite = Cbx_Favorite.ItemIndex ) then begin
       if not ( NodeExists( _Node, Cst_Favorite ) ) then begin
          _Node.AddChild( Cst_Favorite );
          _NodeAdded:= True;
       end;
       if ( Cbx_Favorite.ItemIndex = 0 ) then _Node.ChildNodes.Nodes[Cst_Favorite].Text:= Cst_False
       else _Node.ChildNodes.Nodes[Cst_Favorite].Text:= Cst_True;
-      _Game.FFavorite:= Cbx_Favorite.ItemIndex;
+      _Game.Favorite:= Cbx_Favorite.ItemIndex;
    end;
 
    //Et enfin on enregistre le fichier (en formatant correctement si on a ajouté un noeud)
@@ -1982,7 +1387,7 @@ begin
    ProgressBar.Max:= Pred( _List.Count );
    ProgressBar.Position:= 0;
    for ii:= Pred( _List.Count ) downto 0 do begin
-      if _List.Items[ii].FIsOrphan then
+      if _List.Items[ii].IsOrphan then
          DeleteGame( _List.Items[ii] );
       ProgressBar.Position:= ( ProgressBar.Position + 1);
    end;
@@ -2011,7 +1416,7 @@ begin
 
     //Et on boucle pour trouver le bon noeud
     repeat
-       if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.FRomPath ) then Break;
+       if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.RomPath ) then Break;
        _Node := _Node.NextSibling;
     until not Assigned( _Node );
 
@@ -2022,14 +1427,14 @@ begin
     XMLDoc.Active:= False;
 
     //On supprime l'image du jeu
-    DeleteFile( aGame.FPhysicalImagePath );
+    DeleteFile( aGame.PhysicalImagePath );
 
     //suppression du jeu physiquement (action spéciale pour PSX)
     if ( getSystemKind = skPS ) then begin
-       DeleteFile( StringReplace( aGame.FPhysicalRomPath, '.cue', '.bin', [rfReplaceAll] ) );
-       DeleteFile( StringReplace( aGame.FPhysicalRomPath, '.bin', '.cue', [rfReplaceAll] ) );
+       DeleteFile( StringReplace( aGame.PhysicalRomPath, '.cue', '.bin', [rfReplaceAll] ) );
+       DeleteFile( StringReplace( aGame.PhysicalRomPath, '.bin', '.cue', [rfReplaceAll] ) );
     end else
-       DeleteFile( aGame.FPhysicalRomPath );
+       DeleteFile( aGame.PhysicalRomPath );
 
     //Suppression du jeu dans sa liste mère
     _List.Remove( aGame );
@@ -2265,12 +1670,12 @@ procedure TFrm_Editor.ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False;
    //rafraichit les données des champs EDIT dans le cas de modif d'un seul jeu
    procedure RefreshDisplay( aGame: TGame );
    begin
-      Edt_Name.Text:= aGame.FName;
-      Edt_Genre.Text:= aGame.FGenre;
-      Edt_Region.Text:= aGame.FRegion;
-      Edt_Publisher.Text:= aGame.FPublisher;
-      Edt_Developer.Text:= aGame.FDeveloper;
-      Mmo_Description.Text:= aGame.FDescription;
+      Edt_Name.Text:= aGame.Name;
+      Edt_Genre.Text:= aGame.Genre;
+      Edt_Region.Text:= aGame.Region;
+      Edt_Publisher.Text:= aGame.Publisher;
+      Edt_Developer.Text:= aGame.Developer;
+      Mmo_Description.Text:= aGame.Description;
       Lbx_Games.Items[Lbx_Games.ItemIndex]:= Edt_Name.Text;
    end;
 
@@ -2304,17 +1709,17 @@ begin
 
    //Et on boucle pour trouver le bon noeud
    repeat
-      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.FRomPath ) then Break;
+      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.RomPath ) then Break;
          _Node := _Node.NextSibling;
    until not Assigned( _Node );
 
    //on met à jour le xml et l'objet game
-   aGame.FName:= ConvertUpOrLow( _Node, Cst_Name, aUp, aGame.FName );
-   aGame.FRegion:= ConvertUpOrLow( _Node, Cst_Region, aUp, aGame.FRegion );
-   aGame.FDeveloper:= ConvertUpOrLow( _Node, Cst_Developer, aUp, aGame.FDeveloper );
-   aGame.FPublisher:= ConvertUpOrLow( _Node, Cst_Publisher, aUp, aGame.FPublisher );
-   aGame.FGenre:= ConvertUpOrLow( _Node, Cst_Genre, aUp, aGame.FGenre );
-   aGame.FDescription:= ConvertUpOrLow( _Node, Cst_Description, aUp, aGame.FDescription );
+   aGame.Name:= ConvertUpOrLow( _Node, Cst_Name, aUp, aGame.Name );
+   aGame.Region:= ConvertUpOrLow( _Node, Cst_Region, aUp, aGame.Region );
+   aGame.Developer:= ConvertUpOrLow( _Node, Cst_Developer, aUp, aGame.Developer );
+   aGame.Publisher:= ConvertUpOrLow( _Node, Cst_Publisher, aUp, aGame.Publisher );
+   aGame.Genre:= ConvertUpOrLow( _Node, Cst_Genre, aUp, aGame.Genre );
+   aGame.Description:= ConvertUpOrLow( _Node, Cst_Description, aUp, aGame.Description );
 
    //si maj d'un seul jeu on met à jour l'affichage du jeu
    if aUnique then RefreshDisplay( aGame );
@@ -2372,49 +1777,32 @@ end;
 //sur le jeu sélectionné
 procedure TFrm_Editor.Btn_MoreInfosClick(Sender: TObject);
 var
-   _Infos: TStringList;
    _Game: TGame;
    MoreInfos: TFrm_MoreInfos;
-   _PathToRom: string;
 begin
-   //on crée une liste avec les infos à afficher
-   _Infos:= TStringList.Create;
+   //on récupère le jeu sélectionné
+   _Game:= TGame( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] );
+
+   //On ajoute les hash si nécessaire.
+   if ( ( _Game.Md5.IsEmpty ) or
+        ( _Game.Sha1.IsEmpty ) or
+        ( _Game.Crc32.IsEmpty ) ) then begin
+      if FAutoHash or
+         ( ( not FAutoHash ) and ( MyMessageDlg( Rst_HashWarning, mtInformation,
+         [mbYes, mbNo], [Rst_Yes, Rst_No], Rst_Info ) = mrYes ) ) then begin
+
+         _Game.Md5:= _Game.CalculateMd5( _Game.PhysicalRomPath );
+         _Game.Sha1:= _Game.CalculateSha1( _Game.PhysicalRomPath );
+         _Game.Crc32:= _Game.CalculateCrc32( _Game.PhysicalRomPath );
+      end;
+   end;
+
+   //et on affiche la fenêtre
+   MoreInfos:= TFrm_MoreInfos.Create( nil );
    try
-      //on récupère le jeu sélectionné
-      _Game:= TGame( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] );
-      _PathToRom:= FRootPath + getCurrentFolderName + '\' + _Game.FRomName;
-
-      //On ajoute les hash si nécessaire.
-      if ( ( _Game.FMd5.IsEmpty ) or
-           ( _Game.FSha1.IsEmpty ) or
-           ( _Game.FCrc32.IsEmpty ) ) then begin
-         if FAutoHash or
-            ( ( not FAutoHash ) and ( MyMessageDlg( Rst_HashWarning, mtInformation,
-            [mbYes, mbNo], [Rst_Yes, Rst_No], Rst_Info ) = mrYes ) ) then begin
-
-            _Game.FMd5:= _Game.GetMd5( _PathToRom );
-            _Game.FSha1:= _Game.GetSha1( _PathToRom );
-            _Game.FCrc32:= _Game.GetCrc32( _PathToRom );
-         end;
-      end;
-
-      //on remplit la liste avec les infos dont on a besoin
-      _Infos.Add( _Game.FPlaycount );
-      _Infos.Add( _Game.FLastplayed );
-      _Infos.Add( _Game.FCrc32 );
-      _Infos.Add( _Game.FMd5 );
-      _Infos.Add( _Game.FSha1 );
-
-      //et on affiche la fenêtre
-      MoreInfos:= TFrm_MoreInfos.Create( nil );
-      try
-         MoreInfos.Execute( _Infos );
-      finally
-         MoreInfos.Free;
-      end;
+      MoreInfos.Execute( _Game );
    finally
-      //Ensuite on supprime la liste
-      _Infos.Free;
+      MoreInfos.Free;
    end;
    Lbx_Games.SetFocus;
 end;
@@ -2437,7 +1825,7 @@ begin
    //on boucle sur les jeux de la liste
    for ii:= 0 to Pred( _List.Count ) do begin
       _Game:= ( Lbx_Games.Items.Objects[ii] as TGame );
-      _Pos:= Pos( '[', _Game.FName );
+      _Pos:= Pos( '[', _Game.Name );
 
       //si on trouve le caractère, on traite
       if not ( _Pos = 0 ) then
@@ -2460,7 +1848,7 @@ end;
 procedure TFrm_Editor.RemoveRegionFromGameName( aGame: TGame; aStartPos: Integer );
 var
    _Node: IXMLNode;
-   _GameListPath: string;
+   _GameListPath, _Name: string;
    _EndPos: Integer;
 begin
    //on construit le chemin vers le gamelist.xml
@@ -2477,18 +1865,20 @@ begin
 
    //Et on boucle pour trouver le bon noeud
    repeat
-      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.FRomPath ) then Break;
+      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = aGame.RomPath ) then Break;
          _Node := _Node.NextSibling;
    until not Assigned( _Node );
 
    //on repère la position du caractère ]
-   _EndPos:= Pos( ']', aGame.FName );
+   _EndPos:= Pos( ']', aGame.Name );
 
     //On met à jour l'objet TGame
-    Delete( aGame.FName, aStartPos,  Succ( _EndPos - aStartPos ) );
+    _Name:= aGame.Name;
+    Delete( _Name, aStartPos,  Succ( _EndPos - aStartPos ) );
+    aGame.Name:= _Name;
 
    //on change le text dans le xml
-   _Node.ChildNodes.FindNode( Cst_Name ).Text:= aGame.FName;
+   _Node.ChildNodes.FindNode( Cst_Name ).Text:= aGame.Name;
 
    //on enregistre le fichier xml
    XMLDoc.SaveToFile( _GameListPath );
