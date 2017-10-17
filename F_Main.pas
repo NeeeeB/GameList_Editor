@@ -191,6 +191,7 @@ type
       function getSystemKind: TSystemKind;
       function getCurrentFolderName: string;
       function GetCurrentLogoName: string;
+      function GetCurrentSystemId: string;
       function BuildGamesList( const aPathToFile: string ): TObjectList<TGame>;
       function FormatDateFromString( const aDate: string; aIso: Boolean = False ): string;
       function GetThemeEnum( aNumber: Integer ): TThemeName;
@@ -1217,6 +1218,12 @@ end;
 function TFrm_Editor.GetCurrentLogoName: string;
 begin
    Result:= Cst_SystemKindImageNames[getSystemKind];
+end;
+
+//Récupère le systemid du système sélectionné dans le combobox
+function TFrm_Editor.GetCurrentSystemId: string;
+begin
+   Result:= Cst_SystemKindId[getSystemKind];
 end;
 
 //Action au click sur bouton "save changes"
