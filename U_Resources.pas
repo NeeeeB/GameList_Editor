@@ -324,6 +324,19 @@ const
    Cst_True = 'true';
    Cst_False = 'false';
 
+   //Constantes pour le scrape
+   Cst_ScraperAddress = 'https://www.screenscraper.fr/api2/';
+   Cst_Category = 'jeuInfos.php';
+   Cst_ScrapeLogin = '?devid=NeeeeB';
+   Cst_ScrapePwd = '&devpassword=mapzoe';
+   Cst_DevSoftName = '&softname=GameListEditorv1';
+   Cst_Output = '&output=xml';
+   Cst_Crc = '&crc=';
+   Cst_SystemId = '&systemid=';
+   Cst_RomType = '&romtype=rom';
+   Cst_RomName = '&romnom=';
+   Cst_RomSize = '&romtaille=';
+
    //tableau de liaison enum themes / noms themes
    Cst_ThemeNameStr: array[TThemeName] of string =
       ( 'Amakrits',
@@ -526,6 +539,54 @@ const
         'psp.png',
         'wii.png',
         'genesis.png' );
+
+   Cst_SystemKindId: array[TSystemKind] of string =
+      ( '3', '4', '2', '1', '75', '65', '26', '41', '42', '138',
+      'fds',
+        'fba',
+        'fba_libretro',
+        'gw',
+        'gbc',
+        'gamegear',
+        'gb',
+        'gba',
+        'imageviewer',
+        'lutro',
+        'lynx',
+        'mame',
+        'msx',
+        'msx1',
+        'msx2',
+        'ngp',
+        'ngpc',
+        'n64',
+        'odyssey2',
+        'pcengine',
+        'pcenginecd',
+        'psx',
+        'prboom',
+        'scummvm',
+        'sega32x',
+        'segacd',
+        'sg1000',
+        'supergrafx',
+        'vectrex',
+        'virtualboy',
+        'wonderswan',
+        'wonderswancolor',
+        'zxspectrum',
+        'z81',
+        'amiga1200',
+        'amiga600',
+        'apple2',
+        'colecovision',
+        'c64',
+        'pc',
+        'dreamcast',
+        'gc',
+        'psp',
+        'wii',
+        'genesis' );
 
 implementation
 
