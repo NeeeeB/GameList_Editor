@@ -57,14 +57,20 @@ Examples of themes :
 
 # For users (Pour les utilisateurs) :
 All you need is the package available in the release section.
+
+https://github.com/NeeeeB/GameList_Editor/releases
+
 Just unzip and you're good to go !!
 
 This is a beta version for the moment, many features will be added in the future but it is already pretty fast.
 (It loads my 5 systems with almost 3000 games in less than a second).
 Loading of gamelist.xml will be slower if you do it directly from your Raspberry (depends on your connexion mostly).
 
-*Tout ce dont vous avez besoin, c'est du package disponible dans la section "release".
-Dézippez, et c'est parti !!*
+*Tout ce dont vous avez besoin, c'est du package disponible dans la section "release".*
+
+https://github.com/NeeeeB/GameList_Editor/releases
+
+*Dézippez, et c'est parti !!*
 
 *C'est une version Béta pour le moment, d'autres options seront ajoutées par la suite mais l'outil est déjà plutôt rapide.
 (Il charge mes 5 systèmes avec quasiment 3000 jeux en moins d'une seconde).
