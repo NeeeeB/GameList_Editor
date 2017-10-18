@@ -5,27 +5,33 @@ interface
 uses
    Winapi.Windows, Winapi.Messages,
    System.SysUtils, System.Variants, System.Classes, System.NetEncoding,
-   System.IOUtils,
-   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg,
+   System.IOUtils, System.Generics.Collections,
+   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Imaging.pngimage,
+   Vcl.Imaging.jpeg, Vcl.ExtCtrls,
    IdHTTP, IdBaseComponent, IdComponent, IdTCPConnection, IdTCPClient, IdURI,
-   IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdException,
+   IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdException, IdIOHandler, IdIOHandlerSocket,
    Xml.XMLDoc, Xml.XMLIntf, Xml.xmldom,
-   U_Resources, U_Game, U_gnugettext, IdIOHandler, IdIOHandlerSocket;
+   U_Resources, U_Game, U_gnugettext;
 
 type
    TFrm_Scraper = class(TForm)
+      Pnl_Back: TPanel;
       Ind_HTTP: TIdHTTP;
       IdSSLIOHandlerSocketOpenSSL: TIdSSLIOHandlerSocketOpenSSL;
       XMLDoc: TXMLDocument;
+
       procedure FormCreate(Sender: TObject);
       procedure FormClose(Sender: TObject; var Action: TCloseAction);
 
    private
       FGame: TGame;
       FXmlPath: string;
+      FImgList: TObjectList<TImage>;
+
+      procedure DisplayPictures;
 
       function GetGameInfos( const aSysId: string; aGame: TGame ): Boolean;
-      function CreatePictures: Boolean;
+      function LoadPictures: Boolean;
       function GetFileSize( const aPath: string ): string;
 
    public
@@ -40,12 +46,16 @@ implementation
 procedure TFrm_Scraper.FormCreate(Sender: TObject);
 begin
    FXmlPath:= ExtractFilePath( Application.ExeName ) + Cst_TempXml;
+   FImgList:= TObjectList<TImage>.Create;
 end;
 
 procedure TFrm_Scraper.Execute( const aSysId: string; aGame: TGame );
 begin
+   Screen.Cursor:= crHourGlass;
    FGame:= aGame;
-   if GetGameInfos( aSysId, FGame ) then begin
+   if GetGameInfos( aSysId, FGame ) and LoadPictures then begin
+      DisplayPictures;
+      Screen.Cursor:= crDefault;
       ShowModal;
    end else
       Close;
@@ -58,7 +68,6 @@ var
    Stream: TMemoryStream;
 begin
    Result:= False;
-   Screen.Cursor:= crHourGlass;
   //Calcul du Crc et de la taille fichier
    Crc32:= aGame.CalculateCrc32( aGame.PhysicalRomPath );
    Size:= GetFileSize( aGame.PhysicalRomPath );
@@ -84,6 +93,7 @@ begin
          end;
          on E : Exception do begin
             Screen.Cursor:= crDefault;
+            ShowMessage('Oops !! An error has occured while reading the stream !!');
             Exit;
          end;
       end;
@@ -92,49 +102,58 @@ begin
    end;
 
    Result:= True;
-   Screen.Cursor:= crDefault;
 end;
 
 //Crée les images (si possible) depuis le fichier xml récupéré.
-function TFrm_Scraper.CreatePictures: Boolean;
+function TFrm_Scraper.LoadPictures: Boolean;
 
-   function LoadPicture( aLink: string; aPng: Boolean ): Boolean;
+   procedure LoadPng( aStream: TMemoryStream );
    var
-      Stream: TMemoryStream;
-      Png: TPNGImage;
-      Jpg: TJPEGImage;
+      Png: TPngImage;
+      Img: TImage;
    begin
-      Result:= False;
-      Stream:= TMemoryStream.Create;
-      if aPng then Png:= TPngImage.Create
-      else Jpg:= TJPEGImage.Create;
+      Png:= TPngImage.Create;
+      Img:= TImage.Create( Pnl_Back );
+      Img.Width:= 300;
+      Img.Height:= 300;
+      Img.Center:= True;
+      Img.Proportional:= True;
+      Img.Visible:= False;
       try
-         try
-            Ind_HTTP.Get( aLink, Stream );
-            Stream.Position:= 0;
-
-         except
-            on E: EIdHTTPProtocolException do begin
-               Screen.Cursor:= crDefault;
-               ShowMessage('Oops !! An error has occured while reaching the server !!');
-               Exit;
-            end;
-            on E : Exception do begin
-               Screen.Cursor:= crDefault;
-               Exit;
-            end;
-         end;
+         Png.LoadFromStream( aStream );
+         Img.Picture.Graphic:= Png;
+         FImgList.Add( Img );
       finally
-         Stream.Free;
-         if aPng then Png.Free
-         else Jpg.Free;
+         Png.Free;
       end;
-      Result:= True;
+   end;
+
+   procedure LoadJpg( aStream: TMemoryStream );
+   var
+      Jpg: TJPEGImage;
+      Img: TImage;
+   begin
+      Jpg:= TJPEGImage.Create;
+      Img:= TImage.Create( Pnl_Back );
+      Img.Width:= 300;
+      Img.Height:= 300;
+      Img.Center:= True;
+      Img.Proportional:= True;
+      Img.Visible:= False;
+      try
+         Jpg.LoadFromStream( aStream );
+         Img.Picture.Graphic:= Jpg;
+         FImgList.Add( Img );
+      finally
+         Jpg.Free;
+      end;
    end;
 
 var
    Nodes: IXMLNodeList;
    ii: Integer;
+   Stream: TMemoryStream;
+   Query: string;
 begin
    Result:= False;
 
@@ -151,15 +170,57 @@ begin
    //Et on boucle pour trouver les noeuds qui nous intéressent
    for ii:= 0 to Pred( Nodes.Count ) do begin
       if ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox2d ) then begin
-         if ( Nodes[ii].Attributes['format'] = 'png' ) then
-            Result:= LoadPicture( Nodes[ii].Text, True )
-         else
-            Result:= LoadPicture( Nodes[ii].Text, False );
+         Query:= Nodes[ii].Text;
+         Stream:= TMemoryStream.Create;
+         try
+            try
+               Ind_HTTP.Get( Query, Stream );
+               Stream.Position:= 0;
+               if ( Nodes[ii].Attributes['format'] = 'png' ) then
+                  LoadPng( Stream )
+               else LoadJpg( Stream );
+            except
+               on E: EIdHTTPProtocolException do begin
+                  Screen.Cursor:= crDefault;
+                  ShowMessage('Oops !! An error has occured while reaching the server !!');
+                  Exit;
+               end;
+               on E : Exception do begin
+                  Screen.Cursor:= crDefault;
+                  ShowMessage('Oops !! An error has occured while reading the stream !!');
+                  Exit;
+               end;
+            end;
+         finally
+            Stream.Free;
+         end;
+         Result:= True;
       end;
    end;
 
    //si on a pas trouvé de médias on le signale
-   if not Result then ShowMessage( 'Looks like there is no media for this game !!' )
+   if not Result then begin
+      Screen.Cursor:= crDefault;
+      ShowMessage( 'Looks like there is no media for this game !!' );
+   end;
+end;
+
+//Affichage des images récupérées
+procedure TFrm_Scraper.DisplayPictures;
+var
+   ii, Left, Count: Integer;
+begin
+   Left:= 10;
+   Count:= FImgList.Count;
+   for ii:= 0 to Pred( Count ) do begin
+      FImgList.Items[ii].Parent:= Pnl_Back;
+      FImgList.Items[ii].Top:= 10;
+      FImgList.Items[ii].Left:= Left;
+      FImgList.Items[ii].Width:= 100;
+      FImgList.Items[ii].Height:= 100;
+      FImgList.Items[ii].Visible:= True;
+      Left:= Left + 110;
+   end;
 end;
 
 //Pour récupérer la taille du fichier du jeu
@@ -179,6 +240,7 @@ end;
 procedure TFrm_Scraper.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
    DeleteFile( FXmlPath );
+   FImgList.Free;
 end;
 
 end.

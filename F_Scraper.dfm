@@ -2,8 +2,8 @@ object Frm_Scraper: TFrm_Scraper
   Left = 0
   Top = 0
   Caption = 'Scrape results'
-  ClientHeight = 549
-  ClientWidth = 968
+  ClientHeight = 600
+  ClientWidth = 900
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,6 +16,19 @@ object Frm_Scraper: TFrm_Scraper
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
+  object Pnl_Back: TPanel
+    Left = 0
+    Top = 0
+    Width = 900
+    Height = 600
+    Align = alClient
+    BevelOuter = bvNone
+    TabOrder = 0
+    ExplicitLeft = 160
+    ExplicitTop = 152
+    ExplicitWidth = 313
+    ExplicitHeight = 193
+  end
   object Ind_HTTP: TIdHTTP
     IOHandler = IdSSLIOHandlerSocketOpenSSL
     AllowCookies = True
@@ -31,8 +44,8 @@ object Frm_Scraper: TFrm_Scraper
     Request.Ranges.Units = 'bytes'
     Request.Ranges = <>
     HTTPOptions = [hoForceEncodeParams]
-    Left = 40
-    Top = 16
+    Left = 24
+    Top = 88
   end
   object IdSSLIOHandlerSocketOpenSSL: TIdSSLIOHandlerSocketOpenSSL
     MaxLineAction = maException
@@ -41,11 +54,11 @@ object Frm_Scraper: TFrm_Scraper
     SSLOptions.Mode = sslmUnassigned
     SSLOptions.VerifyMode = []
     SSLOptions.VerifyDepth = 0
-    Left = 144
+    Left = 104
     Top = 16
   end
   object XMLDoc: TXMLDocument
-    Left = 40
-    Top = 72
+    Left = 24
+    Top = 16
   end
 end
