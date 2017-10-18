@@ -5318,7 +5318,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Lbl_NbGamesFound: TLabel
     Left = 626
-    Top = 197
+    Top = 183
     Width = 3
     Height = 13
     Alignment = taCenter
@@ -6450,7 +6450,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Img_System: TImage
     Left = 547
-    Top = 92
+    Top = 76
     Width = 241
     Height = 104
     Center = True
@@ -6594,7 +6594,7 @@ object Frm_Editor: TFrm_Editor
     Tag = 6
     Left = 765
     Top = 452
-    Width = 97
+    Width = 185
     Height = 17
     Caption = 'Developer'
     Enabled = False
@@ -6603,9 +6603,9 @@ object Frm_Editor: TFrm_Editor
   end
   object Chk_Publisher: TCheckBox
     Tag = 5
-    Left = 533
-    Top = 452
-    Width = 97
+    Left = 532
+    Top = 450
+    Width = 173
     Height = 17
     Caption = 'Publisher'
     Enabled = False
@@ -6616,7 +6616,7 @@ object Frm_Editor: TFrm_Editor
     Tag = 7
     Left = 997
     Top = 452
-    Width = 97
+    Width = 185
     Height = 17
     Caption = 'Genre'
     Enabled = False
@@ -6638,7 +6638,7 @@ object Frm_Editor: TFrm_Editor
     Tag = 8
     Left = 533
     Top = 499
-    Width = 97
+    Width = 164
     Height = 17
     Caption = 'Description'
     Enabled = False
@@ -6678,7 +6678,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_ChangeImage: TButton
     Left = 600
-    Top = 227
+    Top = 234
     Width = 139
     Height = 25
     Caption = 'Change Picture'
@@ -6688,7 +6688,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_SetDefaultPicture: TButton
     Left = 584
-    Top = 286
+    Top = 293
     Width = 169
     Height = 25
     Caption = 'Change Picture to default'
@@ -6698,7 +6698,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_ChangeAll: TButton
     Left = 547
-    Top = 315
+    Top = 322
     Width = 241
     Height = 25
     Caption = 'Change all missing pictures to default'
@@ -6796,7 +6796,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_RemovePicture: TButton
     Left = 600
-    Top = 256
+    Top = 263
     Width = 139
     Height = 25
     Caption = 'Delete Picture'
@@ -6869,6 +6869,16 @@ object Frm_Editor: TFrm_Editor
     Enabled = False
     TabOrder = 34
     OnChange = Edt_SearchChange
+  end
+  object Btn_Scrape: TButton
+    Left = 600
+    Top = 205
+    Width = 139
+    Height = 25
+    Caption = 'Scraper'
+    Enabled = False
+    TabOrder = 35
+    OnClick = Btn_ScrapeClick
   end
   object XMLDoc: TXMLDocument
     NodeIndentStr = #9
@@ -7195,7 +7205,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800A80010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800B00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

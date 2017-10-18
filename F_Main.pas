@@ -9,7 +9,7 @@ uses
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes, Vcl.ImgList,
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
    Xml.omnixmldom, Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
-   F_MoreInfos, F_About, F_Help, F_ConfigureSSH, U_gnugettext, U_Resources, U_Game;
+   F_MoreInfos, F_About, F_Help, F_ConfigureSSH, F_Scraper, U_gnugettext, U_Resources, U_Game;
 
 type
    TFrm_Editor = class(TForm)
@@ -114,6 +114,7 @@ type
       Mnu_Lang6: TMenuItem;
       Mnu_General: TMenuItem;
       Mnu_DeleteDuplicates: TMenuItem;
+      Btn_Scrape: TButton;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -151,6 +152,7 @@ type
       procedure Edt_SearchChange(Sender: TObject);
       procedure Mnu_DeleteOrphansClick(Sender: TObject);
       procedure Mnu_DeleteDuplicatesClick(Sender: TObject);
+      procedure Btn_ScrapeClick(Sender: TObject);
 
    private
 
@@ -731,6 +733,7 @@ begin
    Chk_Hidden.Enabled:= aValue;
    Chk_Favorite.Enabled:= aValue;
    Btn_ChangeImage.Enabled:= aValue;
+   Btn_Scrape.Enabled:= aValue;
    Btn_RemovePicture.Enabled:= aValue;
    Btn_SetDefaultPicture.Enabled:= aValue;
    Btn_MoreInfos.Enabled:= aValue;
@@ -1234,6 +1237,21 @@ begin
    SetFieldsReadOnly( True );
    Btn_SaveChanges.Enabled:= False;
    Lbx_Games.SetFocus;
+end;
+
+//Au click sur le bouton Scraper
+procedure TFrm_Editor.Btn_ScrapeClick(Sender: TObject);
+var
+   SysId: string;
+   Frm_Scrape: TFrm_Scraper;
+begin
+   SysId:= GetCurrentSystemId;
+   Frm_Scrape:= TFrm_Scraper.Create( nil );
+   try
+      Frm_Scrape.Execute( SysId, ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
+   finally
+      Frm_Scrape.Free;
+   end;
 end;
 
 //Enregistre les changements effectués pour le jeu dans le fichier .xml

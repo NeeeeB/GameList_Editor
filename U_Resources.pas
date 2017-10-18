@@ -334,6 +334,12 @@ const
    Cst_RomType = '&romtype=rom';
    Cst_RomName = '&romnom=';
    Cst_RomSize = '&romtaille=';
+   Cst_DataNode = 'Data';
+   Cst_GameNode = 'jeu';
+   Cst_MediaNode = 'medias';
+   Cst_AttType = 'type';
+   Cst_MediaBox2d = 'box-2D';
+   Cst_TempXml = 'temp.xml';
 
    //tableau de liaison enum themes / noms themes
    Cst_ThemeNameStr: array[TThemeName] of string =

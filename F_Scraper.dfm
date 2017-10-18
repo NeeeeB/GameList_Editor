@@ -11,9 +11,13 @@ object Frm_Scraper: TFrm_Scraper
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
+  OnClose = FormClose
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Ind_HTTP: TIdHTTP
+    IOHandler = IdSSLIOHandlerSocketOpenSSL
     AllowCookies = True
     ProxyParams.BasicAuthentication = False
     ProxyParams.ProxyPort = 0
@@ -27,7 +31,21 @@ object Frm_Scraper: TFrm_Scraper
     Request.Ranges.Units = 'bytes'
     Request.Ranges = <>
     HTTPOptions = [hoForceEncodeParams]
-    Left = 16
+    Left = 40
     Top = 16
+  end
+  object IdSSLIOHandlerSocketOpenSSL: TIdSSLIOHandlerSocketOpenSSL
+    MaxLineAction = maException
+    Port = 0
+    DefaultPort = 0
+    SSLOptions.Mode = sslmUnassigned
+    SSLOptions.VerifyMode = []
+    SSLOptions.VerifyDepth = 0
+    Left = 144
+    Top = 16
+  end
+  object XMLDoc: TXMLDocument
+    Left = 40
+    Top = 72
   end
 end
