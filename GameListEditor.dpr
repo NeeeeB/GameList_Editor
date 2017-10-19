@@ -12,7 +12,8 @@ uses
   U_gnugettext in 'U_gnugettext.pas',
   U_Resources in 'U_Resources.pas',
   U_Game in 'U_Game.pas',
-  F_Scraper in 'F_Scraper.pas' {Frm_Scraper};
+  F_Scraper in 'F_Scraper.pas' {Frm_Scraper},
+  F_SplashLoading in 'F_SplashLoading.pas' {Frm_Splash};
 
 {$R *.res}
 
@@ -21,5 +22,6 @@ begin
   Application.MainFormOnTaskbar := True;
   TStyleManager.TrySetStyle('Charcoal Dark Slate');
   Application.CreateForm(TFrm_Editor, Frm_Editor);
+  Application.CreateForm(TFrm_Splash, Frm_Splash);
   Application.Run;
 end.

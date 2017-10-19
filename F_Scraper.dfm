@@ -644,8 +644,7 @@ object Frm_Scraper: TFrm_Scraper
     IOHandler = IdSSLIOHandlerSocketOpenSSL
     AllowCookies = True
     ProxyParams.BasicAuthentication = False
-    ProxyParams.ProxyPort = 3128
-    ProxyParams.ProxyServer = '192.168.1.1'
+    ProxyParams.ProxyPort = 0
     Request.ContentLength = -1
     Request.ContentRangeEnd = -1
     Request.ContentRangeStart = -1

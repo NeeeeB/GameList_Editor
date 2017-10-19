@@ -136,6 +136,10 @@
             <Form>Frm_Scraper</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="F_SplashLoading.pas">
+            <Form>Frm_Splash</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -7,11 +7,11 @@ uses
    System.SysUtils, System.Variants, System.Classes, System.NetEncoding,
    System.IOUtils, System.Generics.Collections,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Imaging.pngimage,
-   Vcl.Imaging.jpeg, Vcl.ExtCtrls,
+   Vcl.Imaging.jpeg, Vcl.ExtCtrls, Vcl.StdCtrls,
    IdHTTP, IdBaseComponent, IdComponent, IdTCPConnection, IdTCPClient, IdURI,
    IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdException, IdIOHandler, IdIOHandlerSocket,
    Xml.XMLDoc, Xml.XMLIntf, Xml.xmldom,
-   U_Resources, U_Game, U_gnugettext, Vcl.StdCtrls;
+   U_Resources, U_Game, U_gnugettext, F_SplashLoading;
 
 type
    TFrm_Scraper = class(TForm)
@@ -67,12 +67,19 @@ begin
    Screen.Cursor:= crHourGlass;
    FGame:= aGame;
    FGameListPath:= aGameListPath;
+   //splash loading ^^
+   Frm_Splash.Show;
+   Frm_Splash.Refresh;
+
    if GetGameInfos( aSysId, FGame ) and LoadPictures then begin
       DisplayPictures;
       Screen.Cursor:= crDefault;
+      Frm_Splash.Close;
       ShowModal;
-   end else
+   end else begin
+      Frm_Splash.Close;
       Close;
+   end;
 end;
 
 //Requête GET pour récupérer le XML des infos du jeu.
