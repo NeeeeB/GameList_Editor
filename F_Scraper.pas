@@ -24,6 +24,7 @@ type
       Scl_Games: TScrollBox;
       Btn_Close: TButton;
       Lbl_Instructions: TLabel;
+      Img_ScreenScraper: TImage;
 
       procedure FormCreate(Sender: TObject);
       procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -37,6 +38,7 @@ type
    private
       FGame: TGame;
       FXmlPath: string;
+      FGameListPath: string;
       FImgList: TObjectList<TImage>;
 
       procedure DisplayPictures;
@@ -46,7 +48,7 @@ type
       function GetFileSize( const aPath: string ): string;
 
    public
-      procedure Execute( const aSysId: string; aGame: TGame );
+      procedure Execute( const aSysId, aGameListPath: string; aGame: TGame );
    end;
 
 implementation
@@ -60,10 +62,11 @@ begin
    FImgList:= TObjectList<TImage>.Create;
 end;
 
-procedure TFrm_Scraper.Execute( const aSysId: string; aGame: TGame );
+procedure TFrm_Scraper.Execute( const aSysId, aGameListPath: string; aGame: TGame );
 begin
    Screen.Cursor:= crHourGlass;
    FGame:= aGame;
+   FGameListPath:= aGameListPath;
    if GetGameInfos( aSysId, FGame ) and LoadPictures then begin
       DisplayPictures;
       Screen.Cursor:= crDefault;
@@ -125,8 +128,7 @@ function TFrm_Scraper.LoadPictures: Boolean;
    begin
       Png:= TPngImage.Create;
       Img:= TImage.Create( Scl_Games );
-      Img.Width:= 300;
-      Img.Height:= 300;
+      Img.AutoSize:= True;
       Img.Center:= True;
       Img.Proportional:= True;
       Img.Visible:= False;
@@ -146,8 +148,7 @@ function TFrm_Scraper.LoadPictures: Boolean;
    begin
       Jpg:= TJPEGImage.Create;
       Img:= TImage.Create( Scl_Games );
-      Img.Width:= 300;
-      Img.Height:= 300;
+      Img.AutoSize:= True;
       Img.Center:= True;
       Img.Proportional:= True;
       Img.Visible:= False;
@@ -230,17 +231,19 @@ begin
    case Count of
       1: Left:= 325;
       2: Left:= 170;
-      else Left:= 15;
+      else Left:= 50;
    end;
 
    for ii:= 0 to Pred( Count ) do begin
       FImgList.Items[ii].Parent:= Scl_Games;
       FImgList.Items[ii].Top:= 25;
       FImgList.Items[ii].Left:= Left;
-      FImgList.Items[ii].Width:= 300;
-      FImgList.Items[ii].Height:= 300;
+      FImgList.Items[ii].Constraints.MinHeight:= 300;
+      FImgList.Items[ii].Constraints.MaxHeight:= 300;
+      FImgList.Items[ii].Constraints.MaxWidth:= 300;
+      FImgList.Items[ii].Center:= True;
       FImgList.Items[ii].Visible:= True;
-      Left:= Left + 310;
+      Left:= Left + FImgList.Items[ii].Width + 50;
    end;
 end;
 

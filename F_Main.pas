@@ -1246,13 +1246,14 @@ end;
 //Au click sur le bouton Scraper
 procedure TFrm_Editor.Btn_ScrapeClick(Sender: TObject);
 var
-   SysId: string;
+   SysId, _GameListPath: string;
    Frm_Scrape: TFrm_Scraper;
 begin
+   _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
    SysId:= GetCurrentSystemId;
    Frm_Scrape:= TFrm_Scraper.Create( nil );
    try
-      Frm_Scrape.Execute( SysId, ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
+      Frm_Scrape.Execute( SysId, _GameListPath, ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
    finally
       Frm_Scrape.Free;
    end;
