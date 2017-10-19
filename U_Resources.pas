@@ -121,6 +121,9 @@ resourcestring
    Rst_No = 'No';
    Rst_Ok = 'Ok';
    Rst_Info = 'Information';
+   Rst_ServerError = 'Oops !! An error has occured while reaching the server !!';
+   Rst_StreamError = 'Oops !! An error has occured while reading the stream !!';
+   Rst_NoMediaFound = 'Looks like there is no media for this game !!';
 
    //noms des systemes tels qu'ils seront affichés dans la combobox
    Rst_SystemKindNES = 'Nintendo';
@@ -334,12 +337,19 @@ const
    Cst_RomType = '&romtype=rom';
    Cst_RomName = '&romnom=';
    Cst_RomSize = '&romtaille=';
+   Cst_TempXml = 'temp.xml';
    Cst_DataNode = 'Data';
    Cst_GameNode = 'jeu';
    Cst_MediaNode = 'medias';
    Cst_AttType = 'type';
+   Cst_AttFormat = 'format';
+   Cst_PngExt = 'png';
    Cst_MediaBox2d = 'box-2D';
-   Cst_TempXml = 'temp.xml';
+   Cst_MediaScreenShot = 'ss';
+   Cst_MediaBox3d = 'box-3D';
+   Cst_MediaMix1 = 'mixrbv1';
+   Cst_MediaMix2 = 'mixrbv2';
+   Cst_MediaArcadeBox1 = 'ssarcademyboxv1';
 
    //tableau de liaison enum themes / noms themes
    Cst_ThemeNameStr: array[TThemeName] of string =

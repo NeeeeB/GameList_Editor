@@ -11,7 +11,7 @@ uses
    IdHTTP, IdBaseComponent, IdComponent, IdTCPConnection, IdTCPClient, IdURI,
    IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdException, IdIOHandler, IdIOHandlerSocket,
    Xml.XMLDoc, Xml.XMLIntf, Xml.xmldom,
-   U_Resources, U_Game, U_gnugettext;
+   U_Resources, U_Game, U_gnugettext, Vcl.StdCtrls;
 
 type
    TFrm_Scraper = class(TForm)
@@ -19,9 +19,20 @@ type
       Ind_HTTP: TIdHTTP;
       IdSSLIOHandlerSocketOpenSSL: TIdSSLIOHandlerSocketOpenSSL;
       XMLDoc: TXMLDocument;
+      Pnl_Top: TPanel;
+      Pnl_Bottom: TPanel;
+      Scl_Games: TScrollBox;
+      Btn_Close: TButton;
+      Lbl_Instructions: TLabel;
 
       procedure FormCreate(Sender: TObject);
       procedure FormClose(Sender: TObject; var Action: TCloseAction);
+      procedure Btn_CloseClick(Sender: TObject);
+      procedure FormMouseWheelDown(Sender: TObject; Shift: TShiftState;
+                MousePos: TPoint; var Handled: Boolean);
+      procedure FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
+                MousePos: TPoint; var Handled: Boolean);
+
 
    private
       FGame: TGame;
@@ -88,12 +99,12 @@ begin
       except
          on E: EIdHTTPProtocolException do begin
             Screen.Cursor:= crDefault;
-            ShowMessage('Oops !! An error has occured while reaching the server !!');
+            ShowMessage( Rst_ServerError );
             Exit;
          end;
          on E : Exception do begin
             Screen.Cursor:= crDefault;
-            ShowMessage('Oops !! An error has occured while reading the stream !!');
+            ShowMessage( Rst_StreamError );
             Exit;
          end;
       end;
@@ -113,7 +124,7 @@ function TFrm_Scraper.LoadPictures: Boolean;
       Img: TImage;
    begin
       Png:= TPngImage.Create;
-      Img:= TImage.Create( Pnl_Back );
+      Img:= TImage.Create( Scl_Games );
       Img.Width:= 300;
       Img.Height:= 300;
       Img.Center:= True;
@@ -134,7 +145,7 @@ function TFrm_Scraper.LoadPictures: Boolean;
       Img: TImage;
    begin
       Jpg:= TJPEGImage.Create;
-      Img:= TImage.Create( Pnl_Back );
+      Img:= TImage.Create( Scl_Games );
       Img.Width:= 300;
       Img.Height:= 300;
       Img.Center:= True;
@@ -163,31 +174,36 @@ begin
    //On trouve le noeud qui nous intéresse
    Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_MediaNode].ChildNodes;
    if ( Nodes.Count = 0 ) then begin
-      ShowMessage( 'Looks like there is no media for this game !!' );
+      ShowMessage( Rst_NoMediaFound );
       Exit;
    end;
 
    //Et on boucle pour trouver les noeuds qui nous intéressent
    for ii:= 0 to Pred( Nodes.Count ) do begin
-      if ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox2d ) then begin
+      if ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox2d ) or
+         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaScreenShot ) or
+         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox3d ) or
+         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaMix1 ) or
+         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaMix2 ) or
+         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaArcadeBox1 ) then begin
          Query:= Nodes[ii].Text;
          Stream:= TMemoryStream.Create;
          try
             try
                Ind_HTTP.Get( Query, Stream );
                Stream.Position:= 0;
-               if ( Nodes[ii].Attributes['format'] = 'png' ) then
+               if ( Nodes[ii].Attributes[Cst_AttFormat] = Cst_PngExt ) then
                   LoadPng( Stream )
                else LoadJpg( Stream );
             except
                on E: EIdHTTPProtocolException do begin
                   Screen.Cursor:= crDefault;
-                  ShowMessage('Oops !! An error has occured while reaching the server !!');
+                  ShowMessage( Rst_ServerError );
                   Exit;
                end;
                on E : Exception do begin
                   Screen.Cursor:= crDefault;
-                  ShowMessage('Oops !! An error has occured while reading the stream !!');
+                  ShowMessage( Rst_StreamError );
                   Exit;
                end;
             end;
@@ -201,7 +217,7 @@ begin
    //si on a pas trouvé de médias on le signale
    if not Result then begin
       Screen.Cursor:= crDefault;
-      ShowMessage( 'Looks like there is no media for this game !!' );
+      ShowMessage( Rst_NoMediaFound );
    end;
 end;
 
@@ -210,16 +226,21 @@ procedure TFrm_Scraper.DisplayPictures;
 var
    ii, Left, Count: Integer;
 begin
-   Left:= 10;
    Count:= FImgList.Count;
+   case Count of
+      1: Left:= 325;
+      2: Left:= 170;
+      else Left:= 15;
+   end;
+
    for ii:= 0 to Pred( Count ) do begin
-      FImgList.Items[ii].Parent:= Pnl_Back;
-      FImgList.Items[ii].Top:= 10;
+      FImgList.Items[ii].Parent:= Scl_Games;
+      FImgList.Items[ii].Top:= 25;
       FImgList.Items[ii].Left:= Left;
-      FImgList.Items[ii].Width:= 100;
-      FImgList.Items[ii].Height:= 100;
+      FImgList.Items[ii].Width:= 300;
+      FImgList.Items[ii].Height:= 300;
       FImgList.Items[ii].Visible:= True;
-      Left:= Left + 110;
+      Left:= Left + 310;
    end;
 end;
 
@@ -234,6 +255,26 @@ begin
    finally
       Reader.Free;
    end;
+end;
+
+ //scroll horizontal avec souris
+procedure TFrm_Scraper.FormMouseWheelDown(Sender: TObject; Shift: TShiftState;
+          MousePos: TPoint; var Handled: Boolean);
+begin
+   Scl_Games.Perform(WM_HSCROLL,1,0);
+end;
+
+ //scroll horizontal avec souris
+procedure TFrm_Scraper.FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
+  MousePos: TPoint; var Handled: Boolean);
+begin
+   Scl_Games.Perform(WM_HSCROLL,0,0);
+end;
+
+//au click sur le bouton close
+procedure TFrm_Scraper.Btn_CloseClick(Sender: TObject);
+begin
+   Close;
 end;
 
 //A la fermeture de la form

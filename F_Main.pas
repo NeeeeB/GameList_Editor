@@ -983,6 +983,7 @@ begin
             Btn_RemovePicture.Enabled:= True;
             //on affiche l'image background que si le jeu n'a pas d'image
             Img_BackGround.Visible:= ( Img_Game.Picture.Graphic = nil );
+            Btn_Scrape.Enabled:= FileExists( aGame.PhysicalRomPath );
             Exit;
          finally
             _Image.Free;
@@ -996,13 +997,16 @@ begin
             Btn_RemovePicture.Enabled:= True;
             //on affiche l'image background que si le jeu n'a pas d'image
             Img_BackGround.Visible:= ( Img_Game.Picture.Graphic = nil );
+            Btn_Scrape.Enabled:= FileExists( aGame.PhysicalRomPath );
             Exit;
          finally
             _ImageJpg.Free;
          end;
       end;
-   end else
+   end else begin
       Btn_RemovePicture.Enabled:= False;
+      Btn_Scrape.Enabled:= FileExists( aGame.PhysicalRomPath );
+   end;
 end;
 
 //Action au click sur bouton "change image"
