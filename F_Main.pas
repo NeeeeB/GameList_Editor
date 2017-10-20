@@ -1246,17 +1246,21 @@ end;
 //Au click sur le bouton Scraper
 procedure TFrm_Editor.Btn_ScrapeClick(Sender: TObject);
 var
-   SysId, _GameListPath: string;
+   SysId: string;
    Frm_Scrape: TFrm_Scraper;
 begin
-   _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
+   //on désactive pour éviter les clicks intempestifs pendant le chargement
+   Enabled:= False;
    SysId:= GetCurrentSystemId;
    Frm_Scrape:= TFrm_Scraper.Create( nil );
    try
-      Frm_Scrape.Execute( SysId, _GameListPath, ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
+      Frm_Scrape.Execute( SysId, FRootPath, FCurrentFolder, FImageFolder, FXmlImageFolderPath,
+                          ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
    finally
       Frm_Scrape.Free;
    end;
+   LoadGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
+   Enabled:= True;
 end;
 
 //Enregistre les changements effectués pour le jeu dans le fichier .xml

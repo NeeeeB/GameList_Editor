@@ -6,7 +6,7 @@ uses
    Winapi.Windows, Winapi.Messages,
    System.SysUtils, System.Variants, System.Classes, System.IniFiles,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
-   U_gnugettext, U_Resources;
+   U_gnugettext, U_Resources, Vcl.Imaging.GIFImg, Vcl.ExtCtrls;
 
 type
    TFrm_Help = class(TForm)

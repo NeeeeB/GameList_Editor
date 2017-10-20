@@ -14,17 +14,17 @@ object Frm_Scraper: TFrm_Scraper
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
-  OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnMouseWheelDown = FormMouseWheelDown
   OnMouseWheelUp = FormMouseWheelUp
   PixelsPerInch = 96
   TextHeight = 13
   object Pnl_Back: TPanel
     Left = 0
-    Top = 50
+    Top = 49
     Width = 960
-    Height = 360
+    Height = 361
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
@@ -32,7 +32,7 @@ object Frm_Scraper: TFrm_Scraper
       Left = 0
       Top = 0
       Width = 960
-      Height = 360
+      Height = 361
       Align = alClient
       BevelInner = bvNone
       BevelOuter = bvNone
@@ -44,18 +44,24 @@ object Frm_Scraper: TFrm_Scraper
     Left = 0
     Top = 0
     Width = 960
-    Height = 50
+    Height = 49
     Align = alTop
     TabOrder = 1
+    DesignSize = (
+      960
+      49)
     object Lbl_Instructions: TLabel
-      Left = 307
-      Top = 18
-      Width = 347
-      Height = 16
+      Left = 148
+      Top = 15
+      Width = 665
+      Height = 19
+      Alignment = taCenter
+      Anchors = [akLeft, akTop, akRight, akBottom]
+      AutoSize = False
       Caption = 'Double click on a picture to set it as the game picture'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -13
+      Font.Height = -16
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False

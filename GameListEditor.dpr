@@ -22,6 +22,6 @@ begin
   Application.MainFormOnTaskbar := True;
   TStyleManager.TrySetStyle('Charcoal Dark Slate');
   Application.CreateForm(TFrm_Editor, Frm_Editor);
-  Application.CreateForm(TFrm_Splash, Frm_Splash);
+  Application.CreateForm(TFrm_Splash, FrmSplash);
   Application.Run;
 end.

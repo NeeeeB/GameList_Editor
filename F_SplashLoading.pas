@@ -3,19 +3,22 @@ unit F_SplashLoading;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs;
+   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Imaging.GIFImg, Vcl.ExtCtrls,
+  Vcl.Imaging.pngimage;
 
 type
-  TFrm_Splash = class(TForm)
-  private
+   TFrm_Splash = class(TForm)
+      Pnl_Back: TPanel;
+       Img_Loading: TImage;
+   private
     { Déclarations privées }
-  public
+   public
     { Déclarations publiques }
-  end;
+   end;
 
 var
-  Frm_Splash: TFrm_Splash;
+   FrmSplash: TFrm_Splash;
 
 implementation
 

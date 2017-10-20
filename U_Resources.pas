@@ -346,10 +346,12 @@ const
    Cst_PngExt = 'png';
    Cst_MediaBox2d = 'box-2D';
    Cst_MediaScreenShot = 'ss';
+   Cst_MediaSsTitle = 'sstitle';
    Cst_MediaBox3d = 'box-3D';
    Cst_MediaMix1 = 'mixrbv1';
    Cst_MediaMix2 = 'mixrbv2';
    Cst_MediaArcadeBox1 = 'ssarcademyboxv1';
+   Cst_MediaWheel = 'wheel';
 
    //tableau de liaison enum themes / noms themes
    Cst_ThemeNameStr: array[TThemeName] of string =

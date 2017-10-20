@@ -27,28 +27,34 @@ type
       Img_ScreenScraper: TImage;
 
       procedure FormCreate(Sender: TObject);
-      procedure FormClose(Sender: TObject; var Action: TCloseAction);
       procedure Btn_CloseClick(Sender: TObject);
       procedure FormMouseWheelDown(Sender: TObject; Shift: TShiftState;
                 MousePos: TPoint; var Handled: Boolean);
       procedure FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
                 MousePos: TPoint; var Handled: Boolean);
+      procedure FormDestroy(Sender: TObject);
 
 
    private
       FGame: TGame;
       FXmlPath: string;
-      FGameListPath: string;
+      FRootPath: string;
+      FCurrentFolder: string;
+      FImageFolder: string;
+      FXmlImageFolderPath: string;
       FImgList: TObjectList<TImage>;
 
       procedure DisplayPictures;
+      procedure WarnUser( aMessage: string );
+      procedure ChangeImage( aImg: TImage );
+      procedure ImgDblClick( Sender: TObject );
 
       function GetGameInfos( const aSysId: string; aGame: TGame ): Boolean;
       function LoadPictures: Boolean;
       function GetFileSize( const aPath: string ): string;
 
    public
-      procedure Execute( const aSysId, aGameListPath: string; aGame: TGame );
+      procedure Execute( const aSysId, aRootPath, aCurrentFolder, aImageFolder, aXmlImageFolderPath: string; aGame: TGame );
    end;
 
 implementation
@@ -60,25 +66,27 @@ procedure TFrm_Scraper.FormCreate(Sender: TObject);
 begin
    FXmlPath:= ExtractFilePath( Application.ExeName ) + Cst_TempXml;
    FImgList:= TObjectList<TImage>.Create;
+   TranslateComponent( Self );
 end;
 
-procedure TFrm_Scraper.Execute( const aSysId, aGameListPath: string; aGame: TGame );
+procedure TFrm_Scraper.Execute( const aSysId, aRootPath, aCurrentFolder, aImageFolder, aXmlImageFolderPath: string; aGame: TGame );
 begin
    Screen.Cursor:= crHourGlass;
    FGame:= aGame;
-   FGameListPath:= aGameListPath;
-   //splash loading ^^
-   Frm_Splash.Show;
-   Frm_Splash.Refresh;
+   FRootPath:= aRootPath;
+   FCurrentFolder:= aCurrentFolder;
+   FImageFolder:= aImageFolder;
+   FXmlImageFolderPath:= aXmlImageFolderPath;
+
+   //Splash loading
+   FrmSplash.Show;
+   FrmSplash.Refresh;
 
    if GetGameInfos( aSysId, FGame ) and LoadPictures then begin
       DisplayPictures;
       Screen.Cursor:= crDefault;
-      Frm_Splash.Close;
+      FrmSplash.Close;
       ShowModal;
-   end else begin
-      Frm_Splash.Close;
-      Close;
    end;
 end;
 
@@ -108,13 +116,11 @@ begin
          XMLDoc.SaveToFile( FXmlPath );
       except
          on E: EIdHTTPProtocolException do begin
-            Screen.Cursor:= crDefault;
-            ShowMessage( Rst_ServerError );
+            WarnUser( Rst_ServerError );
             Exit;
          end;
          on E : Exception do begin
-            Screen.Cursor:= crDefault;
-            ShowMessage( Rst_StreamError );
+            WarnUser( Rst_StreamError );
             Exit;
          end;
       end;
@@ -182,18 +188,23 @@ begin
    //On trouve le noeud qui nous intéresse
    Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_MediaNode].ChildNodes;
    if ( Nodes.Count = 0 ) then begin
-      ShowMessage( Rst_NoMediaFound );
+      WarnUser( Rst_NoMediaFound );
       Exit;
    end;
 
    //Et on boucle pour trouver les noeuds qui nous intéressent
    for ii:= 0 to Pred( Nodes.Count ) do begin
+      //C'est moche mais ça évite le "na répond pas"
+      Application.ProcessMessages;
+
       if ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox2d ) or
          ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaScreenShot ) or
+         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaSsTitle ) or
          ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox3d ) or
          ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaMix1 ) or
          ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaMix2 ) or
-         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaArcadeBox1 ) then begin
+         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaArcadeBox1 ) or
+         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaWheel ) then begin
          Query:= Nodes[ii].Text;
          Stream:= TMemoryStream.Create;
          try
@@ -205,13 +216,11 @@ begin
                else LoadJpg( Stream );
             except
                on E: EIdHTTPProtocolException do begin
-                  Screen.Cursor:= crDefault;
-                  ShowMessage( Rst_ServerError );
+                  WarnUser( Rst_ServerError );
                   Exit;
                end;
                on E : Exception do begin
-                  Screen.Cursor:= crDefault;
-                  ShowMessage( Rst_StreamError );
+                  WarnUser( Rst_StreamError );
                   Exit;
                end;
             end;
@@ -224,9 +233,16 @@ begin
 
    //si on a pas trouvé de médias on le signale
    if not Result then begin
-      Screen.Cursor:= crDefault;
-      ShowMessage( Rst_NoMediaFound );
+      WarnUser( Rst_NoMediaFound );
    end;
+end;
+
+//Pour prévenir le user si problème ou pas de médias trouvés
+procedure TFrm_Scraper.WarnUser( aMessage: string );
+begin
+   FrmSplash.Close;
+   Screen.Cursor:= crDefault;
+   ShowMessage( aMessage );
 end;
 
 //Affichage des images récupérées
@@ -248,10 +264,69 @@ begin
       FImgList.Items[ii].Constraints.MinHeight:= 300;
       FImgList.Items[ii].Constraints.MaxHeight:= 300;
       FImgList.Items[ii].Constraints.MaxWidth:= 300;
+      FImgList.Items[ii].OnDblClick:= ImgDblClick;
       FImgList.Items[ii].Center:= True;
       FImgList.Items[ii].Visible:= True;
       Left:= Left + FImgList.Items[ii].Width + 50;
    end;
+end;
+
+procedure TFrm_Scraper.ImgDblClick( Sender: TObject );
+begin
+   ChangeImage( ( Sender as TImage ) );
+end;
+
+//Remplace l'image actuelle du jeu (par autre ou défaut).
+procedure TFrm_Scraper.ChangeImage( aImg: TImage );
+var
+   _ImageLink: string;
+   _Node: IXMLNode;
+   _NodeAdded: Boolean;
+begin
+   _NodeAdded:= False;
+   Screen.Cursor:= crHourGlass;
+
+   //on sauvegarde l'image dans le dossier avec les autres !!
+   // et on ajoute le chemin dans le xml
+   aImg.Picture.SaveToFile( FRootPath + FCurrentFolder + FImageFolder +
+                            '\' + FGame.RomNameWoExt + Cst_ImageSuffixPng );
+
+   //On ouvre le fichier xml
+   XMLDoc.LoadFromFile( FRootPath + FCurrentFolder + Cst_GameListFileName );
+
+   //On récupère le premier noeud "game"
+   _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
+
+   //Et on boucle pour trouver le noeud avec le bon Id
+   repeat
+      if ( _Node.ChildNodes.Nodes[Cst_Path].Text = FGame.RomPath ) then Break;
+      _Node := _Node.NextSibling;
+   until not Assigned( _Node );
+
+   //on écrit le chemin vers l'image
+   _ImageLink:= FXmlImageFolderPath + FGame.RomNameWoExt + Cst_ImageSuffixPng;
+
+   if not Assigned( _Node.ChildNodes.FindNode( Cst_ImageLink ) ) then begin
+      _Node.AddChild( Cst_ImageLink );
+      _NodeAdded:= True;
+   end;
+   _Node.ChildNodes.Nodes[Cst_ImageLink].Text:= _ImageLink;
+
+   //On enregistre le fichier.
+   if _NodeAdded then begin
+      XMLDoc.XML.Text:= Xml.Xmldoc.FormatXMLData( XMLDoc.XML.Text );
+      XMLDoc.Active:= True;
+   end;
+   XMLDoc.SaveToFile( FRootPath + FCurrentFolder + Cst_GameListFileName );
+   XMLDoc.Active:= False;
+
+   //Et enfin on met à jour l'objet TGame associé
+   FGame.ImagePath:= _ImageLink;
+   FGame.PhysicalImagePath:= FRootPath + FCurrentFolder +
+                             IncludeTrailingPathDelimiter( FImageFolder ) +
+                             FGame.RomNameWoExt + Cst_ImageSuffixPng;
+   Screen.Cursor:= crDefault;
+   Close;
 end;
 
 //Pour récupérer la taille du fichier du jeu
@@ -287,8 +362,8 @@ begin
    Close;
 end;
 
-//A la fermeture de la form
-procedure TFrm_Scraper.FormClose(Sender: TObject; var Action: TCloseAction);
+//A la Destruction de la form
+procedure TFrm_Scraper.FormDestroy(Sender: TObject);
 begin
    DeleteFile( FXmlPath );
    FImgList.Free;

@@ -4,7 +4,7 @@ object Frm_Editor: TFrm_Editor
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'GameList Editor'
-  ClientHeight = 670
+  ClientHeight = 690
   ClientWidth = 1210
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -6875,7 +6875,7 @@ object Frm_Editor: TFrm_Editor
     Top = 205
     Width = 139
     Height = 25
-    Caption = 'Scraper'
+    Caption = 'Scrape'
     Enabled = False
     TabOrder = 35
     OnClick = Btn_ScrapeClick
@@ -7205,7 +7205,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800B40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800C00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
