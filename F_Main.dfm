@@ -4,7 +4,7 @@ object Frm_Editor: TFrm_Editor
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'GameList Editor'
-  ClientHeight = 649
+  ClientHeight = 629
   ClientWidth = 1210
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -6848,7 +6848,7 @@ object Frm_Editor: TFrm_Editor
   object Chk_EditMode: TCheckBox
     Left = 533
     Top = 336
-    Width = 97
+    Width = 148
     Height = 17
     Caption = 'Enable edition'
     Enabled = False
@@ -7183,7 +7183,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800CC0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800D00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
