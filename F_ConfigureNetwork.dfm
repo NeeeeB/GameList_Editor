@@ -14,6 +14,7 @@ object Frm_Network: TFrm_Network
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Lbl_ScreenScraper: TLabel
@@ -26,7 +27,7 @@ object Frm_Network: TFrm_Network
   object Lbl_ScreenLogin: TLabel
     Left = 10
     Top = 27
-    Width = 41
+    Width = 25
     Height = 13
     Caption = 'Login'
   end

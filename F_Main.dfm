@@ -4,7 +4,7 @@ object Frm_Editor: TFrm_Editor
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'GameList Editor'
-  ClientHeight = 689
+  ClientHeight = 649
   ClientWidth = 1210
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -6467,7 +6467,7 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Name: TLabel
     Left = 536
     Top = 360
-    Width = 255
+    Width = 27
     Height = 13
     Caption = 'Name'
     Enabled = False
@@ -6475,7 +6475,7 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Region: TLabel
     Left = 1000
     Top = 360
-    Width = 174
+    Width = 33
     Height = 13
     Caption = 'Region'
     Enabled = False
@@ -6483,7 +6483,7 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Date: TLabel
     Left = 536
     Top = 407
-    Width = 108
+    Width = 23
     Height = 13
     Hint = 
       'Following formats are accepted :'#13#10#13#10'dd/mm/yyyy'#13#10'mm/yyyy'#13#10'yyyy'#13#10#13 +
@@ -6494,7 +6494,7 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Players: TLabel
     Left = 671
     Top = 407
-    Width = 108
+    Width = 35
     Height = 13
     Caption = 'Players'
     Enabled = False
@@ -6502,7 +6502,7 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Rating: TLabel
     Left = 808
     Top = 407
-    Width = 108
+    Width = 31
     Height = 13
     Caption = 'Rating'
     Enabled = False
@@ -6510,7 +6510,7 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Hidden: TLabel
     Left = 944
     Top = 407
-    Width = 108
+    Width = 33
     Height = 13
     Caption = 'Hidden'
     Enabled = False
@@ -6518,7 +6518,7 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Favorite: TLabel
     Left = 1077
     Top = 407
-    Width = 108
+    Width = 40
     Height = 13
     Caption = 'Favorite'
     Enabled = False
@@ -6526,7 +6526,7 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Publisher: TLabel
     Left = 536
     Top = 453
-    Width = 185
+    Width = 43
     Height = 13
     Caption = 'Publisher'
     Enabled = False
@@ -6534,7 +6534,7 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Developer: TLabel
     Left = 768
     Top = 453
-    Width = 185
+    Width = 49
     Height = 13
     Caption = 'Developer'
     Enabled = False
@@ -6542,7 +6542,7 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Genre: TLabel
     Left = 1000
     Top = 453
-    Width = 185
+    Width = 29
     Height = 13
     Caption = 'Genre'
     Enabled = False
@@ -6550,7 +6550,7 @@ object Frm_Editor: TFrm_Editor
   object Lbl_Description: TLabel
     Left = 536
     Top = 500
-    Width = 236
+    Width = 53
     Height = 13
     Caption = 'Description'
     Enabled = False
@@ -7159,13 +7159,6 @@ object Frm_Editor: TFrm_Editor
         object Mnu_Lang5: TMenuItem
           Tag = 4
           AutoCheck = True
-          Caption = 'Italian'
-          RadioItem = True
-          OnClick = Mnu_LangClick
-        end
-        object Mnu_Lang6: TMenuItem
-          Tag = 5
-          AutoCheck = True
           Caption = 'Portuguese(BR)'
           RadioItem = True
           OnClick = Mnu_LangClick
@@ -7190,7 +7183,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800C40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800CC0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

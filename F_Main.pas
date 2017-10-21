@@ -101,7 +101,6 @@ type
       Mnu_DeleteOrphans: TMenuItem;
       Mnu_Lang4: TMenuItem;
       Mnu_Lang5: TMenuItem;
-      Mnu_Lang6: TMenuItem;
       Mnu_General: TMenuItem;
       Mnu_DeleteDuplicates: TMenuItem;
       Btn_Scrape: TButton;

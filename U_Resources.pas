@@ -269,7 +269,6 @@ type
                  lnFrench,
                  lnGerman,
                  lnSpanish,
-                 lnItalian,
                  lnPortuguese_BR );
 
 const
@@ -395,7 +394,6 @@ const
         'fr',
         'de',
         'es',
-        'it',
         'pt_BR' );
 
    //tableau de liaison enum systemes / noms systems affichés

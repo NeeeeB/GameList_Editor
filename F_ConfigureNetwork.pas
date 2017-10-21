@@ -6,7 +6,7 @@ uses
    Winapi.Windows, Winapi.Messages,
    System.SysUtils, System.Variants, System.Classes, System.IniFiles,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-   U_Resources;
+   U_Resources, U_gnugettext;
 
 type
    TFrm_Network = class(TForm)
@@ -29,6 +29,7 @@ type
       procedure Btn_SaveClick(Sender: TObject);
       procedure Btn_CancelClick(Sender: TObject);
       procedure Chk_ProxyClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
    private
       procedure SaveToIni;
       procedure EnableControls( aValue: Boolean );
@@ -53,6 +54,11 @@ begin
    Chk_Proxy.Checked:= aProxUse;
    EnableControls( aProxUse );
    ShowModal;
+end;
+
+procedure TFrm_Network.FormCreate(Sender: TObject);
+begin
+   TranslateComponent( Self );
 end;
 
 procedure TFrm_Network.Chk_ProxyClick(Sender: TObject);
