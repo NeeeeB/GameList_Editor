@@ -121,7 +121,14 @@ resourcestring
    Rst_No = 'No';
    Rst_Ok = 'Ok';
    Rst_Info = 'Information';
-   Rst_ServerError = 'Oops !! An error has occured while reaching the server !!';
+   Rst_ServerError1 = 'URL missing parameters';
+   Rst_ServerError2 = 'API closed for non subscriber users';
+   Rst_ServerError3 = 'Dev login error';
+   Rst_ServerError4 = 'Game not found';
+   Rst_ServerError5 = 'API closed';
+   Rst_ServerError6 = 'Scrapper version obsolete';
+   Rst_ServerError7 = 'Maximum threads allowed already used';
+   Rst_ServerError8 = 'Check your Internet/Proxy parameters';
    Rst_StreamError = 'Oops !! An error has occured while reading the stream !!';
    Rst_NoMediaFound = 'Looks like there is no media for this game !!';
 
@@ -307,6 +314,13 @@ const
    Cst_IniRetroLogin = 'SSHRetroLogin';
    Cst_IniRetroPwd = 'SSHRetroPwd';
    Cst_IniLanguage = 'Language';
+   Cst_IniSSUser = 'SSUser';
+   Cst_IniSSPwd = 'SSPwd';
+   Cst_IniProxyUser = 'ProxyUser';
+   Cst_IniProxyPwd = 'ProxyPwd';
+   Cst_IniProxyServer = 'ProxyServer';
+   Cst_IniProxyPort = 'ProxyPort';
+   Cst_IniProxyUse = 'ProxyUse';
    Cst_GenesisLogoName = 'genesis.png';
    Cst_ThemeNumber = 'ThemeNumber';
    Cst_MenuTheme = 'Mnu_Theme';
@@ -332,6 +346,8 @@ const
    Cst_ScrapePwd = '&devpassword=mapzoe';
    Cst_DevSoftName = '&softname=GameListEditorv1';
    Cst_Output = '&output=xml';
+   Cst_SSId = '&ssid=';
+   Cst_SSPwd = '&sspassword=';
    Cst_Crc = '&crc=';
    Cst_SystemId = '&systemid=';
    Cst_RomType = '&romtype=rom';

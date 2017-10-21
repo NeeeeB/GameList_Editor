@@ -9,7 +9,8 @@ uses
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes, Vcl.ImgList,
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
    Xml.omnixmldom, Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
-   F_MoreInfos, F_About, F_Help, F_ConfigureSSH, F_Scraper, U_gnugettext, U_Resources, U_Game;
+   F_MoreInfos, F_About, F_Help, F_ConfigureSSH, F_Scraper, U_gnugettext, U_Resources, U_Game,
+   F_ConfigureNetwork;
 
 type
    TFrm_Editor = class(TForm)
@@ -26,17 +27,9 @@ type
       Edt_Publisher: TEdit;
       Edt_Genre: TEdit;
       Edt_NbPlayers: TEdit;
-      Chk_Rating: TCheckBox;
-      Chk_ReleaseDate: TCheckBox;
-      Chk_Developer: TCheckBox;
-      Chk_Publisher: TCheckBox;
-      Chk_Genre: TCheckBox;
-      Chk_NbPlayers: TCheckBox;
-      Chk_Description: TCheckBox;
       Img_Game: TImage;
       Img_BackGround: TImage;
       Edt_Name: TEdit;
-      Chk_Name: TCheckBox;
       MainMenu: TMainMenu;
       Mnu_File: TMenuItem;
       Mnu_Choosefolder: TMenuItem;
@@ -51,7 +44,6 @@ type
       Lbl_Filter: TLabel;
       Img_Logo: TImage;
       Img_System: TImage;
-      Chk_Region: TCheckBox;
       Edt_Region: TEdit;
       Btn_MoreInfos: TButton;
       Mnu_Options: TMenuItem;
@@ -95,8 +87,6 @@ type
       Mnu_SSH: TMenuItem;
       Mnu_ConfigSSH: TMenuItem;
       N3: TMenuItem;
-      Chk_Hidden: TCheckBox;
-      Chk_Favorite: TCheckBox;
       Cbx_Hidden: TComboBox;
       Cbx_Favorite: TComboBox;
       Mnu_Theme17: TMenuItem;
@@ -115,6 +105,21 @@ type
       Mnu_General: TMenuItem;
       Mnu_DeleteDuplicates: TMenuItem;
       Btn_Scrape: TButton;
+      Lbl_Name: TLabel;
+      Lbl_Region: TLabel;
+      Lbl_Date: TLabel;
+      Lbl_Players: TLabel;
+      Lbl_Rating: TLabel;
+      Lbl_Hidden: TLabel;
+      Lbl_Favorite: TLabel;
+      Lbl_Publisher: TLabel;
+      Lbl_Developer: TLabel;
+      Lbl_Genre: TLabel;
+      Lbl_Description: TLabel;
+      Chk_EditMode: TCheckBox;
+      Mnu_NetWork: TMenuItem;
+      N2: TMenuItem;
+      Mnu_ConfigureNetwork: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -153,6 +158,7 @@ type
       procedure Mnu_DeleteOrphansClick(Sender: TObject);
       procedure Mnu_DeleteDuplicatesClick(Sender: TObject);
       procedure Btn_ScrapeClick(Sender: TObject);
+      procedure Mnu_ConfigureNetworkClick(Sender: TObject);
 
    private
 
@@ -166,6 +172,9 @@ type
       FShowTips, FFolderIsOnPi, FPiPrompts, FSysIsRecal,
       FPiLoadedOnce: Boolean;
       FRecalLogin, FRecalPwd, FRetroLogin, FRetroPwd: string;
+      FSSLogin, FSSPwd, FProxyServer, FProxyUser,
+      FProxyPwd, FProxyPort: string;
+      FProxyUse: Boolean;
       GSystemList: TObjectDictionary<string,TObjectList<TGame>>;
 
       procedure LoadFromIni;
@@ -189,6 +198,7 @@ type
                                    aUp: Boolean = False );
       procedure StopOrStartES( aStop, aRecal: Boolean );
       procedure DeleteDuplicates( aSystem: string );
+      procedure ReloadIni;
 
       function getSystemKind: TSystemKind;
       function getCurrentFolderName: string;
@@ -341,6 +351,14 @@ begin
       FRecalPwd:= FileIni.ReadString( Cst_IniOptions, Cst_IniRecalPwd, Cst_RecalPwd);
       FRetroLogin:= FileIni.ReadString( Cst_IniOptions, Cst_IniRetroLogin, Cst_RetroLogin);
       FRetroPwd:= FileIni.ReadString( Cst_IniOptions, Cst_IniRetroPwd, Cst_RetroPwd);
+
+      FSSLogin:= FileIni.ReadString( Cst_IniOptions, Cst_IniSSUser, '');
+      FSSPwd:= FileIni.ReadString( Cst_IniOptions, Cst_IniSSPwd, '');
+      FProxyUser:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyUser, '');
+      FProxyPwd:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyPwd, '');
+      FProxyServer:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyServer, '');
+      FProxyPort:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyPort, '');
+      FProxyUse:= FileIni.ReadBool( Cst_IniOptions, Cst_IniProxyUse, False);
    finally
       FileIni.Free;
    end;
@@ -365,6 +383,13 @@ begin
       FileIni.WriteString( Cst_IniOptions, Cst_IniRecalPwd, FRecalPwd);
       FileIni.WriteString( Cst_IniOptions, Cst_IniRetroLogin, FRetroLogin);
       FileIni.WriteString( Cst_IniOptions, Cst_IniRetroPwd, FRetroPwd);
+      FileIni.WriteString( Cst_IniOptions, Cst_IniSSUser, FSSLogin);
+      FileIni.WriteString( Cst_IniOptions, Cst_IniSSPwd, FSSPwd);
+      FileIni.WriteString( Cst_IniOptions, Cst_IniProxyUser, FProxyUser);
+      FileIni.WriteString( Cst_IniOptions, Cst_IniProxyPwd, FProxyPwd);
+      FileIni.WriteString( Cst_IniOptions, Cst_IniProxyServer, FProxyServer);
+      FileIni.WriteString( Cst_IniOptions, Cst_IniProxyPort, FProxyPort);
+      FileIni.WriteBool( Cst_IniOptions, Cst_IniProxyUse, FProxyUse);
    finally
       FileIni.Free;
    end;
@@ -721,17 +746,18 @@ end;
 //pour pas se les retaper à chaque changement d'état
 procedure TFrm_Editor.EnableControls( aValue: Boolean );
 begin
-   Chk_Name.Enabled:= aValue;
-   Chk_Genre.Enabled:= aValue;
-   Chk_Rating.Enabled:= aValue;
-   Chk_Developer.Enabled:= aValue;
-   Chk_Publisher.Enabled:= aValue;
-   Chk_NbPlayers.Enabled:= aValue;
-   Chk_ReleaseDate.Enabled:= aValue;
-   Chk_Description.Enabled:= aValue;
-   Chk_Region.Enabled:= aValue;
-   Chk_Hidden.Enabled:= aValue;
-   Chk_Favorite.Enabled:= aValue;
+   Lbl_Name.Enabled:= aValue;
+   Lbl_Genre.Enabled:= aValue;
+   Lbl_Rating.Enabled:= aValue;
+   Lbl_Developer.Enabled:= aValue;
+   Lbl_Publisher.Enabled:= aValue;
+   Lbl_Players.Enabled:= aValue;
+   Lbl_Date.Enabled:= aValue;
+   Lbl_Description.Enabled:= aValue;
+   Lbl_Region.Enabled:= aValue;
+   Lbl_Hidden.Enabled:= aValue;
+   Lbl_Favorite.Enabled:= aValue;
+   Chk_EditMode.Enabled:= aValue;
    Btn_ChangeImage.Enabled:= aValue;
    Btn_Scrape.Enabled:= aValue;
    Btn_RemovePicture.Enabled:= aValue;
@@ -756,17 +782,7 @@ end;
 //Permet de tout cocher ou décocher les checkboxes d'un coup
 procedure TFrm_Editor.SetCheckBoxes( aValue: Boolean );
 begin
-   Chk_Name.Checked:= aValue;
-   Chk_Genre.Checked:= aValue;
-   Chk_Rating.Checked:= aValue;
-   Chk_Developer.Checked:= aValue;
-   Chk_Publisher.Checked:= aValue;
-   Chk_NbPlayers.Checked:= aValue;
-   Chk_ReleaseDate.Checked:= aValue;
-   Chk_Description.Checked:= aValue;
-   Chk_Region.Checked:= aValue;
-   Chk_Hidden.Checked:= aValue;
-   Chk_Favorite.Checked:= aValue;
+   Chk_EditMode.Checked:= aValue;
 end;
 
 //Repasse tous les champs en readonly ou non
@@ -1248,16 +1264,27 @@ procedure TFrm_Editor.Btn_ScrapeClick(Sender: TObject);
 var
    SysId: string;
    Frm_Scrape: TFrm_Scraper;
+   _List: TStringList;
 begin
    //on désactive pour éviter les clicks intempestifs pendant le chargement
    Enabled:= False;
    SysId:= GetCurrentSystemId;
    Frm_Scrape:= TFrm_Scraper.Create( nil );
+   _List:= TStringList.Create;
    try
+      _List.Add(FSSLogin);
+      _List.Add(FSSPwd);
+      _List.Add(FProxyUser);
+      _List.Add(FProxyPwd);
+      _List.Add(FProxyServer);
+      _List.Add(FProxyPort);
       Frm_Scrape.Execute( SysId, FRootPath, FCurrentFolder, FImageFolder, FXmlImageFolderPath,
-                          ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
+                          ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ), _List, FProxyUse );
+
    finally
       Frm_Scrape.Free;
+      _List.Free;
+
    end;
    LoadGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
    Enabled:= True;
@@ -1582,19 +1609,19 @@ begin
    if Lbx_Games.Items.Count = 0 then Exit;
 
    //On active le champ correspondant au checkbox coché ou non
-   case (Sender as TCheckBox).Tag of
-      1: Edt_Name.ReadOnly:= not (Sender as TCheckBox).Checked;
-      2: Edt_ReleaseDate.ReadOnly:= not (Sender as TCheckBox).Checked;
-      3: Edt_NbPlayers.ReadOnly:= not (Sender as TCheckBox).Checked;
-      4: Edt_Rating.ReadOnly:= not (Sender as TCheckBox).Checked;
-      5: Edt_Publisher.ReadOnly:= not (Sender as TCheckBox).Checked;
-      6: Edt_Developer.ReadOnly:= not (Sender as TCheckBox).Checked;
-      7: Edt_Genre.ReadOnly:= not (Sender as TCheckBox).Checked;
-      8: Mmo_Description.ReadOnly:= not (Sender as TCheckBox).Checked;
-      9: Edt_Region.ReadOnly:= not (Sender as TCheckBox).Checked;
-      10: Cbx_Hidden.Enabled:= (Sender as TCheckBox).Checked;
-      11: Cbx_Favorite.Enabled:= (Sender as TCheckBox).Checked;
-   end;
+
+   Edt_Name.ReadOnly:= not (Sender as TCheckBox).Checked;
+   Edt_ReleaseDate.ReadOnly:= not (Sender as TCheckBox).Checked;
+   Edt_NbPlayers.ReadOnly:= not (Sender as TCheckBox).Checked;
+   Edt_Rating.ReadOnly:= not (Sender as TCheckBox).Checked;
+   Edt_Publisher.ReadOnly:= not (Sender as TCheckBox).Checked;
+   Edt_Developer.ReadOnly:= not (Sender as TCheckBox).Checked;
+   Edt_Genre.ReadOnly:= not (Sender as TCheckBox).Checked;
+   Mmo_Description.ReadOnly:= not (Sender as TCheckBox).Checked;
+   Edt_Region.ReadOnly:= not (Sender as TCheckBox).Checked;
+   Cbx_Hidden.Enabled:= (Sender as TCheckBox).Checked;
+   Cbx_Favorite.Enabled:= (Sender as TCheckBox).Checked;
+
 end;
 
 //Au click sur le menuitem godmode on change la visibilité du bouton delete
@@ -1655,6 +1682,41 @@ begin
       Frm_ConfigSSH.Execute( FRecalLogin, FRecalPwd, FRetroLogin, FRetroPwd );
    finally
       Frm_ConfigSSH.Free;
+   end;
+end;
+
+//Au click sur menu item configure network
+procedure TFrm_Editor.Mnu_ConfigureNetworkClick(Sender: TObject);
+var
+   Frm_Network: TFrm_Network;
+begin
+   //on affiche la fenêtre pour saisir les id screenscraper et proxy
+   Frm_Network:= TFrm_Network.Create( nil );
+   try
+      Frm_Network.Execute( FSSLogin, FSSPwd, FProxyUser, FProxyPwd,
+                           FProxyServer, FProxyPort, FProxyUse );
+   finally
+      Frm_Network.Free;
+   end;
+   ReloadIni;
+end;
+
+//permet de recharger certaines infos depuis le fichier ini
+procedure TFrm_Editor.ReloadIni;
+var
+   FileIni: TIniFile;
+begin
+   FileIni:= TIniFile.Create( ExtractFilePath( Application.ExeName ) + Cst_IniFilePath );
+   try
+      FSSLogin:= FileIni.ReadString( Cst_IniOptions, Cst_IniSSUser, '');
+      FSSPwd:= FileIni.ReadString( Cst_IniOptions, Cst_IniSSPwd, '');
+      FProxyUser:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyUser, '');
+      FProxyPwd:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyPwd, '');
+      FProxyServer:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyServer, '');
+      FProxyPort:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyPort, '');
+      FProxyUse:= FileIni.ReadBool( Cst_IniOptions, Cst_IniProxyUse, False);
+   finally
+      FileIni.Free;
    end;
 end;
 

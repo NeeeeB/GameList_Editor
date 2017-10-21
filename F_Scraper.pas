@@ -42,6 +42,9 @@ type
       FCurrentFolder: string;
       FImageFolder: string;
       FXmlImageFolderPath: string;
+      FSSLogin, FSSPwd, FProxyServer, FProxyUser,
+      FProxyPwd, FProxyPort: string;
+      FProxyUse: Boolean;
       FImgList: TObjectList<TImage>;
 
       procedure DisplayPictures;
@@ -54,7 +57,9 @@ type
       function GetFileSize( const aPath: string ): string;
 
    public
-      procedure Execute( const aSysId, aRootPath, aCurrentFolder, aImageFolder, aXmlImageFolderPath: string; aGame: TGame );
+      procedure Execute( const aSysId, aRootPath, aCurrentFolder, aImageFolder,
+                         aXmlImageFolderPath: string; aGame: TGame; aList: TStringList;
+                         aProxyUse: Boolean );
    end;
 
 implementation
@@ -69,7 +74,9 @@ begin
    TranslateComponent( Self );
 end;
 
-procedure TFrm_Scraper.Execute( const aSysId, aRootPath, aCurrentFolder, aImageFolder, aXmlImageFolderPath: string; aGame: TGame );
+procedure TFrm_Scraper.Execute( const aSysId, aRootPath, aCurrentFolder, aImageFolder,
+                                aXmlImageFolderPath: string; aGame: TGame; aList: TStringList;
+                                aProxyUse: Boolean );
 begin
    Screen.Cursor:= crHourGlass;
    FGame:= aGame;
@@ -77,6 +84,27 @@ begin
    FCurrentFolder:= aCurrentFolder;
    FImageFolder:= aImageFolder;
    FXmlImageFolderPath:= aXmlImageFolderPath;
+
+   FSSLogin:= aList.Strings[0];
+   FSSPwd:= aList.Strings[1];
+   FProxyUser:= aList.Strings[2];
+   FProxyPwd:= aList.Strings[3];
+   FProxyServer:= aList.Strings[4];
+   FProxyPort:= aList.Strings[5];
+   FProxyUse:= aProxyUse;
+
+   //si proxy, on le renseigne
+   if FProxyUse then begin
+      Ind_HTTP.ProxyParams.ProxyUsername:= FProxyUser;
+      Ind_HTTP.ProxyParams.ProxyPassword:= FProxyPwd;
+      Ind_HTTP.ProxyParams.ProxyServer:= FProxyServer;
+      Ind_HTTP.ProxyParams.ProxyPort:= StrToInt( FProxyPort );
+   end else begin
+      Ind_HTTP.ProxyParams.ProxyUsername:= '';
+      Ind_HTTP.ProxyParams.ProxyPassword:= '';
+      Ind_HTTP.ProxyParams.ProxyServer:= '';
+      Ind_HTTP.ProxyParams.ProxyPort:= 0;
+   end;
 
    //Splash loading
    FrmSplash.Show;
@@ -103,7 +131,12 @@ begin
 
    //construction de la requête API pour le jeu
    Query:= Cst_ScraperAddress + Cst_Category + Cst_ScrapeLogin + Cst_ScrapePwd +
-           Cst_DevSoftName + Cst_Output + Cst_Crc + Crc32 + Cst_SystemId + aSysId +
+           Cst_DevSoftName + Cst_Output;
+
+   if ( not FSSLogin.IsEmpty ) and ( not FSSPwd.IsEmpty ) then
+      Query:= Query + Cst_SSId + FSSLogin + Cst_SSPwd + FSSPwd;
+
+   Query:= Query + Cst_Crc + Crc32 + Cst_SystemId + aSysId +
            Cst_RomName + TIdURI.ParamsEncode( aGame.RomName ) + Cst_RomSize + Size;
 
    //chargement dans un stream pour ne pas corrompre l'encodage
@@ -111,16 +144,29 @@ begin
    try
       try
          Ind_HTTP.Get( Query, Stream );
+         if ( Stream.Size = 0 ) then begin
+            WarnUser( Rst_StreamError );
+            Exit;
+         end;
          Stream.Position:= 0;
          XMLDoc.LoadFromStream( Stream );
          XMLDoc.SaveToFile( FXmlPath );
       except
+         //gestion des erreurs de connexion
          on E: EIdHTTPProtocolException do begin
-            WarnUser( Rst_ServerError );
+            case E.ErrorCode of
+               400: WarnUser( Rst_ServerError1 );
+               401: WarnUser( Rst_ServerError2 );
+               403: WarnUser( Rst_ServerError3 );
+               404: WarnUser( Rst_ServerError4 );
+               423: WarnUser( Rst_ServerError5 );
+               426: WarnUser( Rst_ServerError6 );
+               429: WarnUser( Rst_ServerError7 );
+            end;
             Exit;
          end;
-         on E : Exception do begin
-            WarnUser( Rst_StreamError );
+         on E: EIdException do begin
+            WarnUser( Rst_ServerError8 );
             Exit;
          end;
       end;
@@ -210,17 +256,30 @@ begin
          try
             try
                Ind_HTTP.Get( Query, Stream );
+               if ( Stream.Size = 0 ) then begin
+                  WarnUser( Rst_StreamError );
+                  Exit;
+               end;
                Stream.Position:= 0;
                if ( Nodes[ii].Attributes[Cst_AttFormat] = Cst_PngExt ) then
                   LoadPng( Stream )
                else LoadJpg( Stream );
             except
+               //gestion des erreurs de connexion
                on E: EIdHTTPProtocolException do begin
-                  WarnUser( Rst_ServerError );
+                  case E.ErrorCode of
+                     400: WarnUser( Rst_ServerError1 );
+                     401: WarnUser( Rst_ServerError2 );
+                     403: WarnUser( Rst_ServerError3 );
+                     404: WarnUser( Rst_ServerError4 );
+                     423: WarnUser( Rst_ServerError5 );
+                     426: WarnUser( Rst_ServerError6 );
+                     429: WarnUser( Rst_ServerError7 );
+                  end;
                   Exit;
                end;
-               on E : Exception do begin
-                  WarnUser( Rst_StreamError );
+               on E: EIdException do begin
+                  WarnUser( Rst_ServerError8 );
                   Exit;
                end;
             end;

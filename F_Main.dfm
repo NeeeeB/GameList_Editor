@@ -4,7 +4,7 @@ object Frm_Editor: TFrm_Editor
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'GameList Editor'
-  ClientHeight = 690
+  ClientHeight = 689
   ClientWidth = 1210
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -5318,7 +5318,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Lbl_NbGamesFound: TLabel
     Left = 626
-    Top = 183
+    Top = 123
     Width = 3
     Height = 13
     Alignment = taCenter
@@ -6449,8 +6449,8 @@ object Frm_Editor: TFrm_Editor
       AE426082}
   end
   object Img_System: TImage
-    Left = 547
-    Top = 76
+    Left = 561
+    Top = 16
     Width = 241
     Height = 104
     Center = True
@@ -6462,6 +6462,97 @@ object Frm_Editor: TFrm_Editor
     Width = 33
     Height = 13
     Caption = 'Search'
+    Enabled = False
+  end
+  object Lbl_Name: TLabel
+    Left = 536
+    Top = 360
+    Width = 255
+    Height = 13
+    Caption = 'Name'
+    Enabled = False
+  end
+  object Lbl_Region: TLabel
+    Left = 1000
+    Top = 360
+    Width = 174
+    Height = 13
+    Caption = 'Region'
+    Enabled = False
+  end
+  object Lbl_Date: TLabel
+    Left = 536
+    Top = 407
+    Width = 108
+    Height = 13
+    Hint = 
+      'Following formats are accepted :'#13#10#13#10'dd/mm/yyyy'#13#10'mm/yyyy'#13#10'yyyy'#13#10#13 +
+      #10'Everything else will be saved as blank.'
+    Caption = 'Date'
+    Enabled = False
+  end
+  object Lbl_Players: TLabel
+    Left = 671
+    Top = 407
+    Width = 108
+    Height = 13
+    Caption = 'Players'
+    Enabled = False
+  end
+  object Lbl_Rating: TLabel
+    Left = 808
+    Top = 407
+    Width = 108
+    Height = 13
+    Caption = 'Rating'
+    Enabled = False
+  end
+  object Lbl_Hidden: TLabel
+    Left = 944
+    Top = 407
+    Width = 108
+    Height = 13
+    Caption = 'Hidden'
+    Enabled = False
+  end
+  object Lbl_Favorite: TLabel
+    Left = 1077
+    Top = 407
+    Width = 108
+    Height = 13
+    Caption = 'Favorite'
+    Enabled = False
+  end
+  object Lbl_Publisher: TLabel
+    Left = 536
+    Top = 453
+    Width = 185
+    Height = 13
+    Caption = 'Publisher'
+    Enabled = False
+  end
+  object Lbl_Developer: TLabel
+    Left = 768
+    Top = 453
+    Width = 185
+    Height = 13
+    Caption = 'Developer'
+    Enabled = False
+  end
+  object Lbl_Genre: TLabel
+    Left = 1000
+    Top = 453
+    Width = 185
+    Height = 13
+    Caption = 'Genre'
+    Enabled = False
+  end
+  object Lbl_Description: TLabel
+    Left = 536
+    Top = 500
+    Width = 236
+    Height = 13
+    Caption = 'Description'
     Enabled = False
   end
   object Cbx_Systems: TComboBox
@@ -6563,88 +6654,6 @@ object Frm_Editor: TFrm_Editor
     TabOrder = 8
     OnChange = FieldChange
   end
-  object Chk_Rating: TCheckBox
-    Tag = 4
-    Left = 805
-    Top = 406
-    Width = 97
-    Height = 17
-    Caption = 'Rating'
-    Enabled = False
-    TabOrder = 9
-    OnClick = ChkClick
-  end
-  object Chk_ReleaseDate: TCheckBox
-    Tag = 2
-    Left = 533
-    Top = 406
-    Width = 76
-    Height = 17
-    Hint = 
-      'Following formats are accepted :'#13#10#13#10'dd/mm/yyyy'#13#10'mm/yyyy'#13#10'yyyy'#13#10#13 +
-      #10'Everything else will be saved as blank.'
-    Caption = 'Date'
-    Enabled = False
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 10
-    OnClick = ChkClick
-  end
-  object Chk_Developer: TCheckBox
-    Tag = 6
-    Left = 765
-    Top = 452
-    Width = 185
-    Height = 17
-    Caption = 'Developer'
-    Enabled = False
-    TabOrder = 11
-    OnClick = ChkClick
-  end
-  object Chk_Publisher: TCheckBox
-    Tag = 5
-    Left = 532
-    Top = 450
-    Width = 173
-    Height = 17
-    Caption = 'Publisher'
-    Enabled = False
-    TabOrder = 12
-    OnClick = ChkClick
-  end
-  object Chk_Genre: TCheckBox
-    Tag = 7
-    Left = 997
-    Top = 452
-    Width = 185
-    Height = 17
-    Caption = 'Genre'
-    Enabled = False
-    TabOrder = 13
-    OnClick = ChkClick
-  end
-  object Chk_NbPlayers: TCheckBox
-    Tag = 3
-    Left = 668
-    Top = 406
-    Width = 121
-    Height = 17
-    Caption = 'Players'
-    Enabled = False
-    TabOrder = 14
-    OnClick = ChkClick
-  end
-  object Chk_Description: TCheckBox
-    Tag = 8
-    Left = 533
-    Top = 499
-    Width = 164
-    Height = 17
-    Caption = 'Description'
-    Enabled = False
-    TabOrder = 15
-    OnClick = ChkClick
-  end
   object Edt_Name: TEdit
     Left = 533
     Top = 376
@@ -6652,19 +6661,8 @@ object Frm_Editor: TFrm_Editor
     Height = 21
     Enabled = False
     ReadOnly = True
-    TabOrder = 16
+    TabOrder = 9
     OnChange = FieldChange
-  end
-  object Chk_Name: TCheckBox
-    Tag = 1
-    Left = 533
-    Top = 359
-    Width = 97
-    Height = 17
-    Caption = 'Name'
-    Enabled = False
-    TabOrder = 17
-    OnClick = ChkClick
   end
   object Btn_SaveChanges: TButton
     Left = 752
@@ -6673,37 +6671,37 @@ object Frm_Editor: TFrm_Editor
     Height = 25
     Caption = 'Save Changes for this game'
     Enabled = False
-    TabOrder = 18
+    TabOrder = 10
     OnClick = Btn_SaveChangesClick
   end
   object Btn_ChangeImage: TButton
     Left = 600
-    Top = 234
+    Top = 174
     Width = 139
     Height = 25
     Caption = 'Change Picture'
     Enabled = False
-    TabOrder = 19
+    TabOrder = 11
     OnClick = Btn_ChangeImageClick
   end
   object Btn_SetDefaultPicture: TButton
     Left = 584
-    Top = 293
+    Top = 233
     Width = 169
     Height = 25
     Caption = 'Change Picture to default'
     Enabled = False
-    TabOrder = 20
+    TabOrder = 12
     OnClick = Btn_SetDefaultPictureClick
   end
   object Btn_ChangeAll: TButton
     Left = 547
-    Top = 322
+    Top = 262
     Width = 241
     Height = 25
     Caption = 'Change all missing pictures to default'
     Enabled = False
-    TabOrder = 21
+    TabOrder = 13
     OnClick = Btn_ChangeAllClick
   end
   object Cbx_Filter: TComboBox
@@ -6715,7 +6713,7 @@ object Frm_Editor: TFrm_Editor
     DropDownCount = 15
     Enabled = False
     ItemIndex = 0
-    TabOrder = 22
+    TabOrder = 14
     Text = 'All'
     OnChange = Cbx_FilterChange
     Items.Strings = (
@@ -6733,17 +6731,6 @@ object Frm_Editor: TFrm_Editor
       'Favorite'
       'Orphan')
   end
-  object Chk_Region: TCheckBox
-    Tag = 9
-    Left = 997
-    Top = 359
-    Width = 97
-    Height = 17
-    Caption = 'Region'
-    Enabled = False
-    TabOrder = 23
-    OnClick = ChkClick
-  end
   object Edt_Region: TEdit
     Left = 997
     Top = 376
@@ -6751,7 +6738,7 @@ object Frm_Editor: TFrm_Editor
     Height = 21
     Enabled = False
     ReadOnly = True
-    TabOrder = 24
+    TabOrder = 15
     OnChange = FieldChange
   end
   object Btn_MoreInfos: TButton
@@ -6761,7 +6748,7 @@ object Frm_Editor: TFrm_Editor
     Height = 25
     Caption = 'More infos...'
     Enabled = False
-    TabOrder = 25
+    TabOrder = 16
     OnClick = Btn_MoreInfosClick
   end
   object Btn_Delete: TButton
@@ -6781,7 +6768,7 @@ object Frm_Editor: TFrm_Editor
     ImageMargins.Right = -10
     Images = Img_List
     ParentFont = False
-    TabOrder = 26
+    TabOrder = 17
     OnClick = Btn_DeleteClick
   end
   object ProgressBar: TProgressBar
@@ -6791,40 +6778,18 @@ object Frm_Editor: TFrm_Editor
     Height = 8
     MarqueeInterval = 1
     BarColor = clRed
-    TabOrder = 27
+    TabOrder = 18
     Visible = False
   end
   object Btn_RemovePicture: TButton
     Left = 600
-    Top = 263
+    Top = 203
     Width = 139
     Height = 25
     Caption = 'Delete Picture'
     Enabled = False
-    TabOrder = 28
+    TabOrder = 19
     OnClick = Btn_RemovePictureClick
-  end
-  object Chk_Hidden: TCheckBox
-    Tag = 10
-    Left = 941
-    Top = 406
-    Width = 97
-    Height = 17
-    Caption = 'Hidden'
-    Enabled = False
-    TabOrder = 29
-    OnClick = ChkClick
-  end
-  object Chk_Favorite: TCheckBox
-    Tag = 11
-    Left = 1074
-    Top = 406
-    Width = 97
-    Height = 17
-    Caption = 'Favorite'
-    Enabled = False
-    TabOrder = 30
-    OnClick = ChkClick
   end
   object Cbx_Hidden: TComboBox
     Left = 941
@@ -6833,7 +6798,7 @@ object Frm_Editor: TFrm_Editor
     Height = 21
     Style = csDropDownList
     Enabled = False
-    TabOrder = 31
+    TabOrder = 20
     OnChange = FieldChange
     Items.Strings = (
       'No'
@@ -6846,7 +6811,7 @@ object Frm_Editor: TFrm_Editor
     Height = 21
     Style = csDropDownList
     Enabled = False
-    TabOrder = 32
+    TabOrder = 21
     OnChange = FieldChange
     Items.Strings = (
       'No'
@@ -6859,7 +6824,7 @@ object Frm_Editor: TFrm_Editor
     Height = 21
     Enabled = False
     ReadOnly = True
-    TabOrder = 33
+    TabOrder = 22
   end
   object Edt_Search: TEdit
     Left = 29
@@ -6867,18 +6832,28 @@ object Frm_Editor: TFrm_Editor
     Width = 473
     Height = 21
     Enabled = False
-    TabOrder = 34
+    TabOrder = 23
     OnChange = Edt_SearchChange
   end
   object Btn_Scrape: TButton
     Left = 600
-    Top = 205
+    Top = 145
     Width = 139
     Height = 25
     Caption = 'Scrape'
     Enabled = False
-    TabOrder = 35
+    TabOrder = 24
     OnClick = Btn_ScrapeClick
+  end
+  object Chk_EditMode: TCheckBox
+    Left = 533
+    Top = 336
+    Width = 97
+    Height = 17
+    Caption = 'Enable edition'
+    Enabled = False
+    TabOrder = 25
+    OnClick = ChkClick
   end
   object XMLDoc: TXMLDocument
     NodeIndentStr = #9
@@ -6989,6 +6964,16 @@ object Frm_Editor: TFrm_Editor
         end
       end
       object N3: TMenuItem
+        Caption = '-'
+      end
+      object Mnu_NetWork: TMenuItem
+        Caption = 'Network'
+        object Mnu_ConfigureNetwork: TMenuItem
+          Caption = 'Configure'
+          OnClick = Mnu_ConfigureNetworkClick
+        end
+      end
+      object N2: TMenuItem
         Caption = '-'
       end
       object Mnu_SSH: TMenuItem
@@ -7205,7 +7190,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800C00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800C40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

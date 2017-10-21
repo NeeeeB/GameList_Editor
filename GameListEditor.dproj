@@ -140,6 +140,10 @@
             <Form>Frm_Splash</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="F_ConfigureNetwork.pas">
+            <Form>Frm_Network</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
