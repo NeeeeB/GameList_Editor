@@ -115,7 +115,6 @@ type
       Lbl_Developer: TLabel;
       Lbl_Genre: TLabel;
       Lbl_Description: TLabel;
-      Chk_EditMode: TCheckBox;
       Mnu_NetWork: TMenuItem;
       N2: TMenuItem;
       Mnu_ConfigureNetwork: TMenuItem;
@@ -184,8 +183,6 @@ type
       procedure ClearAllFields;
       procedure SaveChangesToGamelist;
       procedure EnableControls( aValue: Boolean );
-      procedure SetCheckBoxes( aValue: Boolean );
-      procedure SetFieldsReadOnly( aValue: Boolean );
       procedure CheckIfChangesToSave;
       procedure ChangeImage( const aPath: string; aGame: TGame );
       procedure LoadSystemLogo( aPictureName: string );
@@ -477,7 +474,6 @@ begin
    ClearAllFields;
    Lbx_Games.Items.Clear;
    BuildSystemsList;
-   SetCheckBoxes( False );
    Btn_SaveChanges.Enabled:= False;
 end;
 
@@ -756,7 +752,6 @@ begin
    Lbl_Region.Enabled:= aValue;
    Lbl_Hidden.Enabled:= aValue;
    Lbl_Favorite.Enabled:= aValue;
-   Chk_EditMode.Enabled:= aValue;
    Btn_ChangeImage.Enabled:= aValue;
    Btn_Scrape.Enabled:= aValue;
    Btn_RemovePicture.Enabled:= aValue;
@@ -774,30 +769,8 @@ begin
    Edt_ReleaseDate.Enabled:= aValue;
    Edt_NbPlayers.Enabled:= aValue;
    Mmo_Description.Enabled:= aValue;
-   Cbx_Hidden.Enabled:= not aValue;
-   Cbx_Favorite.Enabled:= not aValue;
-end;
-
-//Permet de tout cocher ou décocher les checkboxes d'un coup
-procedure TFrm_Editor.SetCheckBoxes( aValue: Boolean );
-begin
-   Chk_EditMode.Checked:= aValue;
-end;
-
-//Repasse tous les champs en readonly ou non
-procedure TFrm_Editor.SetFieldsReadOnly( aValue: Boolean );
-begin
-   Edt_Name.ReadOnly:= aValue;
-   Edt_Genre.ReadOnly:= aValue;
-   Edt_Rating.ReadOnly:= aValue;
-   Edt_Developer.ReadOnly:= aValue;
-   Edt_Publisher.ReadOnly:= aValue;
-   Edt_NbPlayers.ReadOnly:= aValue;
-   Edt_ReleaseDate.ReadOnly:= aValue;
-   Edt_Region.ReadOnly:= aValue;
-   Mmo_Description.ReadOnly:= aValue;
-   Cbx_Hidden.Enabled:= not aValue;
-   Cbx_Favorite.Enabled:= not aValue;
+   Cbx_Hidden.Enabled:= aValue;
+   Cbx_Favorite.Enabled:= aValue;
 end;
 
 //Action lorsqu'on change le contenu d'un des champs
@@ -958,7 +931,6 @@ end;
 procedure TFrm_Editor.Lbx_GamesClick(Sender: TObject);
 begin
    ClearAllFields;
-   SetCheckBoxes( False );
    LoadGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) )
 end;
 
@@ -1252,8 +1224,6 @@ end;
 procedure TFrm_Editor.Btn_SaveChangesClick(Sender: TObject);
 begin
    SaveChangesToGamelist;
-   SetCheckBoxes( False );
-   SetFieldsReadOnly( True );
    Btn_SaveChanges.Enabled:= False;
    Lbx_Games.SetFocus;
 end;
@@ -1520,7 +1490,6 @@ var
 begin
    //on commence par vider les champs
    Lbx_Games.Clear;
-   SetFieldsReadOnly( False );
    ClearAllFields;
 
    //on construit le chemin vers le gamelist.xml
@@ -1572,7 +1541,6 @@ begin
 
    //on recharge la liste des jeux
    LoadGamesList( aSystem );
-   SetFieldsReadOnly( True );
    Screen.Cursor:= crDefault;
 end;
 

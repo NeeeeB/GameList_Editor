@@ -6450,7 +6450,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Img_System: TImage
     Left = 561
-    Top = 16
+    Top = 21
     Width = 241
     Height = 104
     Center = True
@@ -6584,7 +6584,6 @@ object Frm_Editor: TFrm_Editor
     Width = 649
     Height = 113
     Enabled = False
-    ReadOnly = True
     TabOrder = 2
     OnChange = FieldChange
     OnKeyPress = Mmo_DescriptionKeyPress
@@ -6595,7 +6594,6 @@ object Frm_Editor: TFrm_Editor
     Width = 108
     Height = 21
     Enabled = False
-    ReadOnly = True
     TabOrder = 3
     OnChange = FieldChange
   end
@@ -6609,7 +6607,6 @@ object Frm_Editor: TFrm_Editor
       #10'Everything else will be saved as blank.'
     Enabled = False
     ParentShowHint = False
-    ReadOnly = True
     ShowHint = True
     TabOrder = 4
     OnChange = FieldChange
@@ -6620,7 +6617,6 @@ object Frm_Editor: TFrm_Editor
     Width = 185
     Height = 21
     Enabled = False
-    ReadOnly = True
     TabOrder = 5
     OnChange = FieldChange
   end
@@ -6630,7 +6626,6 @@ object Frm_Editor: TFrm_Editor
     Width = 185
     Height = 21
     Enabled = False
-    ReadOnly = True
     TabOrder = 6
     OnChange = FieldChange
   end
@@ -6640,7 +6635,6 @@ object Frm_Editor: TFrm_Editor
     Width = 185
     Height = 21
     Enabled = False
-    ReadOnly = True
     TabOrder = 7
     OnChange = FieldChange
   end
@@ -6650,7 +6644,6 @@ object Frm_Editor: TFrm_Editor
     Width = 108
     Height = 21
     Enabled = False
-    ReadOnly = True
     TabOrder = 8
     OnChange = FieldChange
   end
@@ -6660,7 +6653,6 @@ object Frm_Editor: TFrm_Editor
     Width = 417
     Height = 21
     Enabled = False
-    ReadOnly = True
     TabOrder = 9
     OnChange = FieldChange
   end
@@ -6676,7 +6668,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_ChangeImage: TButton
     Left = 600
-    Top = 174
+    Top = 179
     Width = 139
     Height = 25
     Caption = 'Change Picture'
@@ -6686,7 +6678,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_SetDefaultPicture: TButton
     Left = 584
-    Top = 233
+    Top = 238
     Width = 169
     Height = 25
     Caption = 'Change Picture to default'
@@ -6696,7 +6688,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_ChangeAll: TButton
     Left = 547
-    Top = 262
+    Top = 267
     Width = 241
     Height = 25
     Caption = 'Change all missing pictures to default'
@@ -6737,7 +6729,6 @@ object Frm_Editor: TFrm_Editor
     Width = 185
     Height = 21
     Enabled = False
-    ReadOnly = True
     TabOrder = 15
     OnChange = FieldChange
   end
@@ -6783,7 +6774,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_RemovePicture: TButton
     Left = 600
-    Top = 203
+    Top = 208
     Width = 139
     Height = 25
     Caption = 'Delete Picture'
@@ -6837,23 +6828,13 @@ object Frm_Editor: TFrm_Editor
   end
   object Btn_Scrape: TButton
     Left = 600
-    Top = 145
+    Top = 150
     Width = 139
     Height = 25
     Caption = 'Scrape'
     Enabled = False
     TabOrder = 24
     OnClick = Btn_ScrapeClick
-  end
-  object Chk_EditMode: TCheckBox
-    Left = 533
-    Top = 336
-    Width = 148
-    Height = 17
-    Caption = 'Enable edition'
-    Enabled = False
-    TabOrder = 25
-    OnClick = ChkClick
   end
   object XMLDoc: TXMLDocument
     NodeIndentStr = #9
@@ -7183,7 +7164,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800D40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800D80010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
