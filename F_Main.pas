@@ -1258,6 +1258,7 @@ begin
    end;
    LoadGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
    Enabled:= True;
+   Application.MainForm.SetFocus;
 end;
 
 //Enregistre les changements effectués pour le jeu dans le fichier .xml
