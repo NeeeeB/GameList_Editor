@@ -675,7 +675,7 @@ object Frm_Scraper: TFrm_Scraper
     Top = 64
   end
   object XMLDoc: TXMLDocument
-    Left = 128
+    Left = 120
     Top = 64
   end
 end

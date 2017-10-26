@@ -46,13 +46,15 @@ type
       FProxyPwd, FProxyPort: string;
       FProxyUse: Boolean;
       FImgList: TObjectList<TImage>;
+      FInfosList: TObjectList<TDictionary<string, string>>;
 
       procedure DisplayPictures;
       procedure WarnUser( aMessage: string );
       procedure ChangeImage( aImg: TImage );
       procedure ImgDblClick( Sender: TObject );
+      procedure ParseXml;
 
-      function GetGameInfos( const aSysId: string; aGame: TGame ): Boolean;
+      function GetGameXml( const aSysId: string; aGame: TGame ): Boolean;
       function LoadPictures: Boolean;
       function GetFileSize( const aPath: string ): string;
 
@@ -71,6 +73,7 @@ procedure TFrm_Scraper.FormCreate(Sender: TObject);
 begin
    FXmlPath:= ExtractFilePath( Application.ExeName ) + Cst_TempXml;
    FImgList:= TObjectList<TImage>.Create;
+   FInfosList:= TObjectList<TDictionary<string, string>>.Create( True );
    TranslateComponent( Self );
 end;
 
@@ -90,7 +93,8 @@ begin
    FProxyUser:= aList.Strings[2];
    FProxyPwd:= aList.Strings[3];
    FProxyServer:= aList.Strings[4];
-   FProxyPort:= aList.Strings[5];
+   if aList.Strings[5].IsEmpty then FProxyPort:= '0'
+   else FProxyPort:= aList.Strings[5];
    FProxyUse:= aProxyUse;
 
    //si proxy, on le renseigne
@@ -110,7 +114,8 @@ begin
    FrmSplash.Show;
    FrmSplash.Refresh;
 
-   if GetGameInfos( aSysId, FGame ) and LoadPictures then begin
+   if GetGameXml( aSysId, FGame ) and LoadPictures then begin
+//      ParseXml;
       DisplayPictures;
       Screen.Cursor:= crDefault;
       FrmSplash.Close;
@@ -119,7 +124,7 @@ begin
 end;
 
 //Requête GET pour récupérer le XML des infos du jeu.
-function TFrm_Scraper.GetGameInfos( const aSysId: string; aGame: TGame ): Boolean;
+function TFrm_Scraper.GetGameXml( const aSysId: string; aGame: TGame ): Boolean;
 var
    Query, Crc32, Size: String;
    Stream: TMemoryStream;
@@ -175,6 +180,16 @@ begin
    end;
 
    Result:= True;
+end;
+
+//parsing du Xml pour récupérer tout ce qui est description, région, nombre joueurs etc...
+procedure TFrm_Scraper.ParseXml;
+var
+   Nodes: IXMLNodeList;
+   ii: Integer;
+begin
+   //ouverture du fichier xml
+   XMLDoc.LoadFromFile( FXmlPath );
 end;
 
 //Crée les images (si possible) depuis le fichier xml récupéré.
@@ -426,6 +441,7 @@ procedure TFrm_Scraper.FormDestroy(Sender: TObject);
 begin
    DeleteFile( FXmlPath );
    FImgList.Free;
+   FInfosList.Free;
 end;
 
 end.

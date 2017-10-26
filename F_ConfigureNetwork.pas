@@ -95,7 +95,8 @@ begin
       FileIni.WriteString( Cst_IniOptions, Cst_IniProxyUser, Edt_ProxyUser.Text );
       FileIni.WriteString( Cst_IniOptions, Cst_IniProxyPwd, Edt_ProxyPwd.Text );
       FileIni.WriteString( Cst_IniOptions, Cst_IniProxyServer, Edt_ProxyServer.Text );
-      FileIni.WriteString( Cst_IniOptions, Cst_IniProxyPort, Edt_ProxyPort.Text );
+      if ( Edt_ProxyPort.Text = '' ) then FileIni.WriteString( Cst_IniOptions, Cst_IniProxyPort, '0' )
+      else FileIni.WriteString( Cst_IniOptions, Cst_IniProxyPort, Edt_ProxyPort.Text );
       FileIni.WriteBool( Cst_IniOptions, Cst_IniProxyUse, Chk_Proxy.Checked );
    finally
       FileIni.Free;

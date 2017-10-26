@@ -353,7 +353,7 @@ begin
       FProxyUser:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyUser, '');
       FProxyPwd:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyPwd, '');
       FProxyServer:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyServer, '');
-      FProxyPort:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyPort, '');
+      FProxyPort:= FileIni.ReadString( Cst_IniOptions, Cst_IniProxyPort, '0');
       FProxyUse:= FileIni.ReadBool( Cst_IniOptions, Cst_IniProxyUse, False);
    finally
       FileIni.Free;
@@ -384,7 +384,8 @@ begin
       FileIni.WriteString( Cst_IniOptions, Cst_IniProxyUser, FProxyUser);
       FileIni.WriteString( Cst_IniOptions, Cst_IniProxyPwd, FProxyPwd);
       FileIni.WriteString( Cst_IniOptions, Cst_IniProxyServer, FProxyServer);
-      FileIni.WriteString( Cst_IniOptions, Cst_IniProxyPort, FProxyPort);
+      if ( FProxyPort.IsEmpty ) then FileIni.WriteString( Cst_IniOptions, Cst_IniProxyPort, '0' )
+      else FileIni.WriteString( Cst_IniOptions, Cst_IniProxyPort, FProxyPort );
       FileIni.WriteBool( Cst_IniOptions, Cst_IniProxyUse, FProxyUse);
    finally
       FileIni.Free;
