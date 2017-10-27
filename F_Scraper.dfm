@@ -33,6 +33,7 @@ object Frm_Scraper: TFrm_Scraper
       Top = 0
       Width = 960
       Height = 361
+      HorzScrollBar.Tracking = True
       Align = alClient
       BevelInner = bvNone
       BevelOuter = bvNone

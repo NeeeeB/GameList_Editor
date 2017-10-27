@@ -46,7 +46,7 @@ type
       FProxyPwd, FProxyPort: string;
       FProxyUse: Boolean;
       FImgList: TObjectList<TImage>;
-      FInfosList: TObjectList<TDictionary<string, string>>;
+      FInfosList: TStringList;
 
       procedure DisplayPictures;
       procedure WarnUser( aMessage: string );
@@ -73,7 +73,7 @@ procedure TFrm_Scraper.FormCreate(Sender: TObject);
 begin
    FXmlPath:= ExtractFilePath( Application.ExeName ) + Cst_TempXml;
    FImgList:= TObjectList<TImage>.Create;
-   FInfosList:= TObjectList<TDictionary<string, string>>.Create( True );
+   FInfosList:= TStringList.Create( True );
    TranslateComponent( Self );
 end;
 
@@ -115,7 +115,7 @@ begin
    FrmSplash.Refresh;
 
    if GetGameXml( aSysId, FGame ) and LoadPictures then begin
-//      ParseXml;
+      ParseXml;
       DisplayPictures;
       Screen.Cursor:= crDefault;
       FrmSplash.Close;
@@ -184,12 +184,53 @@ end;
 
 //parsing du Xml pour récupérer tout ce qui est description, région, nombre joueurs etc...
 procedure TFrm_Scraper.ParseXml;
+
+   function CreateDict( aNodeList: IXMLNodeList; aAttName: string ): TDictionary<string, string>;
+   var
+      ii: Integer;
+   begin
+      Result:= TDictionary<string, string>.Create;
+      for ii:= 0 to Pred( aNodeList.Count ) do begin
+         Result.Add( aNodeList[ii].Attributes[aAttName], aNodeList[ii].Text );
+      end;
+   end;
+
 var
    Nodes: IXMLNodeList;
    ii: Integer;
+   List: TStringList;
 begin
    //ouverture du fichier xml
    XMLDoc.LoadFromFile( FXmlPath );
+
+   //On trouve le noeud qui nous intéresse
+   Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_NamesNode].ChildNodes;
+   FInfosList.AddObject( Cst_NamesNode, CreateDict( Nodes, Cst_AttRegion ) );
+
+   Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_RegionsNode].ChildNodes;
+   List:= TStringList.Create;
+   for ii:= 0 to Pred( Nodes.Count ) do begin
+      List.Add( Nodes[ii].Text );
+   end;
+   FInfosList.AddObject( Cst_RegionsNode, List );
+
+   Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_SynopNode].ChildNodes;
+   FInfosList.AddObject( Cst_SynopNode, CreateDict( Nodes, Cst_AttLang ) );
+
+   Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_DateNode].ChildNodes;
+   FInfosList.AddObject( Cst_DateNode, CreateDict( Nodes, Cst_AttRegion ) );
+
+   Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_GenreNode].ChildNodes;
+   FInfosList.AddObject( Cst_GenreNode, CreateDict( Nodes, Cst_AttLang ) );
+
+   FInfosList.Add( XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_EditNode].Text );
+
+   FInfosList.Add( XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_DevNode].Text );
+
+   FInfosList.Add( XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_PlayersNode].Text );
+
+   FInfosList.Add( XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_NoteNode].Text );
+
 end;
 
 //Crée les images (si possible) depuis le fichier xml récupéré.
