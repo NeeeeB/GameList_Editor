@@ -118,6 +118,11 @@ type
       Mnu_NetWork: TMenuItem;
       N2: TMenuItem;
       Mnu_ConfigureNetwork: TMenuItem;
+      Mnu_Selection: TMenuItem;
+      Mnu_SetHidden: TMenuItem;
+      Mnu_SetNoHidden: TMenuItem;
+      Mnu_SetFavorite: TMenuItem;
+      Mnu_SetNoFavorite: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -157,6 +162,10 @@ type
       procedure Mnu_DeleteDuplicatesClick(Sender: TObject);
       procedure Btn_ScrapeClick(Sender: TObject);
       procedure Mnu_ConfigureNetworkClick(Sender: TObject);
+      procedure Mnu_SetHiddenClick(Sender: TObject);
+      procedure Mnu_SetNoHiddenClick(Sender: TObject);
+      procedure Mnu_SetFavoriteClick(Sender: TObject);
+      procedure Mnu_SetNoFavoriteClick(Sender: TObject);
 
    private
 
@@ -183,6 +192,7 @@ type
       procedure ClearAllFields;
       procedure SaveChangesToGamelist;
       procedure EnableControls( aValue: Boolean );
+      procedure EnableComponents( aValue: Boolean );
       procedure CheckIfChangesToSave;
       procedure ChangeImage( const aPath: string; aGame: TGame );
       procedure LoadSystemLogo( aPictureName: string );
@@ -195,6 +205,7 @@ type
       procedure StopOrStartES( aStop, aRecal: Boolean );
       procedure DeleteDuplicates( aSystem: string );
       procedure ReloadIni;
+      procedure SetFavOrHidden( aFav, aValue: Boolean );
 
       function getSystemKind: TSystemKind;
       function getCurrentFolderName: string;
@@ -753,14 +764,17 @@ begin
    Lbl_Region.Enabled:= aValue;
    Lbl_Hidden.Enabled:= aValue;
    Lbl_Favorite.Enabled:= aValue;
+
    Btn_ChangeImage.Enabled:= aValue;
    Btn_Scrape.Enabled:= aValue;
    Btn_RemovePicture.Enabled:= aValue;
    Btn_SetDefaultPicture.Enabled:= aValue;
    Btn_MoreInfos.Enabled:= aValue;
    Btn_Delete.Enabled:= aValue;
+
    Mnu_System.Enabled:= aValue or not ( GSystemList.Count = 0 );
    Mnu_Game.Enabled:= aValue and not ( Lbx_Games.Items.Count = 0 );
+
    Edt_Name.Enabled:= aValue;
    Edt_Genre.Enabled:= aValue;
    Edt_Rating.Enabled:= aValue;
@@ -770,6 +784,7 @@ begin
    Edt_ReleaseDate.Enabled:= aValue;
    Edt_NbPlayers.Enabled:= aValue;
    Mmo_Description.Enabled:= aValue;
+
    Cbx_Hidden.Enabled:= aValue;
    Cbx_Favorite.Enabled:= aValue;
 end;
@@ -932,7 +947,54 @@ end;
 procedure TFrm_Editor.Lbx_GamesClick(Sender: TObject);
 begin
    ClearAllFields;
-   LoadGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) )
+   if ( Lbx_Games.SelCount > 1 ) then begin
+      EnableComponents( False );
+   end else begin
+      EnableComponents( True );
+      LoadGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
+   end;
+end;
+
+//Désactivation des composants quand multiselect
+procedure TFrm_Editor.EnableComponents( aValue: Boolean );
+begin
+   Edt_Name.Enabled:= aValue;
+   Edt_Genre.Enabled:= aValue;
+   Edt_Rating.Enabled:= aValue;
+   Edt_Region.Enabled:= aValue;
+   Edt_Developer.Enabled:= aValue;
+   Edt_Publisher.Enabled:= aValue;
+   Edt_NbPlayers.Enabled:= aValue;
+   Edt_ReleaseDate.Enabled:= aValue;
+
+   Mmo_Description.Enabled:= aValue;
+
+   Cbx_Hidden.Enabled:= aValue;
+   Cbx_Favorite.Enabled:= aValue;
+
+   Lbl_Name.Enabled:= aValue;
+   Lbl_Date.Enabled:= aValue;
+   Lbl_Genre.Enabled:= aValue;
+   Lbl_Region.Enabled:= aValue;
+   Lbl_Players.Enabled:= aValue;
+   Lbl_Rating.Enabled:= aValue;
+   Lbl_Hidden.Enabled:= aValue;
+   Lbl_Favorite.Enabled:= aValue;
+   Lbl_Description.Enabled:= aValue;
+   Lbl_Publisher.Enabled:= aValue;
+
+   Lbl_Developer.Enabled:= aValue;
+   Btn_MoreInfos.Enabled:= aValue;
+   Btn_Delete.Enabled:= aValue;
+   Btn_Scrape.Enabled:= aValue;
+   Btn_ChangeImage.Enabled:= aValue;
+   Btn_RemovePicture.Enabled:= aValue;
+   Btn_SetDefaultPicture.Enabled:= aValue;
+   Btn_ChangeAll.Enabled:= aValue and ( Cbx_Filter.ItemIndex = 1) and ( Lbx_Games.Items.Count > 0 );
+
+   Mnu_Game.Enabled:= aValue;
+   Mnu_System.Enabled:= aValue;
+   Mnu_Selection.Enabled:= not aValue;
 end;
 
 //Chargement dans les différents champs des infos du jeu sélectionné
@@ -1277,15 +1339,18 @@ var
    _Node: IXMLNode;
    _Game: TGame;
    _GameListPath, _Date: string;
-   _NodeAdded, _NameChanged: Boolean;
+   _NodeAdded: Boolean;
+   _Index: Integer;
 begin
    _NodeAdded:= False;
-   _NameChanged:= False;
+
    //On récupère le chemin du fichier gamelist.xml
    _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
 
    //On récupère l'objet TGame qu'on souhaite modifier
    _Game:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
+
+   _Index:= Lbx_Games.ItemIndex;
 
    //On ouvre le fichier xml
    XMLDoc.LoadFromFile( _GameListPath );
@@ -1304,7 +1369,6 @@ begin
       _Node.ChildNodes.Nodes[Cst_Name].Text:= Edt_Name.Text;
       _Game.Name:= Edt_Name.Text;
       Lbx_Games.Items[Lbx_Games.ItemIndex]:= Edt_Name.Text;
-      _NameChanged:= True;
    end;
    if not ( _Game.Genre.Equals( Edt_Genre.Text ) ) then begin
       _Node.ChildNodes.Nodes[Cst_Genre].Text:= Edt_Genre.Text;
@@ -1377,9 +1441,125 @@ begin
    XMLDoc.SaveToFile( _GameListPath );
    XMLDoc.Active:= False;
 
-   //si on a changé le nom du jeu, on rafraichit la liste
-   if _NameChanged then  LoadGamesList( getCurrentFolderName );
+   //on rafraichit la liste
+   LoadGamesList( getCurrentFolderName );
 
+   //et on remet la sélection sur le bon item si possible
+   if ( ( _Index = 0 ) and ( Lbx_Games.Count = 0 ) ) or
+      ( ( _Index > 1 ) and ( Lbx_Games.Count > 1 ) ) then
+      Lbx_Games.ItemIndex:= Pred( _Index )
+   else Lbx_Games.ItemIndex:= _Index;
+   Lbx_Games.Selected[Lbx_Games.ItemIndex]:= True;
+   if ( Lbx_Games.ItemIndex > 0 ) then Lbx_Games.Selected[0]:= False;
+   if ( Lbx_Games.Count > 0 ) then
+      LoadGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
+
+
+end;
+
+//Diverse sections du menu sélection
+procedure TFrm_Editor.Mnu_SetFavoriteClick(Sender: TObject);
+begin
+   SetFavOrHidden( True, True );
+end;
+
+procedure TFrm_Editor.Mnu_SetHiddenClick(Sender: TObject);
+begin
+   SetFavOrHidden( False, True );
+end;
+
+procedure TFrm_Editor.Mnu_SetNoFavoriteClick(Sender: TObject);
+begin
+   SetFavOrHidden( True, False );
+end;
+
+procedure TFrm_Editor.Mnu_SetNoHiddenClick(Sender: TObject);
+begin
+   SetFavOrHidden( False, False );
+end;
+
+//Passe la sélection en favoris ou hidden (et inversement)
+procedure TFrm_Editor.SetFavOrHidden( aFav, aValue: Boolean );
+
+   //Permet de s'assurer q'un noeud existe
+   function NodeExists( aNode: IXMLNode; const aNodeName: string ): Boolean;
+   begin
+      Result:= False;
+      if Assigned( aNode.ChildNodes.FindNode( aNodeName ) ) then
+         Result:= True;
+   end;
+
+var
+   _Node: IXMLNode;
+   _GameListPath: string;
+   _NodeAdded: Boolean;
+   _Game: TGame;
+   ii: Integer;
+begin
+   _NodeAdded:= False;
+   //On récupère le chemin du fichier gamelist.xml
+   _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
+
+   //On ouvre le fichier xml
+   XMLDoc.LoadFromFile( _GameListPath );
+
+   Screen.Cursor:= crHourGlass;
+   ProgressBar.Visible:= True;
+   ProgressBar.Position:= 0;
+   ProgressBar.Max:= Lbx_Games.SelCount;
+
+   //on boucle sur les jeux sélectionnés
+   for ii:= 0 to Pred( Lbx_Games.Items.Count ) do begin
+      if ( Lbx_Games.Selected[ii] ) then begin
+
+         //On récupère le jeu correspondant
+         _Game:= ( Lbx_Games.Items.Objects[ii] as TGame );
+
+         //On récupère le premier noeud "game"
+         _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
+
+         //Et on boucle pour trouver le bon noeud
+         repeat
+            if ( _Node.ChildNodes.Nodes[Cst_Path].Text = _Game.RomPath ) then Break;
+            _Node := _Node.NextSibling;
+         until not Assigned( _Node );
+
+         if aFav then begin
+            if not ( NodeExists( _Node, Cst_Favorite ) ) then begin
+               _Node.AddChild( Cst_Favorite );
+               _NodeAdded:= True;
+            end;
+            if aValue then _Node.ChildNodes.Nodes[Cst_Favorite].Text:= Cst_True
+            else _Node.ChildNodes.Nodes[Cst_Favorite].Text:= Cst_False;
+            _Game.Favorite:= Ord( aValue );
+         end else begin
+            if not ( NodeExists( _Node, Cst_Hidden ) ) then begin
+               _Node.AddChild( Cst_Hidden );
+               _NodeAdded:= True;
+            end;
+            if aValue then _Node.ChildNodes.Nodes[Cst_Hidden].Text:= Cst_True
+            else _Node.ChildNodes.Nodes[Cst_Hidden].Text:= Cst_False;
+            _Game.Hidden:= Ord( aValue );
+         end;
+
+         ProgressBar.Position:= ProgressBar.Position + 1;
+
+      end;
+   end;
+
+   ProgressBar.Visible:= False;
+
+   if _NodeAdded then begin
+      XMLDoc.XML.Text:= Xml.Xmldoc.FormatXMLData( XMLDoc.XML.Text );
+      XMLDoc.Active:= True;
+   end;
+   XMLDoc.SaveToFile( _GameListPath );
+   XMLDoc.Active:= False;
+
+   //on rafraichit la liste
+   LoadGamesList( getCurrentFolderName );
+
+   Screen.Cursor:= crDefault;
 end;
 
 //Action au click sur le bouton delete this game
@@ -1403,6 +1583,8 @@ begin
       if ( Lbx_Games.Count > 0 ) then
          LoadGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
       Lbx_Games.SetFocus;
+      Lbx_Games.Selected[Lbx_Games.ItemIndex]:= True;
+      if ( Lbx_Games.ItemIndex > 0 ) then Lbx_Games.Selected[0]:= False;
    end;
 end;
 

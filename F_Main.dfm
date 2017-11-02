@@ -6573,6 +6573,7 @@ object Frm_Editor: TFrm_Editor
     Height = 408
     DoubleBuffered = True
     ItemHeight = 13
+    MultiSelect = True
     ParentDoubleBuffered = False
     Sorted = True
     TabOrder = 1
@@ -6907,6 +6908,26 @@ object Frm_Editor: TFrm_Editor
           OnClick = ChangeCaseGameClick
         end
       end
+      object Mnu_Selection: TMenuItem
+        Caption = 'Selection'
+        Enabled = False
+        object Mnu_SetHidden: TMenuItem
+          Caption = 'Add to Hidden'
+          OnClick = Mnu_SetHiddenClick
+        end
+        object Mnu_SetNoHidden: TMenuItem
+          Caption = 'Remove from Hidden'
+          OnClick = Mnu_SetNoHiddenClick
+        end
+        object Mnu_SetFavorite: TMenuItem
+          Caption = 'Add to Favorites'
+          OnClick = Mnu_SetFavoriteClick
+        end
+        object Mnu_SetNoFavorite: TMenuItem
+          Caption = 'Remove from Favorites'
+          OnClick = Mnu_SetNoFavoriteClick
+        end
+      end
     end
     object Mnu_Options: TMenuItem
       Caption = 'Options'
@@ -7164,7 +7185,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800E40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800F00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
