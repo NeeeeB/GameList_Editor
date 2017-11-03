@@ -57,6 +57,7 @@ type
       function GetGameXml( const aSysId: string; aGame: TGame ): Boolean;
       function LoadPictures: Boolean;
       function GetFileSize( const aPath: string ): string;
+      function StringToIsoDate( const aDate: string ): string;
 
    public
       procedure Execute( const aSysId, aRootPath, aCurrentFolder, aImageFolder,
@@ -195,6 +196,28 @@ procedure TFrm_Scraper.ParseXml;
       end;
    end;
 
+   function CreateGenreDict( aNodeList: IXMLNodeList; aAttId, aAttLang: string ): TObjectDictionary<string, TDictionary<string, string>>;
+   var
+      ii: Integer;
+      id: string;
+      List: TDictionary<string, string>;
+   begin
+      Result:= TObjectDictionary<string, TDictionary<string, string>>.Create( [doOwnsValues] );
+      List:= TDictionary<string, string>.Create;
+      id:= aNodeList[0].Attributes[aAttId];
+      for ii:= 0 to Pred( aNodeList.Count ) do begin
+         if ( aNodeList[ii].Attributes[aAttId] = id ) then
+            List.Add( aNodeList[ii].Attributes[aAttLang], aNodeList[ii].Text )
+         else begin
+            Result.Add( id, List );
+            id:= aNodeList[ii].Attributes[aAttId];
+            List:= TDictionary<string, string>.Create;
+            List.Add( aNodeList[ii].Attributes[aAttLang], aNodeList[ii].Text );
+         end;
+      end;
+      Result.Add( id, List );
+   end;
+
 var
    Nodes: IXMLNodeList;
    ii: Integer;
@@ -205,23 +228,25 @@ begin
 
    //On trouve le noeud qui nous intéresse
    Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_NamesNode].ChildNodes;
-   FInfosList.AddObject( Cst_NamesNode, CreateDict( Nodes, Cst_AttRegion ) );
+   if Assigned( Nodes ) then FInfosList.AddObject( Cst_NamesNode, CreateDict( Nodes, Cst_AttRegion ) );
 
    Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_RegionsNode].ChildNodes;
-   List:= TStringList.Create;
-   for ii:= 0 to Pred( Nodes.Count ) do begin
-      List.Add( Nodes[ii].Text );
+   if Assigned( Nodes ) then begin
+      List:= TStringList.Create;
+      for ii:= 0 to Pred( Nodes.Count ) do begin
+         List.Add( Nodes[ii].Text );
+      end;
+      FInfosList.AddObject( Cst_RegionsNode, List );
    end;
-   FInfosList.AddObject( Cst_RegionsNode, List );
 
    Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_SynopNode].ChildNodes;
-   FInfosList.AddObject( Cst_SynopNode, CreateDict( Nodes, Cst_AttLang ) );
+   if Assigned( Nodes ) then FInfosList.AddObject( Cst_SynopNode, CreateDict( Nodes, Cst_AttLang ) );
 
    Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_DateNode].ChildNodes;
-   FInfosList.AddObject( Cst_DateNode, CreateDict( Nodes, Cst_AttRegion ) );
+   if Assigned( Nodes ) then FInfosList.AddObject( Cst_DateNode, CreateDict( Nodes, Cst_AttRegion ) );
 
    Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_GenreNode].ChildNodes;
-   FInfosList.AddObject( Cst_GenreNode, CreateDict( Nodes, Cst_AttLang ) );
+   if Assigned( Nodes ) then FInfosList.AddObject( Cst_GenreNode, CreateGenreDict( Nodes, Cst_AttId, Cst_AttLang ) );
 
    FInfosList.Add( XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_EditNode].Text );
 
@@ -296,7 +321,7 @@ begin
 
    //Et on boucle pour trouver les noeuds qui nous intéressent
    for ii:= 0 to Pred( Nodes.Count ) do begin
-      //C'est moche mais ça évite le "na répond pas"
+      //C'est moche mais ça évite le "ne répond pas"
       Application.ProcessMessages;
 
       if ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox2d ) or
@@ -442,6 +467,35 @@ begin
                              FGame.RomNameWoExt + Cst_ImageSuffixPng;
    Screen.Cursor:= crDefault;
    Close;
+end;
+
+//Renvoie une date format Iso pour sauvegarde dans XML
+function TFrm_Scraper.StringToIsoDate( const aDate: string ): string;
+var
+   FullStr, Day, Month, Year: string;
+begin
+   FullStr:= aDate;
+   Result:= '';
+
+   //si la chaine fait 4 caractères de long
+   if ( Length( FullStr) = 4 ) then
+      Result:= FullStr + Cst_DateLongFill + Cst_DateSuffix;
+
+   //si la chaine fait 7 caractères de long
+   if ( Length( FullStr) = 7 ) then begin
+      Month:= Copy( FullStr, 6, 2 );
+      Year:= Copy( FullStr, 1, 4 );
+      Result:= Year + Month + Cst_DateShortFill + Cst_DateSuffix;
+   end;
+
+   //si la chaine fait 10 caractères de long
+   if ( Length( FullStr) = 10 ) then begin
+      Day:= Copy( FullStr, 9, 2 );
+      Month:= Copy( FullStr, 6, 2 );
+      Year:= Copy( FullStr, 1, 4 );
+      Result:= Year + Month + Day + Cst_DateSuffix;
+   end;
+
 end;
 
 //Pour récupérer la taille du fichier du jeu

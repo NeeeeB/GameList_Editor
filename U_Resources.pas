@@ -271,6 +271,46 @@ type
                  lnSpanish,
                  lnPortuguese_BR );
 
+   //enum pour les pays
+   TCountryName = ( cnDe,
+                    cnAsi,
+                    cnAu,
+                    cnBr,
+                    cnBg,
+                    cnCa,
+                    cnCl,
+                    cnCn,
+                    cnAme,
+                    cnKr,
+                    cnCus,
+                    cnDk,
+                    cnSp,
+                    cnEu,
+                    cnFi,
+                    cnFr,
+                    cnGr,
+                    cnHu,
+                    cnIl,
+                    cnIt,
+                    cnJp,
+                    cnKw,
+                    cnWor,
+                    cnMor,
+                    cnNo,
+                    cnNz,
+                    cnOce,
+                    cnNl,
+                    cnPe,
+                    cnPl,
+                    cnPt,
+                    cnCz,
+                    cnUk,
+                    cnRu,
+                    cnSk,
+                    cnSe,
+                    cnTw,
+                    cnTr,
+                    cnUs );
 const
    Cst_Path = 'path';
    Cst_Game = 'game';
@@ -369,6 +409,7 @@ const
    Cst_AttFormat = 'format';
    Cst_AttRegion = 'region';
    Cst_AttLang = 'langue';
+   Cst_AttId = 'id';
    Cst_PngExt = 'png';
    Cst_MediaBox2d = 'box-2D';
    Cst_MediaScreenShot = 'ss';
@@ -584,6 +625,13 @@ const
         '113', '25', '82', '14', '104', '31', '114', '57', '135', '123',
         '19', '20', '109', '105', '102', '11', '45', '46', '76', '77', '64',
         '64', '86', '48', '66', '135', '23', '13', '61', '16', '1' );
+
+   Cst_CountryNameFull: array[TCountryName] of array[1..5] of string =
+      ( ( 'Allemagne', 'Deutschland', 'Germany', 'Alemania', 'Alemanha' ),
+        ( 'Asie', 'Asien', 'Asia', 'Asia', 'Ásia' ),
+        ( 'Australie', 'Australien', 'Australia', 'Australia', 'Austrália' ),
+        ( 'Brésil', 'Brasilien', 'Brazil', 'Brasil', 'Brasil' ),
+        ( 'Bulgarie', 'Bulgarien', 'Bulgaria', 'Bulgaria', 'Bulgária' ) );
 
 implementation
 
