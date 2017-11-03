@@ -123,6 +123,7 @@ type
       Mnu_SetNoHidden: TMenuItem;
       Mnu_SetFavorite: TMenuItem;
       Mnu_SetNoFavorite: TMenuItem;
+      Chk_ListByRom: TCheckBox;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -166,6 +167,7 @@ type
       procedure Mnu_SetNoHiddenClick(Sender: TObject);
       procedure Mnu_SetFavoriteClick(Sender: TObject);
       procedure Mnu_SetNoFavoriteClick(Sender: TObject);
+      procedure Chk_ListByRomClick(Sender: TObject);
 
    private
 
@@ -783,10 +785,12 @@ begin
    Edt_Publisher.Enabled:= aValue;
    Edt_ReleaseDate.Enabled:= aValue;
    Edt_NbPlayers.Enabled:= aValue;
+   Edt_RomPath.Enabled:= aValue;
    Mmo_Description.Enabled:= aValue;
 
    Cbx_Hidden.Enabled:= aValue;
    Cbx_Favorite.Enabled:= aValue;
+   Chk_ListByRom.Enabled:= aValue;
 end;
 
 //Action lorsqu'on change le contenu d'un des champs
@@ -896,9 +900,15 @@ begin
             ( ( _FilterIndex = 11 ) and ( _TmpGame.Favorite = 1 ) ) or
             ( ( _FilterIndex = 12 ) and ( _TmpGame.IsOrphan ) ) then begin
 
-            if ( Edt_Search.Text = '' ) or
-               ContainsText( _TmpGame.Name, Edt_Search.Text ) then
-               Lbx_Games.Items.AddObject( _TmpGame.Name, _TmpGame );
+            if ( not Chk_ListByRom.Checked ) and
+               ( ( Edt_Search.Text = '' ) or
+               ContainsText( _TmpGame.Name, Edt_Search.Text ) ) then
+               Lbx_Games.Items.AddObject( _TmpGame.Name, _TmpGame )
+
+            else if ( Chk_ListByRom.Checked ) and
+                    ( ( Edt_Search.Text = '' ) or
+                    ContainsText( _TmpGame.RomName, Edt_Search.Text ) ) then
+               Lbx_Games.Items.AddObject( _TmpGame.RomName, _TmpGame );
          end
       end;
 
@@ -966,11 +976,13 @@ begin
    Edt_Publisher.Enabled:= aValue;
    Edt_NbPlayers.Enabled:= aValue;
    Edt_ReleaseDate.Enabled:= aValue;
+   Edt_RomPath.Enabled:= aValue;
 
    Mmo_Description.Enabled:= aValue;
 
    Cbx_Hidden.Enabled:= aValue;
    Cbx_Favorite.Enabled:= aValue;
+   Chk_ListByRom.Enabled:= aValue;
 
    Lbl_Name.Enabled:= aValue;
    Lbl_Date.Enabled:= aValue;
@@ -1773,6 +1785,12 @@ begin
    Cbx_Hidden.Enabled:= (Sender as TCheckBox).Checked;
    Cbx_Favorite.Enabled:= (Sender as TCheckBox).Checked;
 
+end;
+
+//Au click sur la checkbox "list by rom name"
+procedure TFrm_Editor.Chk_ListByRomClick(Sender: TObject);
+begin
+   LoadGamesList( getCurrentFolderName );
 end;
 
 //Au click sur le menuitem godmode on change la visibilité du bouton delete

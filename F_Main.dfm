@@ -5325,7 +5325,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Lbl_SelectSystem: TLabel
     Left = 32
-    Top = 133
+    Top = 132
     Width = 91
     Height = 13
     Caption = 'Select your system'
@@ -5341,7 +5341,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Lbl_Filter: TLabel
     Left = 308
-    Top = 133
+    Top = 132
     Width = 79
     Height = 13
     Caption = 'Select your filter'
@@ -6458,7 +6458,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Lbl_Search: TLabel
     Left = 32
-    Top = 176
+    Top = 175
     Width = 33
     Height = 13
     Caption = 'Search'
@@ -6837,6 +6837,18 @@ object Frm_Editor: TFrm_Editor
     TabOrder = 24
     OnClick = Btn_ScrapeClick
   end
+  object Chk_ListByRom: TCheckBox
+    Left = 306
+    Top = 173
+    Width = 196
+    Height = 17
+    BiDiMode = bdLeftToRight
+    Caption = 'List by Rom name'
+    Enabled = False
+    ParentBiDiMode = False
+    TabOrder = 25
+    OnClick = Chk_ListByRomClick
+  end
   object XMLDoc: TXMLDocument
     NodeIndentStr = #9
     Options = [doAttrNull, doAutoPrefix, doNamespaceDecl]
@@ -7185,7 +7197,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800F00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800F40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
