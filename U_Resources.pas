@@ -265,9 +265,9 @@ type
                   tnWindowsBasic );
 
    //enum pour les langues
-   TLangName = ( lnEnglish,
-                 lnFrench,
+   TLangName = ( lnFrench,
                  lnGerman,
+                 lnEnglish,
                  lnSpanish,
                  lnPortuguese_BR );
 
@@ -341,6 +341,7 @@ const
    Cst_LogoPicsFolder = 'Resources\SystemsLogos\';
    Cst_IniFilePath = 'Resources\Settings.ini';
    Cst_ResourcesFolder = 'Resources\';
+
    Cst_IniOptions = 'Options';
    Cst_IniGodMode = 'GodMode';
    Cst_IniAutoHash = 'AutoHash';
@@ -360,6 +361,7 @@ const
    Cst_IniProxyServer = 'ProxyServer';
    Cst_IniProxyPort = 'ProxyPort';
    Cst_IniProxyUse = 'ProxyUse';
+
    Cst_GenesisLogoName = 'genesis.png';
    Cst_ThemeNumber = 'ThemeNumber';
    Cst_MenuTheme = 'Mnu_Theme';
@@ -442,9 +444,9 @@ const
 
    //tableau de liaison enum langues / noms langues
    Cst_LangNameStr: array[TLangName] of string =
-      ( 'en',
-        'fr',
+      ( 'fr',
         'de',
+        'en',
         'es',
         'pt_BR' );
 
@@ -631,7 +633,41 @@ const
         ( 'Asie', 'Asien', 'Asia', 'Asia', 'Ásia' ),
         ( 'Australie', 'Australien', 'Australia', 'Australia', 'Austrália' ),
         ( 'Brésil', 'Brasilien', 'Brazil', 'Brasil', 'Brasil' ),
-        ( 'Bulgarie', 'Bulgarien', 'Bulgaria', 'Bulgaria', 'Bulgária' ) );
+        ( 'Bulgarie', 'Bulgarien', 'Bulgaria', 'Bulgaria', 'Bulgária' ),
+        ( 'Canada', 'Kanada', 'Canada', 'Canadá', 'Canadá' ),
+        ( 'Chili', 'Chile', 'Chile', 'Chile', 'Chile' ),
+        ( 'Chine', 'China', 'China', 'China', 'China' ),
+        ( 'Continent Américain', 'Amerikanischen Kontinent', 'American continent', 'Continente americano', 'Continente americano' ),
+        ( 'Corée', 'Korea', 'Korea', 'Corea', 'Coreia' ),
+        ( 'Custom', 'Maßgeschneidert', 'Custom', 'Personalizado', 'Personalizadas' ),
+        ( 'Danemark', 'Dänemark', 'Denmark', 'Dinamarca', 'Dinamarca' ),
+        ( 'Espagne', 'Spanien', 'Spain', 'España', 'Espanha' ),
+        ( 'Europe', 'Europa', 'Europe', 'Europa', 'Europa' ),
+        ( 'Finlande', 'Finnland', 'Finland', 'Finlandia', 'Finlândia' ),
+        ( 'France', 'Frankreich', 'France', 'Francia', 'França' ),
+        ( 'Grèce', 'Griechenland', 'Greece', 'Grecia', 'Grécia' ),
+        ( 'Hongrie', 'Ungarn', 'Hungary', 'Hungría', 'Hungria' ),
+        ( 'Israel', 'Israel', 'Israel', 'Israel', 'Israel' ),
+        ( 'Italie', 'Italien', 'Italy', 'Italia', 'Itália' ),
+        ( 'Japon', 'Japan', 'Japan', 'Japón', 'Japão' ),
+        ( 'Koweït', 'Kuwait', 'Kuwait', 'Kuwait', 'Kuweit' ),
+        ( 'Monde', 'World', 'World', 'Mundo', 'Mundo' ),
+        ( 'Moyen-Orient', 'Naher Osten', 'Middle East', 'Medio Oriente', 'Médio Oriente' ),
+        ( 'Norvège', 'Norwegen', 'Norway', 'Noruega', 'Noruega' ),
+        ( 'Nouvelle-Zélande', 'Neuseeland', 'New Zealand', 'Nueva Zelanda', 'Nova Zelândia' ),
+        ( 'Océanie', 'Ozeanien', 'Oceania', 'Oceanía', 'Oceânia' ),
+        ( 'Pays-Bas', 'Niederlande', 'Netherlands', 'Holanda', 'Holanda' ),
+        ( 'Pérou', 'Peru', 'Peru', 'Perú', 'Peru' ),
+        ( 'Pologne', 'Polen', 'Poland', 'Polonia', 'Polônia' ),
+        ( 'Portugal', 'Portugal', 'Portugal', 'Portugal', 'Portugal' ),
+        ( 'République Tchèque', 'Tschechien', 'Czech republic', 'República Checa', 'República Checa' ),
+        ( 'Royaume-Uni', 'Großbritannien', 'United Kingdom', 'Reino Unido', 'Reino Unido' ),
+        ( 'Russie', 'Russland', 'Russia', 'Rusia', 'Rússia' ),
+        ( 'Slovaquie', 'Slowakei', 'Slovakia', 'Eslovaquia', 'Eslováquia' ),
+        ( 'Suede', 'Schweden', 'Sweden', 'Suecia', 'Suécia' ),
+        ( 'Taiwan', 'Taiwan', 'Taiwan', 'Taiwan', 'Taiwan' ),
+        ( 'Turquie', 'Türkei', 'Turkey', 'Turquía', 'Turquia' ),
+        ( 'USA', 'USA', 'USA', 'EUA', 'EUA' ) );
 
 implementation
 

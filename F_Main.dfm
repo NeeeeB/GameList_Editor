@@ -4,7 +4,7 @@ object Frm_Editor: TFrm_Editor
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'GameList Editor'
-  ClientHeight = 690
+  ClientHeight = 689
   ClientWidth = 1210
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -6939,6 +6939,10 @@ object Frm_Editor: TFrm_Editor
           Caption = 'Remove from Favorites'
           OnClick = Mnu_SetNoFavoriteClick
         end
+        object Mnu_NameEditor: TMenuItem
+          Caption = 'Advanced name editor'
+          OnClick = Mnu_NameEditorClick
+        end
       end
     end
     object Mnu_Options: TMenuItem
@@ -7145,21 +7149,21 @@ object Frm_Editor: TFrm_Editor
         Caption = 'Language'
         object Mnu_Lang1: TMenuItem
           AutoCheck = True
-          Caption = 'English'
+          Caption = 'French'
           RadioItem = True
           OnClick = Mnu_LangClick
         end
         object Mnu_Lang2: TMenuItem
           Tag = 1
           AutoCheck = True
-          Caption = 'French'
+          Caption = 'German'
           RadioItem = True
           OnClick = Mnu_LangClick
         end
         object Mnu_Lang3: TMenuItem
           Tag = 2
           AutoCheck = True
-          Caption = 'German'
+          Caption = 'English'
           RadioItem = True
           OnClick = Mnu_LangClick
         end
@@ -7197,7 +7201,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800F40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800000110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

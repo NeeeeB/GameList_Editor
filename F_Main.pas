@@ -10,7 +10,7 @@ uses
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
    Xml.omnixmldom, Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
    F_MoreInfos, F_About, F_Help, F_ConfigureSSH, F_Scraper, U_gnugettext, U_Resources, U_Game,
-   F_ConfigureNetwork;
+   F_ConfigureNetwork, F_AdvNameEditor;
 
 type
    TFrm_Editor = class(TForm)
@@ -92,10 +92,10 @@ type
       Mnu_Theme17: TMenuItem;
       N4: TMenuItem;
       Mnu_Language: TMenuItem;
-      Mnu_Lang1: TMenuItem;
-      Mnu_Lang2: TMenuItem;
-      Edt_RomPath: TEdit;
       Mnu_Lang3: TMenuItem;
+      Mnu_Lang1: TMenuItem;
+      Edt_RomPath: TEdit;
+      Mnu_Lang2: TMenuItem;
       Edt_Search: TEdit;
       Lbl_Search: TLabel;
       Mnu_DeleteOrphans: TMenuItem;
@@ -124,6 +124,7 @@ type
       Mnu_SetFavorite: TMenuItem;
       Mnu_SetNoFavorite: TMenuItem;
       Chk_ListByRom: TCheckBox;
+      Mnu_NameEditor: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -168,6 +169,7 @@ type
       procedure Mnu_SetFavoriteClick(Sender: TObject);
       procedure Mnu_SetNoFavoriteClick(Sender: TObject);
       procedure Chk_ListByRomClick(Sender: TObject);
+      procedure Mnu_NameEditorClick(Sender: TObject);
 
    private
 
@@ -208,6 +210,9 @@ type
       procedure DeleteDuplicates( aSystem: string );
       procedure ReloadIni;
       procedure SetFavOrHidden( aFav, aValue: Boolean );
+      procedure TransformGamesNames( aRemChars, aAddChars, aChangecase: Boolean;
+                                     aNbStart, aNbEnd, aCaseIndex: Integer;
+                                     aStringStart, aStringEnd : string );
 
       function getSystemKind: TSystemKind;
       function getCurrentFolderName: string;
@@ -2185,6 +2190,113 @@ begin
          Lbl_NbGamesFound.Caption:= IntToStr( Lbx_Games.Items.Count ) + ' / ' +
                                     IntToStr( _TmpList.Count ) + Rst_GamesFound;
    end;
+end;
+
+//Au click sur le menu item Advanced name editor
+procedure TFrm_Editor.Mnu_NameEditorClick(Sender: TObject);
+var
+   FrmNameEditor: TFrm_AdvNameEditor;
+   RemChars, AddChars, ChangeCase: Boolean;
+   NbStart, NbEnd, CaseIndex, ii: Integer;
+   StringStart, StringEnd, Preview: string;
+begin
+   for ii:= 0 to Pred( Lbx_Games.Items.Count ) do begin
+      if ( Lbx_Games.Selected[ii] ) then begin
+         Preview:= ( Lbx_Games.Items.Objects[ii] as TGame).Name;
+         Break;
+      end;
+   end;
+
+   FrmNameEditor:= TFrm_AdvNameEditor.Create( nil );
+   try
+      if FrmNameEditor.Execute( RemChars, AddChars, ChangeCase, NbStart, NbEnd,
+                                CaseIndex, StringStart, StringEnd, Preview ) then begin
+         TransformGamesNames( RemChars, AddChars, ChangeCase, NbStart,
+                                NbEnd, CaseIndex, StringStart, StringEnd );
+         LoadGamesList( getCurrentFolderName );
+      end;
+   finally
+      FrmNameEditor.Free;
+   end;
+end;
+
+//Transforme les noms des jeux de la sélection selon les options
+//choisies dans l'éditeur avancé.
+procedure TFrm_Editor.TransformGamesNames( aRemChars, aAddChars, aChangecase: Boolean;
+                                           aNbStart, aNbEnd, aCaseIndex: Integer;
+                                           aStringStart, aStringEnd : string );
+var
+   _Node: IXMLNode;
+   _GameListPath, TmpStr: string;
+   _Game: TGame;
+   ii: Integer;
+begin
+   //On récupère le chemin du fichier gamelist.xml
+   _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
+
+   //On ouvre le fichier xml
+   XMLDoc.LoadFromFile( _GameListPath );
+
+   Screen.Cursor:= crHourGlass;
+   ProgressBar.Visible:= True;
+   ProgressBar.Position:= 0;
+   ProgressBar.Max:= Lbx_Games.SelCount;
+
+   //on boucle sur les jeux sélectionnés
+   for ii:= 0 to Pred( Lbx_Games.Items.Count ) do begin
+      if ( Lbx_Games.Selected[ii] ) then begin
+
+         //On récupère le jeu correspondant
+         _Game:= ( Lbx_Games.Items.Objects[ii] as TGame );
+         TmpStr:= _Game.Name;
+
+         if aRemChars then begin
+            if ( aNbStart > 0 ) then
+               TmpStr:= Copy( TmpStr, Succ( aNbStart ), ( TmpStr.Length - aNbStart ) );
+            if ( aNbEnd > 0 ) then
+               SetLength( TmpStr, TmpStr.Length - aNbEnd );
+         end;
+
+         if aChangeCase then begin
+            case aCaseIndex of
+               0: TmpStr[1]:= UpCase( TmpStr[1] );
+               1: TmpStr:= UpperCase( TmpStr );
+               2: TmpStr:= LowerCase( TmpStr );
+            end;
+         end;
+
+         if aAddChars then begin
+            if not ( aStringStart.IsEmpty ) then
+               TmpStr:= aStringStart + TmpStr;
+            if not ( aStringEnd.IsEmpty ) then
+               TmpStr:= TmpStr + aStringEnd;
+         end;
+
+         //on change le nom du jeu par le nouveau
+         _Game.Name:= TmpStr;
+
+         //On récupère le premier noeud "game"
+         _Node := XMLDoc.DocumentElement.ChildNodes.FindNode( Cst_Game );
+
+         //Et on boucle pour trouver le bon noeud
+         repeat
+            if ( _Node.ChildNodes.Nodes[Cst_Path].Text = _Game.RomPath ) then Break;
+            _Node := _Node.NextSibling;
+         until not Assigned( _Node );
+
+         //on change le nom du jeu dans le xml
+         _Node.ChildNodes.Nodes[Cst_Name].Text:= TmpStr;
+
+      end;
+   end;
+
+   ProgressBar.Visible:= False;
+
+   //et on sauvegarde
+   XMLDoc.SaveToFile( _GameListPath );
+   XMLDoc.Active:= False;
+
+    Screen.Cursor:= crDefault;
 end;
 
 //Click sur le menuitem "Quit"

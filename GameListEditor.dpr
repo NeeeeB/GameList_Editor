@@ -14,7 +14,8 @@ uses
   U_Game in 'U_Game.pas',
   F_Scraper in 'F_Scraper.pas' {Frm_Scraper},
   F_SplashLoading in 'F_SplashLoading.pas' {Frm_Splash},
-  F_ConfigureNetwork in 'F_ConfigureNetwork.pas' {Frm_Network};
+  F_ConfigureNetwork in 'F_ConfigureNetwork.pas' {Frm_Network},
+  F_AdvNameEditor in 'F_AdvNameEditor.pas' {Frm_AdvNameEditor};
 
 {$R *.res}
 

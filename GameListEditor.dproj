@@ -144,6 +144,10 @@
             <Form>Frm_Network</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="F_AdvNameEditor.pas">
+            <Form>Frm_AdvNameEditor</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
