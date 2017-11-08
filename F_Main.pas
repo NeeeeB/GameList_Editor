@@ -125,6 +125,8 @@ type
       Mnu_SetNoFavorite: TMenuItem;
       Chk_ListByRom: TCheckBox;
       Mnu_NameEditor: TMenuItem;
+      Mnu_ExportTxt: TMenuItem;
+      SaveDialog: TSaveDialog;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -170,6 +172,7 @@ type
       procedure Mnu_SetNoFavoriteClick(Sender: TObject);
       procedure Chk_ListByRomClick(Sender: TObject);
       procedure Mnu_NameEditorClick(Sender: TObject);
+      procedure Mnu_ExportTxtClick(Sender: TObject);
 
    private
 
@@ -213,6 +216,7 @@ type
       procedure TransformGamesNames( aRemChars, aAddChars, aChangecase: Boolean;
                                      aNbStart, aNbEnd, aCaseIndex: Integer;
                                      aStringStart, aStringEnd : string );
+      procedure ExportToTxt;
 
       function getSystemKind: TSystemKind;
       function getCurrentFolderName: string;
@@ -1355,11 +1359,12 @@ procedure TFrm_Editor.SaveChangesToGamelist;
 var
    _Node: IXMLNode;
    _Game: TGame;
-   _GameListPath, _Date: string;
-   _NodeAdded: Boolean;
+   _GameListPath, _Date, _NewName: string;
+   _NodeAdded, _NameChanged: Boolean;
    _Index: Integer;
 begin
    _NodeAdded:= False;
+   _NameChanged:= False;
 
    //On récupère le chemin du fichier gamelist.xml
    _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
@@ -1386,24 +1391,46 @@ begin
       _Node.ChildNodes.Nodes[Cst_Name].Text:= Edt_Name.Text;
       _Game.Name:= Edt_Name.Text;
       Lbx_Games.Items[Lbx_Games.ItemIndex]:= Edt_Name.Text;
+      _NameChanged:= True;
+      _NewName:= Edt_Name.Text;
    end;
    if not ( _Game.Genre.Equals( Edt_Genre.Text ) ) then begin
+      if not ( NodeExists( _Node, Cst_Genre ) ) then begin
+         _Node.AddChild( Cst_Genre );
+         _NodeAdded:= True;
+      end;
       _Node.ChildNodes.Nodes[Cst_Genre].Text:= Edt_Genre.Text;
       _Game.Genre:= Edt_Genre.Text;
    end;
    if not ( _Game.Rating.Equals( Edt_Rating.Text ) ) then begin
+      if not ( NodeExists( _Node, Cst_Rating ) ) then begin
+         _Node.AddChild( Cst_Rating );
+         _NodeAdded:= True;
+      end;
       _Node.ChildNodes.Nodes[Cst_Rating].Text:= Edt_Rating.Text;
       _Game.Rating:= Edt_Rating.Text;
    end;
    if not ( _Game.Players.Equals( Edt_NbPlayers.Text ) ) then begin
+      if not ( NodeExists( _Node, Cst_Players ) ) then begin
+         _Node.AddChild( Cst_Players );
+         _NodeAdded:= True;
+      end;
       _Node.ChildNodes.Nodes[Cst_Players].Text:= Edt_NbPlayers.Text;
       _Game.Players:= Edt_NbPlayers.Text;
    end;
    if not ( _Game.Developer.Equals( Edt_Developer.Text ) ) then begin
+      if not ( NodeExists( _Node, Cst_Developer ) ) then begin
+         _Node.AddChild( Cst_Developer );
+         _NodeAdded:= True;
+      end;
       _Node.ChildNodes.Nodes[Cst_Developer].Text:= Edt_Developer.Text;
       _Game.Developer:= Edt_Developer.Text;
    end;
    if not ( _Game.ReleaseDate.Equals( Edt_ReleaseDate.Text ) ) then begin
+      if not ( NodeExists( _Node, Cst_ReleaseDate ) ) then begin
+         _Node.AddChild( Cst_ReleaseDate );
+         _NodeAdded:= True;
+      end;
       _Date:= FormatDateFromString( Edt_ReleaseDate.Text, True );
       if not _Date.IsEmpty then
          _Game.ReleaseDate:= Edt_ReleaseDate.Text
@@ -1414,10 +1441,18 @@ begin
       _Node.ChildNodes.Nodes[Cst_ReleaseDate].Text:= _Date;
    end;
    if not ( _Game.Publisher.Equals( Edt_Publisher.Text ) ) then begin
+      if not ( NodeExists( _Node, Cst_Publisher ) ) then begin
+         _Node.AddChild( Cst_Publisher );
+         _NodeAdded:= True;
+      end;
       _Node.ChildNodes.Nodes[Cst_Publisher].Text:= Edt_Publisher.Text;
       _Game.Publisher:= Edt_Publisher.Text;
    end;
    if not ( _Game.Description.Equals( Mmo_Description.Text ) ) then begin
+      if not ( NodeExists( _Node, Cst_Description ) ) then begin
+         _Node.AddChild( Cst_Description );
+         _NodeAdded:= True;
+      end;
       _Node.ChildNodes.Nodes[Cst_Description].Text:= Mmo_Description.Text;
       _Game.Description:= Mmo_Description.Text;
    end;
@@ -1461,17 +1496,27 @@ begin
    //on rafraichit la liste
    LoadGamesList( getCurrentFolderName );
 
+   if ( Lbx_Games.Count > 0 ) then Lbx_Games.Selected[0]:= False;
+
    //et on remet la sélection sur le bon item si possible
-   if ( ( _Index = 0 ) and ( Lbx_Games.Count = 0 ) ) or
-      ( ( _Index > 1 ) and ( Lbx_Games.Count > 1 ) ) then
-      Lbx_Games.ItemIndex:= Pred( _Index )
-   else Lbx_Games.ItemIndex:= _Index;
-   Lbx_Games.Selected[Lbx_Games.ItemIndex]:= True;
-   if ( Lbx_Games.ItemIndex > 0 ) then Lbx_Games.Selected[0]:= False;
-   if ( Lbx_Games.Count > 0 ) then
+   if ( Lbx_Games.Count = 0 ) then
+      Lbx_Games.ItemIndex:= -1
+   else if ( Lbx_Games.Count > 0 ) then begin
+      if _NameChanged then begin
+         if ( Lbx_Games.Items.IndexOf( _NewName ) >=0 ) then
+            Lbx_Games.ItemIndex:= Lbx_Games.Items.IndexOf( _NewName )
+         else
+         Lbx_Games.ItemIndex:= Pred( _Index );
+      end else if ( _Index >= Lbx_Games.Count ) then begin
+         Lbx_Games.ItemIndex:= Pred( Lbx_Games.Count );
+      end else
+      Lbx_Games.ItemIndex:= _Index;
+   end;
+
+   if ( Lbx_Games.Count > 0 ) then begin
+      Lbx_Games.Selected[Lbx_Games.ItemIndex]:= True;
       LoadGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
-
-
+   end;
 end;
 
 //Diverse sections du menu sélection
@@ -1843,6 +1888,66 @@ end;
 procedure TFrm_Editor.Mnu_DeleteWoPromptClick(Sender: TObject);
 begin
    FDelWoPrompt:= Mnu_DeleteWoPrompt.Checked;
+end;
+
+//Au click sur le menu item export to txt file
+procedure TFrm_Editor.Mnu_ExportTxtClick(Sender: TObject);
+begin
+   ExportToTxt;
+end;
+
+//Permet d'exporter la liste des jeux du système courant dans un fichier txt
+//trié par ordre alphabétique avec délimiteur par lettre
+procedure TFrm_Editor.ExportToTxt;
+var
+   FirstCharRef, FirstCharCurrent: string;
+   SortedList, FormatedList: TStringList;
+   SystemList: TObjectList<TGame>;
+   Game: TGame;
+   ii: Integer;
+begin
+   //on récupère la liste du système courant
+   GSystemList.TryGetValue( getCurrentFolderName, SystemList );
+
+   //On crée la stringlist triée et on la remplit avec noms des jeux.
+   SortedList:= TStringList.Create;
+   SortedList.Sorted:= True;
+   SortedList.Duplicates:= dupAccept;
+   //on crée la liste finale formatée pour export
+   FormatedList:= TStringList.Create;
+   try
+      for Game in SystemList do begin
+         if Chk_ListByRom.Checked then SortedList.Add( Game.RomName )
+         else SortedList.Add( Game.Name );
+      end;
+
+      //on chope le premier caractère du premier élément de la liste triée
+      FirstCharRef:= SortedList[0][1];
+      FormatedList.Add( '---------- ' + UpperCase( FirstCharRef ) + ' ----------' );
+      FormatedList.Add( sLineBreak );
+      //ici on boucle sur la liste triée pour remplir la liste formatée
+      for ii:= 0 to Pred( SortedList.Count ) do begin
+         FirstCharCurrent:= SortedList[ii][1];
+         if ( FirstCharCurrent = FirstCharRef ) then
+            FormatedList.Add( SortedList[ii] )
+         else begin
+            FirstCharRef:= FirstCharCurrent;
+            FormatedList.Add( sLineBreak );
+            FormatedList.Add( '---------- ' + UpperCase( FirstCharRef ) + ' ----------' );
+            FormatedList.Add( sLineBreak );
+            FormatedList.Add( SortedList[ii] );
+         end;
+      end;
+
+      //et on demande à l'utilisateur où il veut sauvegarder et avec quel nom
+      if SaveDialog.Execute then
+         FormatedList.SaveToFile( SaveDialog.FileName + Cst_TxtExtension );
+
+   finally
+      //et enfin on libère tout ce petit monde
+      SortedList.Free;
+      FormatedList.Free;
+   end;
 end;
 
 //au click sur le menu item configure SSH

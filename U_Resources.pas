@@ -341,6 +341,7 @@ const
    Cst_LogoPicsFolder = 'Resources\SystemsLogos\';
    Cst_IniFilePath = 'Resources\Settings.ini';
    Cst_ResourcesFolder = 'Resources\';
+   Cst_TxtExtension = '.txt';
 
    Cst_IniOptions = 'Options';
    Cst_IniGodMode = 'GodMode';

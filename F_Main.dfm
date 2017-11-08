@@ -6905,6 +6905,10 @@ object Frm_Editor: TFrm_Editor
           Caption = 'Delete duplicates from gamelist'
           OnClick = Mnu_DeleteDuplicatesClick
         end
+        object Mnu_ExportTxt: TMenuItem
+          Caption = 'Export games list to txt file'
+          OnClick = Mnu_ExportTxtClick
+        end
       end
       object Mnu_Game: TMenuItem
         Caption = 'Game'
@@ -7201,7 +7205,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800000110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800080110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -7339,5 +7343,10 @@ object Frm_Editor: TFrm_Editor
       F81F000000000000FC3F000000000000FE3F000000000000FE7F000000000000
       FFFF000000000000FFFF00000000000000000000000000000000000000000000
       000000000000}
+  end
+  object SaveDialog: TSaveDialog
+    Filter = 'Text File|*.txt'
+    Left = 336
+    Top = 376
   end
 end
