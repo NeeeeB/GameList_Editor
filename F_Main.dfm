@@ -5325,7 +5325,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Lbl_SelectSystem: TLabel
     Left = 32
-    Top = 132
+    Top = 133
     Width = 91
     Height = 13
     Caption = 'Select your system'
@@ -5341,7 +5341,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Lbl_Filter: TLabel
     Left = 308
-    Top = 132
+    Top = 133
     Width = 79
     Height = 13
     Caption = 'Select your filter'
@@ -6456,14 +6456,6 @@ object Frm_Editor: TFrm_Editor
     Center = True
     Proportional = True
   end
-  object Lbl_Search: TLabel
-    Left = 32
-    Top = 175
-    Width = 33
-    Height = 13
-    Caption = 'Search'
-    Enabled = False
-  end
   object Lbl_Name: TLabel
     Left = 536
     Top = 360
@@ -6555,9 +6547,17 @@ object Frm_Editor: TFrm_Editor
     Caption = 'Description'
     Enabled = False
   end
+  object Lbl_Search: TLabel
+    Left = 32
+    Top = 197
+    Width = 33
+    Height = 13
+    Caption = 'Search'
+    Enabled = False
+  end
   object Cbx_Systems: TComboBox
     Left = 29
-    Top = 149
+    Top = 150
     Width = 196
     Height = 21
     Style = csDropDownList
@@ -6568,9 +6568,9 @@ object Frm_Editor: TFrm_Editor
   end
   object Lbx_Games: TListBox
     Left = 29
-    Top = 221
+    Top = 238
     Width = 473
-    Height = 408
+    Height = 391
     DoubleBuffered = True
     ItemHeight = 13
     MultiSelect = True
@@ -6699,7 +6699,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Cbx_Filter: TComboBox
     Left = 306
-    Top = 149
+    Top = 150
     Width = 196
     Height = 21
     Style = csDropDownList
@@ -6820,7 +6820,7 @@ object Frm_Editor: TFrm_Editor
   end
   object Edt_Search: TEdit
     Left = 29
-    Top = 192
+    Top = 212
     Width = 473
     Height = 21
     Enabled = False
@@ -6838,8 +6838,8 @@ object Frm_Editor: TFrm_Editor
     OnClick = Btn_ScrapeClick
   end
   object Chk_ListByRom: TCheckBox
-    Left = 306
-    Top = 173
+    Left = 29
+    Top = 174
     Width = 196
     Height = 17
     BiDiMode = bdLeftToRight
@@ -6848,6 +6848,18 @@ object Frm_Editor: TFrm_Editor
     ParentBiDiMode = False
     TabOrder = 25
     OnClick = Chk_ListByRomClick
+  end
+  object Chk_FullRomName: TCheckBox
+    Left = 306
+    Top = 174
+    Width = 196
+    Height = 17
+    BiDiMode = bdLeftToRight
+    Caption = 'Show full Rom name'
+    Enabled = False
+    ParentBiDiMode = False
+    TabOrder = 26
+    OnClick = Chk_FullRomNameClick
   end
   object XMLDoc: TXMLDocument
     NodeIndentStr = #9
@@ -7205,7 +7217,7 @@ object Frm_Editor: TFrm_Editor
     Left = 216
     Top = 376
     Bitmap = {
-      494C010101000800080110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800100110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

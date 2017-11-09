@@ -97,7 +97,6 @@ type
       Edt_RomPath: TEdit;
       Mnu_Lang2: TMenuItem;
       Edt_Search: TEdit;
-      Lbl_Search: TLabel;
       Mnu_DeleteOrphans: TMenuItem;
       Mnu_Lang4: TMenuItem;
       Mnu_Lang5: TMenuItem;
@@ -127,6 +126,8 @@ type
       Mnu_NameEditor: TMenuItem;
       Mnu_ExportTxt: TMenuItem;
       SaveDialog: TSaveDialog;
+      Lbl_Search: TLabel;
+      Chk_FullRomName: TCheckBox;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -173,6 +174,7 @@ type
       procedure Chk_ListByRomClick(Sender: TObject);
       procedure Mnu_NameEditorClick(Sender: TObject);
       procedure Mnu_ExportTxtClick(Sender: TObject);
+    procedure Chk_FullRomNameClick(Sender: TObject);
 
    private
 
@@ -911,13 +913,18 @@ begin
 
             if ( not Chk_ListByRom.Checked ) and
                ( ( Edt_Search.Text = '' ) or
-               ContainsText( _TmpGame.Name, Edt_Search.Text ) ) then
+               ContainsText( _TmpGame.Name, Edt_Search.Text ) ) then begin
                Lbx_Games.Items.AddObject( _TmpGame.Name, _TmpGame )
 
-            else if ( Chk_ListByRom.Checked ) and
-                    ( ( Edt_Search.Text = '' ) or
-                    ContainsText( _TmpGame.RomName, Edt_Search.Text ) ) then
-               Lbx_Games.Items.AddObject( _TmpGame.RomName, _TmpGame );
+            end else if ( Chk_ListByRom.Checked ) then begin
+               if ( Chk_FullRomName.Checked ) and
+                  ( ( Edt_Search.Text = '' ) or
+                  ContainsText( _TmpGame.RomPath, Edt_Search.Text ) ) then
+                  Lbx_Games.Items.AddObject( StringReplace( _TmpGame.RomPath, './', '', [] ), _TmpGame )
+               else if ( ( Edt_Search.Text = '' ) or
+                  ContainsText( _TmpGame.RomName, Edt_Search.Text ) ) then
+                  Lbx_Games.Items.AddObject( _TmpGame.RomName, _TmpGame )
+            end;
          end
       end;
 
@@ -1838,8 +1845,14 @@ begin
 end;
 
 //Au click sur la checkbox "list by rom name"
+procedure TFrm_Editor.Chk_FullRomNameClick(Sender: TObject);
+begin
+   LoadGamesList( getCurrentFolderName );
+end;
+
 procedure TFrm_Editor.Chk_ListByRomClick(Sender: TObject);
 begin
+   Chk_FullRomName.Enabled:= Chk_ListByRom.Checked;
    LoadGamesList( getCurrentFolderName );
 end;
 
