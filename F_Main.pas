@@ -1312,7 +1312,7 @@ begin
 end;
 
 //Action au click sur bouton "save changes"
-procedure TFrm_Editor.Btn_SaveChangesClick(Sender: TObject);
+procedure TFrm_Editor.Btn_SaveChangesClick( Sender: TObject );
 begin
    SaveChangesToGamelist;
    Btn_SaveChanges.Enabled:= False;
@@ -1320,7 +1320,7 @@ begin
 end;
 
 //Au click sur le bouton Scraper
-procedure TFrm_Editor.Btn_ScrapeClick(Sender: TObject);
+procedure TFrm_Editor.Btn_ScrapeClick( Sender: TObject );
 var
    SysId: string;
    Frm_Scrape: TFrm_Scraper;
@@ -1332,12 +1332,12 @@ begin
    Frm_Scrape:= TFrm_Scraper.Create( nil );
    _List:= TStringList.Create;
    try
-      _List.Add(FSSLogin);
-      _List.Add(FSSPwd);
-      _List.Add(FProxyUser);
-      _List.Add(FProxyPwd);
-      _List.Add(FProxyServer);
-      _List.Add(FProxyPort);
+      _List.Add( FSSLogin );
+      _List.Add( FSSPwd );
+      _List.Add( FProxyUser );
+      _List.Add( FProxyPwd );
+      _List.Add( FProxyServer );
+      _List.Add( FProxyPort );
       Frm_Scrape.Execute( SysId, FRootPath, FCurrentFolder, FImageFolder, FXmlImageFolderPath,
                           ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ), _List, FProxyUse );
 

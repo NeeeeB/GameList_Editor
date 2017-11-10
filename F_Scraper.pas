@@ -291,7 +291,8 @@ begin
       end;
    end;
 
-   FMaxThreads:= StrToInt( XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_UserNode].ChildNodes[Cst_ThreadNode].Text );
+   if not TryStrToInt( XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_UserNode].ChildNodes[Cst_ThreadNode].Text, FMaxThreads ) then
+      FMaxThreads:= 1;
 end;
 
 //Crée les images depuis la liste globale des liens.
