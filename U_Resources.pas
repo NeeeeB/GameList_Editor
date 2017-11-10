@@ -130,7 +130,6 @@ resourcestring
    Rst_ServerError7 = 'Maximum threads allowed already used';
    Rst_ServerError8 = 'Check your Internet/Proxy parameters';
    Rst_StreamError = 'Oops !! An error has occured while reading the stream !!';
-   Rst_NoMediaFound = 'Looks like there is no media for this game !!';
 
    //noms des systemes tels qu'ils seront affichés dans la combobox
    Rst_SystemKindNES = 'Nintendo';
@@ -398,6 +397,8 @@ const
    Cst_TempXml = 'temp.xml';
    Cst_DataNode = 'Data';
    Cst_GameNode = 'jeu';
+   Cst_UserNode = 'ssuser';
+   Cst_ThreadNode = 'maxthreads';
    Cst_MediaNode = 'medias';
    Cst_NamesNode = 'noms';
    Cst_RegionsNode = 'regions';

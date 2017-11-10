@@ -14,6 +14,11 @@ uses
    U_Resources, U_Game, U_gnugettext, F_SplashLoading;
 
 type
+   TMediaInfo = class
+      FileExt: string;
+      FileLink: string;
+   end;
+
    TFrm_Scraper = class(TForm)
       Pnl_Back: TPanel;
       Ind_HTTP: TIdHTTP;
@@ -47,6 +52,8 @@ type
       FProxyUse: Boolean;
       FImgList: TObjectList<TImage>;
       FInfosList: TStringList;
+      FPictureLinks: TObjectList<TMediaInfo>;
+      FMaxThreads: Integer;
 
       procedure DisplayPictures;
       procedure WarnUser( aMessage: string );
@@ -55,7 +62,7 @@ type
       procedure ParseXml;
 
       function GetGameXml( const aSysId: string; aGame: TGame ): Boolean;
-      function LoadPictures: Boolean;
+      procedure LoadPictures;
       function GetFileSize( const aPath: string ): string;
       function StringToIsoDate( const aDate: string ): string;
 
@@ -75,6 +82,7 @@ begin
    FXmlPath:= ExtractFilePath( Application.ExeName ) + Cst_TempXml;
    FImgList:= TObjectList<TImage>.Create;
    FInfosList:= TStringList.Create( True );
+   FPictureLinks:= TObjectList<TMediaInfo>.Create;
    TranslateComponent( Self );
 end;
 
@@ -115,9 +123,12 @@ begin
    FrmSplash.Show;
    FrmSplash.Refresh;
 
-   if GetGameXml( aSysId, FGame ) and LoadPictures then begin
+   if GetGameXml( aSysId, FGame ) then begin
       ParseXml;
-      DisplayPictures;
+      if ( FPictureLinks.Count > 0 ) then begin
+         LoadPictures;
+         DisplayPictures;
+      end;
       Screen.Cursor:= crDefault;
       FrmSplash.Close;
       ShowModal;
@@ -222,6 +233,7 @@ var
    Nodes: IXMLNodeList;
    ii: Integer;
    List: TStringList;
+   Media: TMediaInfo;
 begin
    //ouverture du fichier xml
    XMLDoc.LoadFromFile( FXmlPath );
@@ -256,124 +268,98 @@ begin
 
    FInfosList.Add( XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_NoteNode].Text );
 
-end;
+   Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_MediaNode].ChildNodes;
+   if Assigned( Nodes ) and ( Nodes.Count > 0 ) then begin
+      //Et on boucle pour trouver les noeuds qui nous intéressent
+      for ii:= 0 to Pred( Nodes.Count ) do begin
+         //C'est moche mais ça évite le "ne répond pas"
+         Application.ProcessMessages;
 
-//Crée les images (si possible) depuis le fichier xml récupéré.
-function TFrm_Scraper.LoadPictures: Boolean;
-
-   procedure LoadPng( aStream: TMemoryStream );
-   var
-      Png: TPngImage;
-      Img: TImage;
-   begin
-      Png:= TPngImage.Create;
-      Img:= TImage.Create( Scl_Games );
-      Img.AutoSize:= True;
-      Img.Center:= True;
-      Img.Proportional:= True;
-      Img.Visible:= False;
-      try
-         Png.LoadFromStream( aStream );
-         Img.Picture.Graphic:= Png;
-         FImgList.Add( Img );
-      finally
-         Png.Free;
+         if ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox2d ) or
+            ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaScreenShot ) or
+            ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaSsTitle ) or
+            ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox3d ) or
+            ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaMix1 ) or
+            ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaMix2 ) or
+            ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaArcadeBox1 ) or
+            ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaWheel ) then begin
+            Media:= TMediaInfo.Create;
+            Media.FileExt:= Nodes[ii].Attributes[Cst_AttFormat];
+            Media.FileLink:= Nodes[ii].Text;
+            FPictureLinks.Add( Media );
+         end;
       end;
    end;
 
-   procedure LoadJpg( aStream: TMemoryStream );
+   FMaxThreads:= StrToInt( XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_UserNode].ChildNodes[Cst_ThreadNode].Text );
+end;
+
+//Crée les images depuis la liste globale des liens.
+procedure TFrm_Scraper.LoadPictures;
+
+   procedure CreateImage( aGraph: TGraphic );
    var
-      Jpg: TJPEGImage;
       Img: TImage;
    begin
-      Jpg:= TJPEGImage.Create;
       Img:= TImage.Create( Scl_Games );
       Img.AutoSize:= True;
       Img.Center:= True;
       Img.Proportional:= True;
       Img.Visible:= False;
-      try
-         Jpg.LoadFromStream( aStream );
-         Img.Picture.Graphic:= Jpg;
-         FImgList.Add( Img );
-      finally
-         Jpg.Free;
-      end;
+      Img.Picture.Graphic:= aGraph;
+      FImgList.Add( Img );
    end;
 
 var
-   Nodes: IXMLNodeList;
-   ii: Integer;
    Stream: TMemoryStream;
    Query: string;
+   Media: TMediaInfo;
+   Graph: TGraphic;
 begin
-   Result:= False;
-
-   //ouverture du fichier xml
-   XMLDoc.LoadFromFile( FXmlPath );
-
-   //On trouve le noeud qui nous intéresse
-   Nodes:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode].ChildNodes[Cst_MediaNode].ChildNodes;
-   if ( Nodes.Count = 0 ) then begin
-      WarnUser( Rst_NoMediaFound );
-      Exit;
-   end;
-
-   //Et on boucle pour trouver les noeuds qui nous intéressent
-   for ii:= 0 to Pred( Nodes.Count ) do begin
+   for Media in FPictureLinks do begin
       //C'est moche mais ça évite le "ne répond pas"
       Application.ProcessMessages;
 
-      if ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox2d ) or
-         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaScreenShot ) or
-         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaSsTitle ) or
-         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox3d ) or
-         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaMix1 ) or
-         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaMix2 ) or
-         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaArcadeBox1 ) or
-         ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaWheel ) then begin
-         Query:= Nodes[ii].Text;
-         Stream:= TMemoryStream.Create;
+      Query:= Media.FileLink;
+      Stream:= TMemoryStream.Create;
+      try
          try
-            try
-               Ind_HTTP.Get( Query, Stream );
-               if ( Stream.Size = 0 ) then begin
-                  WarnUser( Rst_StreamError );
-                  Exit;
-               end;
-               Stream.Position:= 0;
-               if ( Nodes[ii].Attributes[Cst_AttFormat] = Cst_PngExt ) then
-                  LoadPng( Stream )
-               else LoadJpg( Stream );
-            except
-               //gestion des erreurs de connexion
-               on E: EIdHTTPProtocolException do begin
-                  case E.ErrorCode of
-                     400: WarnUser( Rst_ServerError1 );
-                     401: WarnUser( Rst_ServerError2 );
-                     403: WarnUser( Rst_ServerError3 );
-                     404: WarnUser( Rst_ServerError4 );
-                     423: WarnUser( Rst_ServerError5 );
-                     426: WarnUser( Rst_ServerError6 );
-                     429: WarnUser( Rst_ServerError7 );
-                  end;
-                  Exit;
-               end;
-               on E: EIdException do begin
-                  WarnUser( Rst_ServerError8 );
-                  Exit;
-               end;
+            Ind_HTTP.Get( Query, Stream );
+            if ( Stream.Size = 0 ) then begin
+               WarnUser( Rst_StreamError );
+               Exit;
             end;
-         finally
-            Stream.Free;
-         end;
-         Result:= True;
-      end;
-   end;
+            Stream.Position:= 0;
 
-   //si on a pas trouvé de médias on le signale
-   if not Result then begin
-      WarnUser( Rst_NoMediaFound );
+            //on crée le graphic qui va bien en fonction de l'extension
+            if ( Media.FileExt = Cst_PngExt ) then Graph:= TPngImage.Create
+            else Graph:= TJPEGImage.create;
+
+            Graph.LoadFromStream( Stream );
+            CreateImage( Graph );
+
+         except
+            //gestion des erreurs de connexion
+            on E: EIdHTTPProtocolException do begin
+               case E.ErrorCode of
+                  400: WarnUser( Rst_ServerError1 );
+                  401: WarnUser( Rst_ServerError2 );
+                  403: WarnUser( Rst_ServerError3 );
+                  404: WarnUser( Rst_ServerError4 );
+                  423: WarnUser( Rst_ServerError5 );
+                  426: WarnUser( Rst_ServerError6 );
+                  429: WarnUser( Rst_ServerError7 );
+               end;
+               Exit;
+            end;
+            on E: EIdException do begin
+               WarnUser( Rst_ServerError8 );
+               Exit;
+            end;
+         end;
+      finally
+         Stream.Free;
+      end;
    end;
 end;
 
@@ -537,6 +523,7 @@ begin
    DeleteFile( FXmlPath );
    FImgList.Free;
    FInfosList.Free;
+   FPictureLinks.Free;
 end;
 
 end.
