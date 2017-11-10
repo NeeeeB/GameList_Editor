@@ -328,7 +328,7 @@ begin
             Ind_HTTP.Get( Query, Stream );
             if ( Stream.Size = 0 ) then begin
                WarnUser( Rst_StreamError );
-               Exit;
+               Continue;
             end;
             Stream.Position:= 0;
 
@@ -351,11 +351,11 @@ begin
                   426: WarnUser( Rst_ServerError6 );
                   429: WarnUser( Rst_ServerError7 );
                end;
-               Exit;
+               Continue;
             end;
             on E: EIdException do begin
                WarnUser( Rst_ServerError8 );
-               Exit;
+               Continue;
             end;
          end;
       finally
