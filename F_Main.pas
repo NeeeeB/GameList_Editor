@@ -5,21 +5,47 @@ interface
 uses
    Winapi.Windows, Winapi.Messages, Winapi.ShellAPI,
    System.SysUtils, System.Variants, System.Classes, System.IniFiles, System.Generics.Collections,
-   System.RegularExpressions, System.UITypes, System.ImageList, System.StrUtils,
+   System.RegularExpressions, System.UITypes, System.ImageList, System.StrUtils, System.IOUtils,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes, Vcl.ImgList,
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
    Xml.omnixmldom, Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
-   F_MoreInfos, F_About, F_Help, F_ConfigureSSH, F_Scraper, U_gnugettext, U_Resources, U_Game,
-   F_ConfigureNetwork, F_AdvNameEditor;
+   F_MoreInfos, F_About, F_Help, F_ConfigureSSH, U_gnugettext, U_Resources, U_Game,
+   F_ConfigureNetwork, F_AdvNameEditor, IdIOHandler, IdIOHandlerSocket, IdURI,
+   IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdBaseComponent, IdComponent, IdException,
+   IdTCPConnection, IdTCPClient, IdHTTP;
 
 type
+   TMediaInfo = class
+      FileExt: string;
+      FileLink: string;
+   end;
+
    TFrm_Editor = class(TForm)
-      XMLDoc: TXMLDocument;
-      OpenDialog: TFileOpenDialog;
-      Cbx_Systems: TComboBox;
-      Lbx_Games: TListBox;
+      Pnl_Background: TPanel;
+      Pgc_Editor: TPageControl;
+      Tbs_Main: TTabSheet;
+      Tbs_Scrape: TTabSheet;
+      Img_BackGround: TImage;
       Lbl_NbGamesFound: TLabel;
       Lbl_SelectSystem: TLabel;
+      Img_Game: TImage;
+      Lbl_Filter: TLabel;
+      Img_Logo: TImage;
+      Img_System: TImage;
+      Lbl_Name: TLabel;
+      Lbl_Region: TLabel;
+      Lbl_Date: TLabel;
+      Lbl_Players: TLabel;
+      Lbl_Rating: TLabel;
+      Lbl_Hidden: TLabel;
+      Lbl_Favorite: TLabel;
+      Lbl_Publisher: TLabel;
+      Lbl_Developer: TLabel;
+      Lbl_Genre: TLabel;
+      Lbl_Description: TLabel;
+      Lbl_Search: TLabel;
+      Cbx_Systems: TComboBox;
+      Lbx_Games: TListBox;
       Mmo_Description: TMemo;
       Edt_Rating: TEdit;
       Edt_ReleaseDate: TEdit;
@@ -27,41 +53,61 @@ type
       Edt_Publisher: TEdit;
       Edt_Genre: TEdit;
       Edt_NbPlayers: TEdit;
-      Img_Game: TImage;
-      Img_BackGround: TImage;
       Edt_Name: TEdit;
+      Btn_SaveChanges: TButton;
+      Btn_ChangeImage: TButton;
+      Btn_SetDefaultPicture: TButton;
+      Btn_ChangeAll: TButton;
+      Cbx_Filter: TComboBox;
+      Edt_Region: TEdit;
+      Btn_MoreInfos: TButton;
+      Btn_Delete: TButton;
+      ProgressBar: TProgressBar;
+      Btn_RemovePicture: TButton;
+      Cbx_Hidden: TComboBox;
+      Cbx_Favorite: TComboBox;
+      Edt_RomPath: TEdit;
+      Edt_Search: TEdit;
+      Chk_ListByRom: TCheckBox;
+      Chk_FullRomName: TCheckBox;
+      XMLDoc: TXMLDocument;
+      OpenDialog: TFileOpenDialog;
       MainMenu: TMainMenu;
       Mnu_File: TMenuItem;
       Mnu_Choosefolder: TMenuItem;
       Mnu_Quit: TMenuItem;
       Mnu_Actions: TMenuItem;
-      Btn_SaveChanges: TButton;
-      OpenFile: TOpenDialog;
-      Btn_ChangeImage: TButton;
-      Btn_SetDefaultPicture: TButton;
-      Btn_ChangeAll: TButton;
-      Cbx_Filter: TComboBox;
-      Lbl_Filter: TLabel;
-      Img_Logo: TImage;
-      Img_System: TImage;
-      Edt_Region: TEdit;
-      Btn_MoreInfos: TButton;
-      Mnu_Options: TMenuItem;
-      Mnu_About: TMenuItem;
-      Mnu_GodMode: TMenuItem;
-      Mnu_AutoHash: TMenuItem;
       Mnu_System: TMenuItem;
-      Mnu_Game: TMenuItem;
       Mnu_LowerCase: TMenuItem;
       Mnu_UpperCase: TMenuItem;
+      Mnu_RemoveRegion: TMenuItem;
+      Mnu_DeleteOrphans: TMenuItem;
+      Mnu_DeleteDuplicates: TMenuItem;
+      Mnu_ExportTxt: TMenuItem;
+      Mnu_Game: TMenuItem;
       Mnu_GaLowerCase: TMenuItem;
       Mnu_GaUpperCase: TMenuItem;
-      Mnu_RemoveRegion: TMenuItem;
-      Btn_Delete: TButton;
-      Img_List: TImageList;
+      Mnu_Selection: TMenuItem;
+      Mnu_SetHidden: TMenuItem;
+      Mnu_SetNoHidden: TMenuItem;
+      Mnu_SetFavorite: TMenuItem;
+      Mnu_SetNoFavorite: TMenuItem;
+      Mnu_NameEditor: TMenuItem;
+      Mnu_Options: TMenuItem;
+      Mnu_General: TMenuItem;
+      Mnu_GodMode: TMenuItem;
       Mnu_DeleteWoPrompt: TMenuItem;
-      ProgressBar: TProgressBar;
-      Btn_RemovePicture: TButton;
+      Mnu_AutoHash: TMenuItem;
+      Mnu_PiPrompts: TMenuItem;
+      Mnu_ShowTips: TMenuItem;
+      Mnu_Genesis: TMenuItem;
+      N3: TMenuItem;
+      Mnu_NetWork: TMenuItem;
+      Mnu_ConfigureNetwork: TMenuItem;
+      N2: TMenuItem;
+      Mnu_SSH: TMenuItem;
+      Mnu_ConfigSSH: TMenuItem;
+      N1: TMenuItem;
       Mnu_Theme: TMenuItem;
       Mnu_Theme1: TMenuItem;
       Mnu_Theme2: TMenuItem;
@@ -79,55 +125,44 @@ type
       Mnu_Theme14: TMenuItem;
       Mnu_Theme15: TMenuItem;
       Mnu_Theme16: TMenuItem;
-      N1: TMenuItem;
-      Mnu_Help: TMenuItem;
-      Mnu_Genesis: TMenuItem;
-      Mnu_ShowTips: TMenuItem;
-      Mnu_PiPrompts: TMenuItem;
-      Mnu_SSH: TMenuItem;
-      Mnu_ConfigSSH: TMenuItem;
-      N3: TMenuItem;
-      Cbx_Hidden: TComboBox;
-      Cbx_Favorite: TComboBox;
       Mnu_Theme17: TMenuItem;
       N4: TMenuItem;
       Mnu_Language: TMenuItem;
-      Mnu_Lang3: TMenuItem;
       Mnu_Lang1: TMenuItem;
-      Edt_RomPath: TEdit;
       Mnu_Lang2: TMenuItem;
-      Edt_Search: TEdit;
-      Mnu_DeleteOrphans: TMenuItem;
+      Mnu_Lang3: TMenuItem;
       Mnu_Lang4: TMenuItem;
       Mnu_Lang5: TMenuItem;
-      Mnu_General: TMenuItem;
-      Mnu_DeleteDuplicates: TMenuItem;
-      Btn_Scrape: TButton;
-      Lbl_Name: TLabel;
-      Lbl_Region: TLabel;
-      Lbl_Date: TLabel;
-      Lbl_Players: TLabel;
-      Lbl_Rating: TLabel;
-      Lbl_Hidden: TLabel;
-      Lbl_Favorite: TLabel;
-      Lbl_Publisher: TLabel;
-      Lbl_Developer: TLabel;
-      Lbl_Genre: TLabel;
-      Lbl_Description: TLabel;
-      Mnu_NetWork: TMenuItem;
-      N2: TMenuItem;
-      Mnu_ConfigureNetwork: TMenuItem;
-      Mnu_Selection: TMenuItem;
-      Mnu_SetHidden: TMenuItem;
-      Mnu_SetNoHidden: TMenuItem;
-      Mnu_SetFavorite: TMenuItem;
-      Mnu_SetNoFavorite: TMenuItem;
-      Chk_ListByRom: TCheckBox;
-      Mnu_NameEditor: TMenuItem;
-      Mnu_ExportTxt: TMenuItem;
+      Mnu_Help: TMenuItem;
+      Mnu_About: TMenuItem;
+      OpenFile: TOpenDialog;
+      Img_List: TImageList;
       SaveDialog: TSaveDialog;
-      Lbl_Search: TLabel;
-      Chk_FullRomName: TCheckBox;
+      Pnl_Top: TPanel;
+      Scl_Pictures: TScrollBox;
+      Img_ScreenScraper: TImage;
+      Ind_HTTP: TIdHTTP;
+      IdSSLIOHandlerSocketOpenSSL: TIdSSLIOHandlerSocketOpenSSL;
+      Btn_Scrape: TButton;
+      Img_Loading: TImage;
+      Mmo_ScrapeDescription: TMemo;
+      Lbl_ScrapeDescription: TLabel;
+      Lbl_ScrapeGenre: TLabel;
+      Edt_ScrapeGenre: TEdit;
+      Lbl_ScrapeDeveloper: TLabel;
+      Edt_ScrapeDeveloper: TEdit;
+      Lbl_ScrapePublisher: TLabel;
+      Edt_ScrapePublisher: TEdit;
+      Lbl_ScrapeRating: TLabel;
+      Edt_ScrapeRating: TEdit;
+      Lbl_ScrapePlayers: TLabel;
+      Edt_ScrapePlayers: TEdit;
+      Lbl_ScrapeDate: TLabel;
+      Edt_ScrapeDate: TEdit;
+      Edt_ScrapeRegion: TEdit;
+      Lbl_ScrapeRegion: TLabel;
+      Edt_ScrapeName: TEdit;
+      Lbl_ScrapeName: TLabel;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -174,7 +209,13 @@ type
       procedure Chk_ListByRomClick(Sender: TObject);
       procedure Mnu_NameEditorClick(Sender: TObject);
       procedure Mnu_ExportTxtClick(Sender: TObject);
-    procedure Chk_FullRomNameClick(Sender: TObject);
+      procedure Chk_FullRomNameClick(Sender: TObject);
+      procedure Tbs_ScrapeShow(Sender: TObject);
+      procedure Tbs_ScrapeHide(Sender: TObject);
+      procedure FormMouseWheelDown(Sender: TObject; Shift: TShiftState;
+                MousePos: TPoint; var Handled: Boolean);
+      procedure FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
+                MousePos: TPoint; var Handled: Boolean);
 
    private
 
@@ -191,7 +232,15 @@ type
       FSSLogin, FSSPwd, FProxyServer, FProxyUser,
       FProxyPwd, FProxyPort: string;
       FProxyUse: Boolean;
+      FScrapedGame: TGame;
       GSystemList: TObjectDictionary<string,TObjectList<TGame>>;
+
+      //Pour le scrape
+      FImgList: TObjectList<TImage>;
+      FInfosList: TStringList;
+      FPictureLinks: TObjectList<TMediaInfo>;
+      FMaxThreads: Integer;
+      FTempXmlPath: string;
 
       procedure LoadFromIni;
       procedure SaveToIni;
@@ -224,6 +273,7 @@ type
       function getCurrentFolderName: string;
       function GetCurrentLogoName: string;
       function GetCurrentSystemId: string;
+      function GetCountryEnum( aShortName: string ): TCountryName;
       function BuildGamesList( const aPathToFile: string ): TObjectList<TGame>;
       function FormatDateFromString( const aDate: string; aIso: Boolean = False ): string;
       function GetThemeEnum( aNumber: Integer ): TThemeName;
@@ -233,6 +283,14 @@ type
       function MyMessageDlg( const Msg: string; DlgTypt: TmsgDlgType; button: TMsgDlgButtons;
                             Caption: array of string; dlgcaption: string ): Integer;
 
+      //Méthodes relatives à l'onglet de scrape
+      procedure WarnUser( aMessage: string );
+      procedure ParseXml;
+      procedure LoadPictures;
+      procedure DisplayPictures;
+      procedure FillFields;
+      function GetGameXml( const aSysId: string; aGame: TGame ): Boolean;
+      function GetFileSize( const aPath: string ): string;
    end;
 
 var
@@ -444,15 +502,33 @@ begin
    end;
 end;
 
+//Recup l'énum du pays (région) du jeu scrapé
+function TFrm_Editor.GetCountryEnum( aShortName: string ): TCountryName;
+var
+   _CountryName: TCountryName;
+begin
+   Result:= cnUnd;
+   for _CountryName:= Low( TCountryName ) to High( TCountryName ) do begin
+      if ( aShortName =  Cst_CountryName[_CountryName] ) then begin
+         Result:= _CountryName;
+         Break;
+      end;
+   end;
+end;
+
 //A l'ouverture du programme
 procedure TFrm_Editor.FormCreate(Sender: TObject);
 begin
    TranslateComponent( Self );
+   FImgList:= TObjectList<TImage>.Create;
+   FInfosList:= TStringList.Create( True );
+   FPictureLinks:= TObjectList<TMediaInfo>.Create;
    Lbl_NbGamesFound.Caption:= '';
    GSystemList:= TObjectDictionary<string, TObjectList<TGame>>.Create([doOwnsValues]);
    LoadFromIni;
    TStyleManager.TrySetStyle( Cst_ThemeNameStr[GetThemeEnum( FThemeNumber )] );
    FPiLoadedOnce:= False;
+   FTempXmlPath:= ExtractFilePath( Application.ExeName ) + Cst_TempXml;
 end;
 
 //Met le focus sur le combo system à l'affichage de la fenêtre
@@ -473,6 +549,7 @@ begin
          Frm_Help.Free;
       end;
    end;
+   Tbs_Scrape.TabVisible:= False;
    Mnu_ShowTips.Checked:= FShowTips;
    Lbx_Games.SetFocus;
 end;
@@ -802,6 +879,8 @@ begin
    Cbx_Hidden.Enabled:= aValue;
    Cbx_Favorite.Enabled:= aValue;
    Chk_ListByRom.Enabled:= aValue;
+
+   Tbs_Scrape.TabVisible:= aValue;
 end;
 
 //Action lorsqu'on change le contenu d'un des champs
@@ -1023,6 +1102,8 @@ begin
    Mnu_Game.Enabled:= aValue;
    Mnu_System.Enabled:= aValue;
    Mnu_Selection.Enabled:= not aValue;
+
+   Tbs_Scrape.TabVisible:= aValue;
 end;
 
 //Chargement dans les différents champs des infos du jeu sélectionné
@@ -1321,34 +1402,30 @@ end;
 
 //Au click sur le bouton Scraper
 procedure TFrm_Editor.Btn_ScrapeClick( Sender: TObject );
-var
-   SysId: string;
-   Frm_Scrape: TFrm_Scraper;
-   _List: TStringList;
 begin
+   //On nettoie les listes pour commencer
+   FInfosList.Clear;
+   FPictureLinks.Clear;
+   FImgList.Clear;
+
    //on désactive pour éviter les clicks intempestifs pendant le chargement
+   Img_Loading.Visible:= True;
+   Refresh;
    Enabled:= False;
-   SysId:= GetCurrentSystemId;
-   Frm_Scrape:= TFrm_Scraper.Create( nil );
-   _List:= TStringList.Create;
-   try
-      _List.Add( FSSLogin );
-      _List.Add( FSSPwd );
-      _List.Add( FProxyUser );
-      _List.Add( FProxyPwd );
-      _List.Add( FProxyServer );
-      _List.Add( FProxyPort );
-      Frm_Scrape.Execute( SysId, FRootPath, FCurrentFolder, FImageFolder, FXmlImageFolderPath,
-                          ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ), _List, FProxyUse );
-
-   finally
-      Frm_Scrape.Free;
-      _List.Free;
-
+   if ( Lbx_Games.Count > 0 ) then begin
+      Screen.Cursor:= crHourGlass;
+      FScrapedGame:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
+      if GetGameXml( GetCurrentSystemId, FScrapedGame ) then begin
+         ParseXml;
+         LoadPictures;
+         Img_Loading.Visible:= False;
+         DisplayPictures;
+         FillFields;
+         Screen.Cursor:= crDefault;
+      end else
+         Img_Loading.Visible:= False;
    end;
-   LoadGame( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) );
    Enabled:= True;
-   Application.MainForm.SetFocus;
 end;
 
 //Enregistre les changements effectués pour le jeu dans le fichier .xml
@@ -2308,6 +2385,9 @@ begin
          Lbl_NbGamesFound.Caption:= IntToStr( Lbx_Games.Items.Count ) + ' / ' +
                                     IntToStr( _TmpList.Count ) + Rst_GamesFound;
    end;
+
+   //Pour changer la langue du scrape en live si on est sur l'onglet scrape
+   if ( Pgc_Editor.ActivePage = Tbs_Scrape ) then FillFields;
 end;
 
 //Au click sur le menu item Advanced name editor
@@ -2433,6 +2513,404 @@ begin
    Application.Terminate;
 end;
 
+
+
+// Ajouté par Benjamin.A le 13/11/2017 11:24:50 :
+// A partir d'ici ce sont toutes les méthodes utilisées dans l'onglet de scrape
+//******************************************************************************
+
+
+
+// Ajouté par Benjamin.A le 13/11/2017 11:26:29 :
+//A l'affichage de l'onglet Scrape
+procedure TFrm_Editor.Tbs_ScrapeShow(Sender: TObject);
+begin
+   //si proxy, on le renseigne
+   if FProxyUse then begin
+      Ind_HTTP.ProxyParams.ProxyUsername:= FProxyUser;
+      Ind_HTTP.ProxyParams.ProxyPassword:= FProxyPwd;
+      Ind_HTTP.ProxyParams.ProxyServer:= FProxyServer;
+      Ind_HTTP.ProxyParams.ProxyPort:= StrToInt( FProxyPort );
+   end else begin
+      Ind_HTTP.ProxyParams.ProxyUsername:= '';
+      Ind_HTTP.ProxyParams.ProxyPassword:= '';
+      Ind_HTTP.ProxyParams.ProxyServer:= '';
+      Ind_HTTP.ProxyParams.ProxyPort:= 0;
+   end;
+
+   //on désactive les items du mainmenu qui ne doivent pas être utilisés
+   Mnu_Actions.Enabled:= False;
+   Mnu_Theme.Enabled:= False;
+end;
+
+//Quand on sort de l'onglet scrape, on vide les listes
+//Et on reload le jeu au cas où on a modifié des trucs
+procedure TFrm_Editor.Tbs_ScrapeHide(Sender: TObject);
+begin
+   if Assigned( FScrapedGame ) and
+      ( ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame ) =
+      FScrapedGame ) then
+      LoadGame( FScrapedGame );
+
+   //on réactive les items du mainmenu désactivés à l'entrée dans l'onglet
+   Mnu_Actions.Enabled:= True;
+   Mnu_Theme.Enabled:= True;
+end;
+
+//Requête GET pour récupérer le XML des infos du jeu.
+function TFrm_Editor.GetGameXml( const aSysId: string; aGame: TGame ): Boolean;
+var
+   Query, Crc32, Size: String;
+   Stream: TBytesStream;
+begin
+   Result:= False;
+   //Calcul du Crc et de la taille fichier
+   Crc32:= aGame.CalculateCrc32( aGame.PhysicalRomPath );
+   Size:= GetFileSize( aGame.PhysicalRomPath );
+
+   //construction de la requête API pour le jeu
+   Query:= Cst_ScraperAddress + Cst_Category + Cst_ScrapeLogin + Cst_ScrapePwd +
+           Cst_DevSoftName + Cst_Output;
+
+   if ( not FSSLogin.IsEmpty ) and ( not FSSPwd.IsEmpty ) then
+      Query:= Query + Cst_SSId + FSSLogin + Cst_SSPwd + FSSPwd;
+
+   Query:= Query + Cst_Crc + Crc32 + Cst_SystemId + aSysId +
+           Cst_RomName + TIdURI.ParamsEncode( aGame.RomName ) + Cst_RomSize + Size;
+
+   //chargement dans un stream pour ne pas corrompre l'encodage
+   Stream:= TBytesStream.Create;
+   try
+      try
+         Ind_HTTP.Get( Query, Stream );
+         if ( Stream.Size = 0 ) then begin
+            WarnUser( Rst_StreamError );
+            Exit;
+         end;
+         Stream.Position:= 0;
+         XMLDoc.LoadFromStream( Stream );
+         XMLDoc.SaveToFile( FTempXmlPath );
+      except
+         //gestion des erreurs de connexion
+         on E: EIdHTTPProtocolException do begin
+            case E.ErrorCode of
+               400: WarnUser( Rst_ServerError1 );
+               401: WarnUser( Rst_ServerError2 );
+               403: WarnUser( Rst_ServerError3 );
+               404: WarnUser( Rst_ServerError4 );
+               423: WarnUser( Rst_ServerError5 );
+               426: WarnUser( Rst_ServerError6 );
+               429: WarnUser( Rst_ServerError7 );
+            end;
+            Exit;
+         end;
+         on E: EIdException do begin
+            WarnUser( Rst_ServerError8 );
+            Exit;
+         end;
+      end;
+   finally
+      Stream.Free;
+   end;
+
+   Result:= True;
+end;
+
+//parsing du Xml pour récupérer tout ce qui est description, région, nombre joueurs etc...
+procedure TFrm_Editor.ParseXml;
+
+   function CreateDict( aNodeList: IXMLNodeList; aAttName: string ): TDictionary<string, string>;
+   var
+      ii: Integer;
+   begin
+      Result:= TDictionary<string, string>.Create;
+      for ii:= 0 to Pred( aNodeList.Count ) do begin
+         Result.Add( aNodeList[ii].Attributes[aAttName], aNodeList[ii].Text );
+      end;
+   end;
+
+   function CreateGenreDict( aNodeList: IXMLNodeList; aAttId, aAttLang: string ): TObjectDictionary<string, TDictionary<string, string>>;
+   var
+      ii: Integer;
+      id: string;
+      List: TDictionary<string, string>;
+   begin
+      Result:= TObjectDictionary<string, TDictionary<string, string>>.Create( [doOwnsValues] );
+      List:= TDictionary<string, string>.Create;
+      id:= aNodeList[0].Attributes[aAttId];
+      for ii:= 0 to Pred( aNodeList.Count ) do begin
+         if ( aNodeList[ii].Attributes[aAttId] = id ) then
+            List.Add( aNodeList[ii].Attributes[aAttLang], aNodeList[ii].Text )
+         else begin
+            Result.Add( id, List );
+            id:= aNodeList[ii].Attributes[aAttId];
+            List:= TDictionary<string, string>.Create;
+            List.Add( aNodeList[ii].Attributes[aAttLang], aNodeList[ii].Text );
+         end;
+      end;
+      Result.Add( id, List );
+   end;
+
+var
+   Nodes: IXMLNodeList;
+   RootNode, Node: IXMLNode;
+   ii: Integer;
+   List: TStringList;
+   Media: TMediaInfo;
+begin
+   //ouverture du fichier xml
+   XMLDoc.LoadFromFile( FTempXmlPath );
+
+   //On trouve le noeud qui nous intéresse
+   RootNode:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_GameNode];
+
+   Node:= RootNode.ChildNodes.FindNode(Cst_NamesNode);
+   if Assigned( Node ) then begin
+      Nodes:= Node.ChildNodes;
+      if Assigned( Nodes ) then FInfosList.AddObject( Cst_NamesNode, CreateDict( Nodes, Cst_AttRegion ) );
+   end else FInfosList.Add( '' );
+
+   Node:= RootNode.ChildNodes.FindNode( Cst_RegionsNode );
+   if Assigned( Node ) then begin
+      Nodes:= Node.ChildNodes;
+      if Assigned( Nodes ) then begin
+         List:= TStringList.Create;
+         for ii:= 0 to Pred( Nodes.Count ) do begin
+            List.Add( Nodes[ii].Text );
+         end;
+         FInfosList.AddObject( Cst_RegionsNode, List );
+      end;
+   end else FInfosList.Add( '' );
+
+   Node:= RootNode.ChildNodes.FindNode( Cst_SynopNode );
+   if Assigned( Node ) then begin
+      Nodes:= Node.ChildNodes;
+      if Assigned( Nodes ) then FInfosList.AddObject( Cst_SynopNode, CreateDict( Nodes, Cst_AttLang ) );
+   end else FInfosList.Add( '' );
+
+   Node:= RootNode.ChildNodes.FindNode( Cst_DateNode );
+   if Assigned( Node ) then begin
+      Nodes:= Node.ChildNodes;
+      if Assigned( Nodes ) then FInfosList.AddObject( Cst_DateNode, CreateDict( Nodes, Cst_AttRegion ) );
+   end else FInfosList.Add( '' );
+
+   Node:= RootNode.ChildNodes.FindNode( Cst_GenreNode );
+   if Assigned( Node ) then begin
+      Nodes:= Node.ChildNodes;
+      if Assigned( Nodes ) then FInfosList.AddObject( Cst_GenreNode, CreateGenreDict( Nodes, Cst_AttId, Cst_AttLang ) );
+   end else FInfosList.Add( '' );
+
+   Node:= RootNode.ChildNodes.FindNode( Cst_EditNode );
+   if Assigned( Node ) then FInfosList.Add( Node.Text )
+   else FInfosList.Add( '' );
+
+   Node:= RootNode.ChildNodes.FindNode( Cst_DevNode );
+   if Assigned( Node ) then FInfosList.Add( Node.Text )
+   else FInfosList.Add( '' );
+
+   Node:= RootNode.ChildNodes.FindNode( Cst_PlayersNode );
+   if Assigned( Node ) then FInfosList.Add( Node.Text )
+   else FInfosList.Add( '' );
+
+   Node:= RootNode.ChildNodes.FindNode( Cst_NoteNode );
+   if Assigned( Node ) then FInfosList.Add( Node.Text )
+   else FInfosList.Add( '' );
+
+   Node:= RootNode.ChildNodes.FindNode( Cst_MediaNode );
+   if Assigned( Node ) then begin
+      Nodes:= Node.ChildNodes;
+      if Assigned( Nodes ) and ( Nodes.Count > 0 ) then begin
+         //Et on boucle pour trouver les noeuds qui nous intéressent
+         for ii:= 0 to Pred( Nodes.Count ) do begin
+            if ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox2d ) or
+               ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaScreenShot ) or
+               ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaSsTitle ) or
+               ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaBox3d ) or
+               ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaMix1 ) or
+               ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaMix2 ) or
+               ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaArcadeBox1 ) or
+               ( Nodes[ii].Attributes[Cst_AttType] = Cst_MediaWheel ) then begin
+               Media:= TMediaInfo.Create;
+               Media.FileExt:= Nodes[ii].Attributes[Cst_AttFormat];
+               Media.FileLink:= Nodes[ii].Text;
+               FPictureLinks.Add( Media );
+            end;
+         end;
+      end;
+   end;
+
+   RootNode:= XMLDoc.ChildNodes[Cst_DataNode].ChildNodes[Cst_UserNode];
+   Node:= RootNode.ChildNodes.FindNode( Cst_ThreadNode );
+   if Assigned( Node ) then begin
+      if not TryStrToInt( Node.Text, FMaxThreads ) then
+         FMaxThreads:= 1;
+   end;
+
+   //on delete le fichier xml temporaire (plus besoin)
+   DeleteFile( FTempXmlPath );
+end;
+
+//Crée les images depuis la liste globale des liens.
+procedure TFrm_Editor.LoadPictures;
+
+   procedure CreateImage( aGraph: TGraphic );
+   var
+      Img: TImage;
+   begin
+      Img:= TImage.Create( nil );
+      Img.AutoSize:= True;
+      Img.Center:= True;
+      Img.Proportional:= True;
+      Img.Visible:= False;
+      Img.Picture.Graphic:= aGraph;
+      FImgList.Add( Img );
+   end;
+
+var
+   Stream: TBytesStream;
+   Query: string;
+   Media: TMediaInfo;
+   Graph: TGraphic;
+begin
+   for Media in FPictureLinks do begin
+      //C'est moche mais ça évite le "ne répond pas"
+      Application.ProcessMessages;
+
+      Query:= Media.FileLink;
+      Stream:= TBytesStream.Create;
+      try
+         try
+            Ind_HTTP.Get( Query, Stream );
+            if ( Stream.Size = 0 ) then begin
+               WarnUser( Rst_StreamError );
+               Continue;
+            end;
+            Stream.Position:= 0;
+
+            //on crée le graphic qui va bien en fonction de l'extension
+            if ( Media.FileExt = Cst_PngExt ) then Graph:= TPngImage.Create
+            else Graph:= TJPEGImage.create;
+
+            Graph.LoadFromStream( Stream );
+            CreateImage( Graph );
+
+         except
+            //gestion des erreurs de connexion
+            on E: EIdHTTPProtocolException do begin
+               case E.ErrorCode of
+                  400: WarnUser( Rst_ServerError1 );
+                  401: WarnUser( Rst_ServerError2 );
+                  403: WarnUser( Rst_ServerError3 );
+                  404: WarnUser( Rst_ServerError4 );
+                  423: WarnUser( Rst_ServerError5 );
+                  426: WarnUser( Rst_ServerError6 );
+                  429: WarnUser( Rst_ServerError7 );
+               end;
+               Continue;
+            end;
+            on E: EIdException do begin
+               WarnUser( Rst_ServerError8 );
+               Continue;
+            end;
+         end;
+      finally
+         Stream.Free;
+      end;
+   end;
+end;
+
+//Affichage des images récupérées
+procedure TFrm_Editor.DisplayPictures;
+var
+   ii, Left, Count: Integer;
+begin
+   Count:= FImgList.Count;
+   case Count of
+      1: Left:= 325;
+      2: Left:= 170;
+      else Left:= 50;
+   end;
+
+   for ii:= 0 to Pred( Count ) do begin
+      FImgList.Items[ii].Parent:= Scl_Pictures;
+      FImgList.Items[ii].Top:= 25;
+      FImgList.Items[ii].Left:= Left;
+      FImgList.Items[ii].Constraints.MinHeight:= 300;
+      FImgList.Items[ii].Constraints.MaxHeight:= 300;
+      FImgList.Items[ii].Constraints.MaxWidth:= 300;
+      FImgList.Items[ii].Center:= True;
+      FImgList.Items[ii].Visible:= True;
+      Left:= Left + FImgList.Items[ii].Width + 50;
+   end;
+
+   if Count > 3 then Scl_Pictures.HorzScrollBar.Visible:= True;
+
+end;
+
+//Remplissage des champs avec les infos scrapées
+procedure TFrm_Editor.FillFields;
+var
+   LangStr, TmpStr: string;
+   Dict: TDictionary<string, string>;
+   ii: Integer;
+begin
+   //On chope la string correspondant à la langue "en cours"
+   LangStr:= Copy( Cst_LangNameStr[GetLangEnum( FLanguage )], 1 , 2 );
+
+   if ( not FInfosList[0].IsEmpty ) then begin
+      if ( FInfosList.Objects[0] as TDictionary<string, string> ).TryGetValue( LangStr, TmpStr ) then
+         Edt_ScrapeName.Text:= TmpStr
+      else if ( FInfosList.Objects[0] as TDictionary<string, string> ).TryGetValue( 'ss', TmpStr ) then
+         Edt_ScrapeName.Text:= TmpStr
+      else Edt_ScrapeName.Text:= '';
+   end else Edt_ScrapeName.Text:= '';
+
+   if not FInfosList[1].IsEmpty then begin
+      for ii:= 0 to Pred( ( FInfosList.Objects[1] as TStringList ).Count ) do begin
+         Edt_ScrapeRegion.Text:= Edt_ScrapeRegion.Text +
+                                 Cst_CountryNameFull[GetCountryEnum( ( FInfosList.Objects[1] as TStringList )[ii] )][Succ(FLanguage)];
+      end;
+   end;
+end;
+
+//Pour prévenir le user si problème ou pas de médias trouvés
+procedure TFrm_Editor.WarnUser( aMessage: string );
+begin
+   Screen.Cursor:= crDefault;
+   ShowMessage( aMessage );
+end;
+
+//Pour récupérer la taille du fichier du jeu
+function TFrm_Editor.GetFileSize( const aPath: string ): string;
+var
+   Reader: TFileStream;
+begin
+   Reader:= TFile.OpenRead( aPath );
+   try
+      Result:= IntToStr( Reader.Size );
+   finally
+      Reader.Free;
+   end;
+end;
+
+//scroll horizontal avec souris
+procedure TFrm_Editor.FormMouseWheelDown(Sender: TObject; Shift: TShiftState;
+          MousePos: TPoint; var Handled: Boolean);
+begin
+   if ( Pgc_Editor.ActivePage = Tbs_Scrape ) then
+      Scl_Pictures.Perform(WM_HSCROLL,1,0);
+end;
+
+//scroll horizontal avec souris
+procedure TFrm_Editor.FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
+          MousePos: TPoint; var Handled: Boolean);
+begin
+   if ( Pgc_Editor.ActivePage = Tbs_Scrape ) then
+      Scl_Pictures.Perform(WM_HSCROLL,0,0);
+end;
+
+
+//******************************************************************************
 //Juste avant la fermeture du programme, on sauvegarde les options dansle .INI
 procedure TFrm_Editor.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
@@ -2454,6 +2932,11 @@ begin
    //Toutes les listes étant "owner" de leurs objets
    //un simple Free sur cette liste videra automatiquement les autres
    GSystemList.Free;
+
+   //On libère toutes les listes du scrape
+   FImgList.Free;
+   FInfosList.Free;
+   FPictureLinks.Free;
 end;
 
 end.

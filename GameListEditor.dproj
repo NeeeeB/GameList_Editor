@@ -132,14 +132,6 @@
         <DCCReference Include="U_gnugettext.pas"/>
         <DCCReference Include="U_Resources.pas"/>
         <DCCReference Include="U_Game.pas"/>
-        <DCCReference Include="F_Scraper.pas">
-            <Form>Frm_Scraper</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
-        <DCCReference Include="F_SplashLoading.pas">
-            <Form>Frm_Splash</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
         <DCCReference Include="F_ConfigureNetwork.pas">
             <Form>Frm_Network</Form>
             <FormType>dfm</FormType>

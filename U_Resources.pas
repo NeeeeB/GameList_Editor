@@ -271,7 +271,8 @@ type
                  lnPortuguese_BR );
 
    //enum pour les pays
-   TCountryName = ( cnDe,
+   TCountryName = ( cnUnd,
+                    cnDe,
                     cnAsi,
                     cnAu,
                     cnBr,
@@ -630,8 +631,15 @@ const
         '19', '20', '109', '105', '102', '11', '45', '46', '76', '77', '64',
         '64', '86', '48', '66', '135', '23', '13', '61', '16', '1' );
 
+   Cst_CountryName: array[TCountryName] of string =
+      ( '', 'de', 'asi', 'au', 'br', 'bg', 'ca', 'cl', 'cn', 'ame', 'kr', 'cus',
+        'dk', 'sp', 'eu', 'fi', 'fr', 'gr', 'hu', 'il', 'it', 'jp', 'kw', 'wor',
+        'mor', 'no', 'nz' , 'oce', 'nl', 'pe', 'pl', 'pt', 'cz', 'uk', 'ru', 'sk',
+        'se', 'tw', 'tr', 'us' );
+
    Cst_CountryNameFull: array[TCountryName] of array[1..5] of string =
-      ( ( 'Allemagne', 'Deutschland', 'Germany', 'Alemania', 'Alemanha' ),
+      ( ( '', '', '', '', '' ),
+        ( 'Allemagne', 'Deutschland', 'Germany', 'Alemania', 'Alemanha' ),
         ( 'Asie', 'Asien', 'Asia', 'Asia', 'Ásia' ),
         ( 'Australie', 'Australien', 'Australia', 'Australia', 'Austrália' ),
         ( 'Brésil', 'Brasilien', 'Brazil', 'Brasil', 'Brasil' ),
