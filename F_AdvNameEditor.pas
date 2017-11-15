@@ -34,7 +34,7 @@ type
       procedure Edt_StartStringChange(Sender: TObject);
       procedure Edt_EndStringChange(Sender: TObject);
       procedure Rdg_CaseClick(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
+      procedure FormCreate(Sender: TObject);
 
    private
       FPreviewStr: string;
@@ -42,7 +42,7 @@ type
    public
       function Execute( out aRemChars, aAddChars, aChangeCase: Boolean;
                         out aNbStart, aNbEnd, aCaseIndex: Integer;
-                        out aStringStart, aStringEnd: string; aPreview: string ): Boolean;
+                        out aStringStart, aStringEnd: string; const aPreview: string ): Boolean;
    end;
 
 implementation
@@ -76,7 +76,7 @@ end;
 
 function TFrm_AdvNameEditor.Execute( out aRemChars, aAddChars, aChangeCase: Boolean;
                                      out aNbStart, aNbEnd, aCaseIndex: Integer;
-                                     out aStringStart, aStringEnd: string; aPreview: string ): Boolean;
+                                     out aStringStart, aStringEnd: string; const aPreview: string ): Boolean;
 begin
    FPreviewStr:= aPreview;
    Edt_Preview.Text:= FPreviewStr;

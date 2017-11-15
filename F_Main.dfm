@@ -1039,7 +1039,7 @@ object Frm_Editor: TFrm_Editor
       Top = 0
       Width = 1238
       Height = 698
-      ActivePage = Tbs_Main
+      ActivePage = Tbs_Scrape
       Align = alClient
       MultiLine = True
       TabOrder = 0
@@ -6887,10 +6887,6 @@ object Frm_Editor: TFrm_Editor
         ImageIndex = 1
         OnHide = Tbs_ScrapeHide
         OnShow = Tbs_ScrapeShow
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Img_ScreenScraper: TImage
           Left = 980
           Top = 625
@@ -13605,7 +13601,7 @@ object Frm_Editor: TFrm_Editor
     Left = 184
     Top = 40
     Bitmap = {
-      494C0101010008002C0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800400110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

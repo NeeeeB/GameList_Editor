@@ -13,7 +13,8 @@ uses
   U_Resources in 'U_Resources.pas',
   U_Game in 'U_Game.pas',
   F_ConfigureNetwork in 'F_ConfigureNetwork.pas' {Frm_Network},
-  F_AdvNameEditor in 'F_AdvNameEditor.pas' {Frm_AdvNameEditor};
+  F_AdvNameEditor in 'F_AdvNameEditor.pas' {Frm_AdvNameEditor},
+  U_DownloadThread in 'U_DownloadThread.pas';
 
 {$R *.res}
 

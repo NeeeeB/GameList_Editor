@@ -6,13 +6,14 @@ uses
    Winapi.Windows, Winapi.Messages, Winapi.ShellAPI,
    System.SysUtils, System.Variants, System.Classes, System.IniFiles, System.Generics.Collections,
    System.RegularExpressions, System.UITypes, System.ImageList, System.StrUtils, System.IOUtils,
+   System.SyncObjs,
    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles, Vcl.Themes, Vcl.ImgList,
    Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls,
    Xml.omnixmldom, Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, Xml.Win.msxmldom,
    F_MoreInfos, F_About, F_Help, F_ConfigureSSH, U_gnugettext, U_Resources, U_Game,
-   F_ConfigureNetwork, F_AdvNameEditor, IdIOHandler, IdIOHandlerSocket, IdURI,
-   IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdBaseComponent, IdComponent, IdException,
-   IdTCPConnection, IdTCPClient, IdHTTP;
+   F_ConfigureNetwork, F_AdvNameEditor, U_DownloadThread,
+   IdIOHandler, IdIOHandlerSocket, IdURI, IdIOHandlerStack, IdSSL, IdSSLOpenSSL,
+   IdBaseComponent, IdComponent, IdException, IdTCPConnection, IdTCPClient, IdHTTP;
 
 type
    TMediaInfo = class
@@ -174,7 +175,6 @@ type
       procedure Lbx_GamesClick(Sender: TObject);
       procedure Mnu_QuitClick(Sender: TObject);
       procedure Mnu_ChoosefolderClick(Sender: TObject);
-      procedure ChkClick(Sender: TObject);
       procedure Btn_SaveChangesClick(Sender: TObject);
       procedure FieldChange(Sender: TObject);
       procedure Mmo_DescriptionKeyPress(Sender: TObject; var Key: Char);
@@ -235,17 +235,14 @@ type
       FShowTips, FFolderIsOnPi, FPiPrompts, FSysIsRecal,
       FPiLoadedOnce: Boolean;
       FRecalLogin, FRecalPwd, FRetroLogin, FRetroPwd: string;
-      FSSLogin, FSSPwd, FProxyServer, FProxyUser,
-      FProxyPwd, FProxyPort: string;
-      FProxyUse: Boolean;
+      FSSLogin, FSSPwd: string;
       FScrapedGame: TGame;
       GSystemList: TObjectDictionary<string,TObjectList<TGame>>;
 
       //Pour le scrape
-      FImgList: TObjectList<TImage>;
-      FInfosList: TStringList;
       FPictureLinks: TObjectList<TMediaInfo>;
-      FMaxThreads: Integer;
+      FInfosList: TStringList;
+      FMaxThreads, FThreadCount, FStartCount: Integer;
       FTempXmlPath: string;
 
       procedure LoadFromIni;
@@ -259,7 +256,7 @@ type
       procedure EnableComponents( aValue: Boolean );
       procedure CheckIfChangesToSave;
       procedure ChangeImage( const aPath: string; aGame: TGame );
-      procedure LoadSystemLogo( aPictureName: string );
+      procedure LoadSystemLogo( const aPictureName: string );
       procedure DeleteGame( aGame: TGame );
       procedure DeleteGamePicture;
       procedure CheckMenuItem( aNumber: Integer; aLang: Boolean = False );
@@ -267,19 +264,19 @@ type
       procedure ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False;
                                    aUp: Boolean = False );
       procedure StopOrStartES( aStop, aRecal: Boolean );
-      procedure DeleteDuplicates( aSystem: string );
+      procedure DeleteDuplicates( const aSystem: string );
       procedure ReloadIni;
       procedure SetFavOrHidden( aFav, aValue: Boolean );
       procedure TransformGamesNames( aRemChars, aAddChars, aChangecase: Boolean;
                                      aNbStart, aNbEnd, aCaseIndex: Integer;
-                                     aStringStart, aStringEnd : string );
+                                     const aStringStart, aStringEnd : string );
       procedure ExportToTxt;
 
       function getSystemKind: TSystemKind;
       function getCurrentFolderName: string;
       function GetCurrentLogoName: string;
       function GetCurrentSystemId: string;
-      function GetCountryEnum( aShortName: string ): TCountryName;
+      function GetCountryEnum( const aShortName: string ): TCountryName;
       function BuildGamesList( const aPathToFile: string ): TObjectList<TGame>;
       function FormatDateFromString( const aDate: string; aIso: Boolean = False ): string;
       function GetThemeEnum( aNumber: Integer ): TThemeName;
@@ -290,20 +287,31 @@ type
                             Caption: array of string; dlgcaption: string ): Integer;
 
       //Méthodes relatives à l'onglet de scrape
-      procedure WarnUser( aMessage: string );
       procedure ParseXml;
-      procedure LoadPictures;
       procedure DisplayPictures;
       procedure FillFields;
       procedure EnableScrapeComponents( aValue: Boolean );
+      procedure GetPictures;
+      procedure GetPicture( aMedia: TMediaInfo );
+      procedure ThreadTerminated( Sender: TObject );
       procedure EmptyScrapeFields;
-                  
+
       function GetGameXml( const aSysId: string; aGame: TGame ): Boolean;
       function GetFileSize( const aPath: string ): string;
+
+   public
+      FProxyServer, FProxyUser,
+      FProxyPwd, FProxyPort: string;
+      FProxyUse: Boolean;
+      FImgList: TObjectList<TImage>;
+      procedure WarnUser( const aMessage: string );
+
    end;
 
 var
    Frm_Editor: TFrm_Editor;
+   //lock pour le compteur de threads (empêche l'accés concurrent)
+   CounterGuard: TCriticalSection;
 
 implementation
 
@@ -512,7 +520,7 @@ begin
 end;
 
 //Recup l'énum du pays (région) du jeu scrapé
-function TFrm_Editor.GetCountryEnum( aShortName: string ): TCountryName;
+function TFrm_Editor.GetCountryEnum( const aShortName: string ): TCountryName;
 var
    _CountryName: TCountryName;
 begin
@@ -538,6 +546,7 @@ begin
    TStyleManager.TrySetStyle( Cst_ThemeNameStr[GetThemeEnum( FThemeNumber )] );
    FPiLoadedOnce:= False;
    FTempXmlPath:= ExtractFilePath( Application.ExeName ) + Cst_TempXml;
+   CounterGuard:= TCriticalSection.Create;
 end;
 
 //Met le focus sur le combo system à l'affichage de la fenêtre
@@ -1044,7 +1053,7 @@ begin
 end;
 
 //Charge le logo du système sélectionné dans le TImage prévu
-procedure TFrm_Editor.LoadSystemLogo( aPictureName: string );
+procedure TFrm_Editor.LoadSystemLogo( const aPictureName: string );
 var
    _Image: TPngImage;
 begin
@@ -1423,20 +1432,15 @@ begin
    Refresh;
    Enabled:= False;
    if ( Lbx_Games.Count > 0 ) then begin
-      Screen.Cursor:= crHourGlass;
       FScrapedGame:= ( Lbx_Games.Items.Objects[Lbx_Games.ItemIndex] as TGame );
       if GetGameXml( GetCurrentSystemId, FScrapedGame ) then begin
          ParseXml;
-         LoadPictures;
+         GetPictures;
+      end else begin
          Img_Loading.Visible:= False;
-         DisplayPictures;
-         FillFields;
-         EnableScrapeComponents( True );
-         Screen.Cursor:= crDefault;
-      end else
-         Img_Loading.Visible:= False;
+         Enabled:= True;
+      end;
    end;
-   Enabled:= True;
 end;
 
 procedure TFrm_Editor.Btn_ScrapeSaveClick(Sender: TObject);
@@ -1487,6 +1491,8 @@ var
    _NodeAdded, _NameChanged: Boolean;
    _Index: Integer;
 begin
+   Screen.Cursor:= crHourGlass;
+
    _NodeAdded:= False;
    _NameChanged:= False;
 
@@ -1693,6 +1699,8 @@ begin
       Pgc_Editor.ActivePage:= Tbs_Main;
       Tbs_ScrapeHide( nil );
    end;
+
+    Screen.Cursor:= crDefault;
 end;
 
 //Diverse sections du menu sélection
@@ -1902,7 +1910,7 @@ begin
 end;
 
 //Delete duplicates in the gamelist.xml
-procedure TFrm_Editor.DeleteDuplicates( aSystem: string );
+procedure TFrm_Editor.DeleteDuplicates( const aSystem: string );
 var
    _NodeList: IXMLNodeList;
    _Node1, _Node2: IXMLNode;
@@ -1988,29 +1996,6 @@ begin
 
    //on remet les évènements sur les champs
    FIsLoading:= False;
-end;
-
-//Centralisation de l'évènement click sur checkbox
-//(passage du champ correspondant en read/write)
-procedure TFrm_Editor.ChkClick(Sender: TObject);
-begin
-   //Si la liste de jeux est vide, on sort
-   if Lbx_Games.Items.Count = 0 then Exit;
-
-   //On active le champ correspondant au checkbox coché ou non
-
-   Edt_Name.ReadOnly:= not (Sender as TCheckBox).Checked;
-   Edt_ReleaseDate.ReadOnly:= not (Sender as TCheckBox).Checked;
-   Edt_NbPlayers.ReadOnly:= not (Sender as TCheckBox).Checked;
-   Edt_Rating.ReadOnly:= not (Sender as TCheckBox).Checked;
-   Edt_Publisher.ReadOnly:= not (Sender as TCheckBox).Checked;
-   Edt_Developer.ReadOnly:= not (Sender as TCheckBox).Checked;
-   Edt_Genre.ReadOnly:= not (Sender as TCheckBox).Checked;
-   Mmo_Description.ReadOnly:= not (Sender as TCheckBox).Checked;
-   Edt_Region.ReadOnly:= not (Sender as TCheckBox).Checked;
-   Cbx_Hidden.Enabled:= (Sender as TCheckBox).Checked;
-   Cbx_Favorite.Enabled:= (Sender as TCheckBox).Checked;
-
 end;
 
 //Au click sur la checkbox "list by rom name"
@@ -2105,7 +2090,7 @@ begin
 
       //on chope le premier caractère du premier élément de la liste triée
       FirstCharRef:= SortedList[0][1];
-      FormatedList.Add( '---------- ' + UpperCase( FirstCharRef ) + ' ----------' );
+      FormatedList.Add( '---------- ' + AnsiUpperCase( FirstCharRef ) + ' ----------' );
       FormatedList.Add( sLineBreak );
       //ici on boucle sur la liste triée pour remplir la liste formatée
       for ii:= 0 to Pred( SortedList.Count ) do begin
@@ -2115,7 +2100,7 @@ begin
          else begin
             FirstCharRef:= FirstCharCurrent;
             FormatedList.Add( sLineBreak );
-            FormatedList.Add( '---------- ' + UpperCase( FirstCharRef ) + ' ----------' );
+            FormatedList.Add( '---------- ' + AnsiUpperCase( FirstCharRef ) + ' ----------' );
             FormatedList.Add( sLineBreak );
             FormatedList.Add( SortedList[ii] );
          end;
@@ -2237,12 +2222,12 @@ procedure TFrm_Editor.ConvertFieldsCase( aGame: TGame; aUnique: Boolean = False;
    end;
 
    //factorisation de code
-   function ConvertUpOrLow( aNode: IXMLNode; const aNodeName: string; aUp: Boolean; aField: string ): string;
+   function ConvertUpOrLow( aNode: IXMLNode; const aNodeName: string; aUp: Boolean; const aField: string ): string;
    begin
       if aUp then begin
-         Result:= UpperCase( aField );
+         Result:= AnsiUpperCase( aField );
       end else begin
-         Result:= LowerCase( aField );
+         Result:= AnsiLowerCase( aField );
       end;
       if Assigned( aNode.ChildNodes.FindNode( aNodeName ) ) then
          aNode.ChildNodes.Nodes[aNodeName].Text:= Result;
@@ -2514,7 +2499,7 @@ end;
 //choisies dans l'éditeur avancé.
 procedure TFrm_Editor.TransformGamesNames( aRemChars, aAddChars, aChangecase: Boolean;
                                            aNbStart, aNbEnd, aCaseIndex: Integer;
-                                           aStringStart, aStringEnd : string );
+                                           const aStringStart, aStringEnd : string );
 var
    _Node: IXMLNode;
    _GameListPath, TmpStr: string;
@@ -2704,14 +2689,13 @@ begin
    finally
       Stream.Free;
    end;
-
    Result:= True;
 end;
 
 //parsing du Xml pour récupérer tout ce qui est description, région, nombre joueurs etc...
 procedure TFrm_Editor.ParseXml;
 
-   function CreateDict( aNodeList: IXMLNodeList; aAttName: string ): TDictionary<string, string>;
+   function CreateDict( aNodeList: IXMLNodeList; const aAttName: string ): TDictionary<string, string>;
    var
       ii: Integer;
    begin
@@ -2721,7 +2705,7 @@ procedure TFrm_Editor.ParseXml;
       end;
    end;
 
-   function CreateGenreDict( aNodeList: IXMLNodeList; aAttId, aAttLang: string ): TObjectDictionary<string, TDictionary<string, string>>;
+   function CreateGenreDict( aNodeList: IXMLNodeList; const aAttId, aAttLang: string ): TObjectDictionary<string, TDictionary<string, string>>;
    var
       ii: Integer;
       id: string;
@@ -2843,72 +2827,59 @@ begin
 end;
 
 //Crée les images depuis la liste globale des liens.
-procedure TFrm_Editor.LoadPictures;
-
-   procedure CreateImage( aGraph: TGraphic );
-   var
-      Img: TImage;
-   begin
-      Img:= TImage.Create( nil );
-      Img.AutoSize:= True;
-      Img.Center:= True;
-      Img.Proportional:= True;
-      Img.Visible:= False;
-      Img.Picture.Graphic:= aGraph;
-      FImgList.Add( Img );
-   end;
-
+//(lancement du nombre de thread en fonction du user screenscraper)
+procedure TFrm_Editor.GetPictures;
 var
-   Stream: TBytesStream;
-   Query: string;
-   Media: TMediaInfo;
-   Graph: TGraphic;
+   ii: Integer;
 begin
-   for Media in FPictureLinks do begin
-      //C'est moche mais ça évite le "ne répond pas"
-      Application.ProcessMessages;
-
-      Query:= Media.FileLink;
-      Stream:= TBytesStream.Create;
-      try
-         try
-            Ind_HTTP.Get( Query, Stream );
-            if ( Stream.Size = 0 ) then begin
-               WarnUser( Rst_StreamError );
-               Continue;
-            end;
-            Stream.Position:= 0;
-
-            //on crée le graphic qui va bien en fonction de l'extension
-            if ( Media.FileExt = Cst_PngExt ) then Graph:= TPngImage.Create
-            else Graph:= TJPEGImage.create;
-
-            Graph.LoadFromStream( Stream );
-            CreateImage( Graph );
-
-         except
-            //gestion des erreurs de connexion
-            on E: EIdHTTPProtocolException do begin
-               case E.ErrorCode of
-                  400: WarnUser( Rst_ServerError1 );
-                  401: WarnUser( Rst_ServerError2 );
-                  403: WarnUser( Rst_ServerError3 );
-                  404: WarnUser( Rst_ServerError4 );
-                  423: WarnUser( Rst_ServerError5 );
-                  426: WarnUser( Rst_ServerError6 );
-                  429: WarnUser( Rst_ServerError7 );
-               end;
-               Continue;
-            end;
-            on E: EIdException do begin
-               WarnUser( Rst_ServerError8 );
-               Continue;
-            end;
-         end;
-      finally
-         Stream.Free;
-      end;
+   //si il n'y a pas d'image à récup, on réactive tout le bazar et on sort
+   if ( FPictureLinks.Count = 0 ) then begin
+      Img_Loading.Visible:= False;
+      FillFields;
+      EnableScrapeComponents( True );
+      Enabled:= True;
+      Exit;
    end;
+
+   FThreadCount:= 0;
+   FStartCount:= FPictureLinks.Count;
+   for ii:= 0 to Pred( FMaxthreads ) do begin
+      if ( FPictureLinks.Count > 0 ) then
+         GetPicture( FPictureLinks.Extract( FPictureLinks[0] ) );
+   end;
+end;
+
+//Crée un thread de download d'image
+procedure TFrm_Editor.GetPicture( aMedia: TMediaInfo );
+var
+   Thread: TDOwnThread;
+begin
+   Thread:= TDOwnThread.Create;
+   Thread.Url:= aMedia.FileLink;
+   Thread.Ext:= aMedia.FileExt;
+   Thread.OnTerminate:= ThreadTerminated;
+   Thread.Start;
+end;
+
+//Action réalisée par un thread lorsqu'il se termine
+procedure TFrm_Editor.ThreadTerminated( Sender: TObject );
+begin
+   //on lock l'accés au compteur de threads
+   CounterGuard.Acquire;
+
+   Inc( FThreadCount );
+   if ( FPictureLinks.Count > 0 ) then begin
+      GetPicture( FPictureLinks.Extract( FPictureLinks[0] ) );
+   end else if ( FThreadCount = FStartCount ) then begin
+      DisplayPictures;
+      Img_Loading.Visible:= False;
+      FillFields;
+      EnableScrapeComponents( True );
+      Enabled:= True;
+   end;
+
+   //on libère le lock du compteur
+   CounterGuard.Release;
 end;
 
 //Affichage des images récupérées
@@ -2917,6 +2888,8 @@ var
    ii, Left, Count: Integer;
 begin
    Count:= FImgList.Count;
+   if ( Count = 0 ) then Exit;
+
    case Count of
       1: Left:= 325;
       2: Left:= 170;
@@ -2943,7 +2916,7 @@ end;
 //Remplissage des champs avec les infos scrapées
 procedure TFrm_Editor.FillFields;
 
-   function GetFormatedDate( aStr: string ): string;
+   function GetFormatedDate( const aStr: string ): string;
    var
       Day, Month, Year: string;
    begin
@@ -3086,7 +3059,7 @@ begin
 end;
 
 //Pour prévenir le user si problème ou pas de médias trouvés
-procedure TFrm_Editor.WarnUser( aMessage: string );
+procedure TFrm_Editor.WarnUser( const aMessage: string );
 begin
    Screen.Cursor:= crDefault;
    ShowMessage( aMessage );
@@ -3155,6 +3128,9 @@ begin
    FImgList.Free;
    FInfosList.Free;
    FPictureLinks.Free;
+
+   //libère l'objet lock du compteur de threads
+   CounterGuard.Free;
 end;
 
 end.
