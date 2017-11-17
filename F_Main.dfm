@@ -6888,8 +6888,8 @@ object Frm_Editor: TFrm_Editor
         OnHide = Tbs_ScrapeHide
         OnShow = Tbs_ScrapeShow
         object Img_ScreenScraper: TImage
-          Left = 980
-          Top = 625
+          Left = 995
+          Top = 644
           Width = 205
           Height = 38
           Picture.Data = {
@@ -11828,7 +11828,7 @@ object Frm_Editor: TFrm_Editor
           Left = 0
           Top = 0
           Width = 1210
-          Height = 350
+          Height = 325
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
@@ -11836,7 +11836,7 @@ object Frm_Editor: TFrm_Editor
             Left = 27
             Top = 0
             Width = 1158
-            Height = 350
+            Height = 325
             HorzScrollBar.Tracking = True
             BevelInner = bvNone
             BevelOuter = bvNone
@@ -13137,7 +13137,7 @@ object Frm_Editor: TFrm_Editor
         end
         object Btn_Scrape: TButton
           Left = 976
-          Top = 416
+          Top = 377
           Width = 209
           Height = 25
           Caption = 'Scrape'
@@ -13226,7 +13226,7 @@ object Frm_Editor: TFrm_Editor
         end
         object Btn_ScrapeSave: TButton
           Left = 976
-          Top = 538
+          Top = 559
           Width = 209
           Height = 25
           Caption = 'Save Changes for this game'
@@ -13241,6 +13241,146 @@ object Frm_Editor: TFrm_Editor
           Height = 21
           ReadOnly = True
           TabOrder = 12
+        end
+        object Btn_ScrapeLower: TButton
+          Left = 976
+          Top = 507
+          Width = 209
+          Height = 25
+          Caption = 'Convert all text to lowercase'
+          Enabled = False
+          TabOrder = 13
+          OnClick = Btn_ScrapeLowerClick
+        end
+        object Btn_ScrapeUpper: TButton
+          Left = 976
+          Top = 476
+          Width = 209
+          Height = 25
+          Caption = 'Convert all text to uppercase'
+          Enabled = False
+          TabOrder = 14
+          OnClick = Btn_ScrapeUpperClick
+        end
+        object Chk_ScrapePicture: TCheckBox
+          Left = 976
+          Top = 590
+          Width = 209
+          Height = 17
+          Caption = 'Save picture'
+          Enabled = False
+          TabOrder = 15
+          OnClick = Chk_ScrapeClick
+        end
+        object Chk_ScrapeInfos: TCheckBox
+          Left = 976
+          Top = 611
+          Width = 209
+          Height = 17
+          Caption = 'Save infos'
+          Checked = True
+          Enabled = False
+          State = cbChecked
+          TabOrder = 16
+          OnClick = Chk_ScrapeClick
+        end
+        object Chk_ManualCRC: TCheckBox
+          Left = 976
+          Top = 408
+          Width = 209
+          Height = 17
+          Caption = 'Enter CRC32 manually'
+          Enabled = False
+          TabOrder = 17
+          OnClick = Chk_ManualCRCClick
+        end
+        object Edt_ManualCRC: TEdit
+          Left = 976
+          Top = 427
+          Width = 209
+          Height = 21
+          Enabled = False
+          TabOrder = 18
+        end
+        object Chk_Box2D: TCheckBox
+          Left = 27
+          Top = 331
+          Width = 90
+          Height = 17
+          Caption = 'Box 2D'
+          Checked = True
+          State = cbChecked
+          TabOrder = 19
+        end
+        object Chk_Box3D: TCheckBox
+          Left = 130
+          Top = 331
+          Width = 90
+          Height = 17
+          Caption = 'Box 3D'
+          Checked = True
+          State = cbChecked
+          TabOrder = 20
+        end
+        object Chk_Mix1: TCheckBox
+          Left = 233
+          Top = 331
+          Width = 90
+          Height = 17
+          Caption = 'Mix 1'
+          Checked = True
+          State = cbChecked
+          TabOrder = 21
+        end
+        object Chk_Mix2: TCheckBox
+          Left = 336
+          Top = 331
+          Width = 90
+          Height = 17
+          Caption = 'Mix 2'
+          Checked = True
+          State = cbChecked
+          TabOrder = 22
+        end
+        object Chk_Screenshot: TCheckBox
+          Left = 439
+          Top = 331
+          Width = 90
+          Height = 17
+          Caption = 'Screenshot'
+          Checked = True
+          State = cbChecked
+          TabOrder = 23
+        end
+        object Chk_Title: TCheckBox
+          Left = 542
+          Top = 331
+          Width = 90
+          Height = 17
+          Caption = 'Title'
+          Checked = True
+          State = cbChecked
+          TabOrder = 24
+        end
+        object Chk_ArcadeBox: TCheckBox
+          Left = 638
+          Top = 331
+          Width = 90
+          Height = 17
+          Caption = 'Arcade Box'
+          Checked = True
+          State = cbChecked
+          TabOrder = 25
+        end
+        object Chk_Wheel: TCheckBox
+          Left = 741
+          Top = 331
+          Width = 90
+          Height = 17
+          Caption = 'Wheel'
+          Checked = True
+          State = cbChecked
+          TabOrder = 26
         end
       end
     end
@@ -13601,7 +13741,7 @@ object Frm_Editor: TFrm_Editor
     Left = 184
     Top = 40
     Bitmap = {
-      494C010101000800400110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101010008004C0110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
