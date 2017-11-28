@@ -182,6 +182,7 @@ type
       Chk_Title: TCheckBox;
       Chk_ArcadeBox: TCheckBox;
       Chk_Wheel: TCheckBox;
+      Mnu_Reload: TMenuItem;
 
       procedure FormCreate(Sender: TObject);
       procedure FormDestroy(Sender: TObject);
@@ -240,6 +241,7 @@ type
       procedure Btn_ScrapeLowerClick(Sender: TObject);
       procedure Chk_ScrapeClick(Sender: TObject);
       procedure Chk_ManualCRCClick(Sender: TObject);
+      procedure Mnu_ReloadClick(Sender: TObject);
 
    private
 
@@ -265,7 +267,7 @@ type
 
       procedure LoadFromIni;
       procedure SaveToIni;
-      procedure BuildSystemsList;
+      procedure BuildSystemsList( aReload : Boolean = False );
       procedure LoadGamesList( const aSystem: string );
       procedure LoadGame( aGame: TGame );
       procedure ClearAllFields;
@@ -616,6 +618,19 @@ begin
    Btn_SaveChanges.Enabled:= False;
 end;
 
+//Action au click sur menuitem "Reload Systems"
+procedure TFrm_Editor.Mnu_ReloadClick(Sender: TObject);
+begin
+   Img_BackGround.Visible:= True;
+   EnableControls( False );
+   Edt_Search.Enabled:= False;
+   Lbl_Search.Enabled:= False;
+   ClearAllFields;
+   Lbx_Games.Items.Clear;
+   BuildSystemsList( True );
+   Btn_SaveChanges.Enabled:= False;
+end;
+
 //permet d'éxecuter la ligne de commande qui stop/start Emulation Station
 //utilisé si on accède aux gamelist directement sur le Pi sinon les modifs ne
 //sont pas prises en compte. Utilise le petit utilitaire plink.exe
@@ -646,7 +661,7 @@ begin
 end;
 
 //Construction de la liste des systèmes trouvés (et des listes de jeux associées)
-procedure TFrm_Editor.BuildSystemsList;
+procedure TFrm_Editor.BuildSystemsList( aReload : Boolean = False );
 var
    _GameListPath: string;
    Info: TSearchRec;
@@ -656,7 +671,7 @@ var
    _system: TSystemKindObject;
 begin
    //on met à vide le chemin de base et le logo systeme
-   FRootPath:= '';
+   //FRootPath:= '';
    Img_System.Picture.Graphic:= nil;
 
    //On vide le combobox des systèmes
@@ -679,105 +694,109 @@ begin
    ValidFolderCount:= 0;
 
    //On sélectionne le dossier parent où se trouvent les dossiers de systèmes
-   if ( OpenDialog.Execute ) then begin
-
-      //On récupère le chemin vers le dossier parent
-      FRootPath:= IncludeTrailingPathDelimiter( OpenDialog.FileName );
-
-      //On check si le dossier n'est pas vide
-      IsFound:= ( FindFirst( FRootPath + '*.*', faAnyFile, Info) = 0 );
-
-      //Si le dossier est vide : message utilisateur
-      if not IsFound then begin
-         ShowMessage( Rst_WrongFolder );
+   if ( not aReload ) then begin
+      Mnu_Reload.Enabled:= False;
+      if ( OpenDialog.Execute ) then
+         //On récupère le chemin vers le dossier parent
+         FRootPath:= IncludeTrailingPathDelimiter( OpenDialog.FileName )
+      else
          Exit;
-      end;
+   end;
 
-      //On boucle sur les dossiers trouvés pour les lister
-      while IsFound do begin
+   //On check si le dossier n'est pas vide
+   IsFound:= ( FindFirst( FRootPath + '*.*', faAnyFile, Info) = 0 );
 
-         //Si le dossier trouvé ne commence pas par un . et qu'il contient
-         //bien un fichier gamelist.xml alors on crée la liste de jeux
-         if ( (Info.Attr and faDirectory) <> 0 ) and
-            ( Info.Name[1] <> '.' ) and
-            ( FileExists( FRootPath + IncludeTrailingPathDelimiter( Info.Name ) +
-                          Cst_GameListFileName ) ) then begin
+   //Si le dossier est vide : message utilisateur
+   if not IsFound then begin
+      ShowMessage( Rst_WrongFolder );
+      Exit;
+   end;
 
-            //on chope le nom du dossier en cours pour construire les chemins
-            FCurrentFolder:= IncludeTrailingPathDelimiter( Info.Name );
+   //On boucle sur les dossiers trouvés pour les lister
+   while IsFound do begin
 
-            //Ici on récupère le chemin vers le fichier gamelist.xml
-            _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
+      //Si le dossier trouvé ne commence pas par un . et qu'il contient
+      //bien un fichier gamelist.xml alors on crée la liste de jeux
+      if ( (Info.Attr and faDirectory) <> 0 ) and
+         ( Info.Name[1] <> '.' ) and
+         ( FileExists( FRootPath + IncludeTrailingPathDelimiter( Info.Name ) +
+                       Cst_GameListFileName ) ) then begin
 
-            //On tente de construire la liste des jeux depuis le .xml
-            TmpList:= BuildGamesList( _GameListPath );
+         //on chope le nom du dossier en cours pour construire les chemins
+         FCurrentFolder:= IncludeTrailingPathDelimiter( Info.Name );
 
-            //Si la liste n'est pas vide, on traite, sinon on zappe
-            if Assigned( TmpList ) then begin
+         //Ici on récupère le chemin vers le fichier gamelist.xml
+         _GameListPath:= FRootPath + FCurrentFolder + Cst_GameListFileName;
 
-               //On construit la liste des jeux du système
-               //et on joute le système à la liste globale de systèmes
-               GSystemList.Add( Info.Name, TmpList );
+         //On tente de construire la liste des jeux depuis le .xml
+         TmpList:= BuildGamesList( _GameListPath );
 
-               //On ajoute ensuite le nom du systeme au combobox des systemes trouvés
-               _system:= TSystemKindObject.Create( Info.Name );
-               if ( _system.FSystemKind = skMegaDrive ) and FGenesisLogo then
-                  Cbx_Systems.Items.AddObject( Cst_SystemKindStr[skGenesis], _system )
-               else
-               Cbx_Systems.Items.AddObject( Cst_SystemKindStr[_system.FSystemKind], _system );
+         //Si la liste n'est pas vide, on traite, sinon on zappe
+         if Assigned( TmpList ) then begin
 
-               //On incrémente le compteur de dossier système valides
-               Inc( ValidFolderCount );
-            end;
+            //On construit la liste des jeux du système
+            //et on joute le système à la liste globale de systèmes
+            GSystemList.Add( Info.Name, TmpList );
+
+            //On ajoute ensuite le nom du systeme au combobox des systemes trouvés
+            _system:= TSystemKindObject.Create( Info.Name );
+            if ( _system.FSystemKind = skMegaDrive ) and FGenesisLogo then
+               Cbx_Systems.Items.AddObject( Cst_SystemKindStr[skGenesis], _system )
+            else
+            Cbx_Systems.Items.AddObject( Cst_SystemKindStr[_system.FSystemKind], _system );
+
+            //On incrémente le compteur de dossier système valides
+            Inc( ValidFolderCount );
          end;
-
-         //Enfin, on passe au dossier suivant (s'il y en a un)
-         IsFound:= ( FindNext(Info) = 0 );
       end;
-      FindClose(Info);
 
-      //Si le compteur de dossier valide est à zéro, message utilisateur
-      if ( ValidFolderCount = 0 ) then begin
-         ShowMessage( Rst_WrongFolder );
-         Screen.Cursor:= crDefault;
-         Exit;
+      //Enfin, on passe au dossier suivant (s'il y en a un)
+      IsFound:= ( FindNext(Info) = 0 );
+   end;
+   FindClose(Info);
 
-         //On active le Combobox des systemes si au moins un systeme a été trouvé
-         //Idem pour le listbox des jeux du systeme et on charge la liste du premier système
-      end else begin
+   //Si le compteur de dossier valide est à zéro, message utilisateur
+   if ( ValidFolderCount = 0 ) then begin
+      ShowMessage( Rst_WrongFolder );
+      Screen.Cursor:= crDefault;
+      Exit;
 
-         //si le dossier sélectionné se trouve sur le Pi,
-         //on prévient l'utilisateur qu'on va stopper ES
-         FFolderIsOnPi:= FRootPath.StartsWith( Cst_Recalbox ) or
-                         FRootPath.StartsWith( Cst_Retropie );
+      //On active le Combobox des systemes si au moins un systeme a été trouvé
+      //Idem pour le listbox des jeux du systeme et on charge la liste du premier système
+   end else begin
 
-         if FFolderIsOnPi and not FPiLoadedOnce then begin
-            FPiLoadedOnce:= True;
-            if not FPiPrompts then
-               MyMessageDlg( Rst_StopES, mtInformation, [mbOK], [Rst_Ok], Rst_Info );
-            if FRootPath.StartsWith( Cst_Recalbox ) then begin
-               StopOrStartES( True, True );
-               FSysIsRecal:= True;
-            end else begin
-               StopOrStartES( True, False );
-               FSysIsRecal:= False;
-            end;
+      //si le dossier sélectionné se trouve sur le Pi,
+      //on prévient l'utilisateur qu'on va stopper ES
+      FFolderIsOnPi:= FRootPath.StartsWith( Cst_Recalbox ) or
+                      FRootPath.StartsWith( Cst_Retropie );
+
+      if FFolderIsOnPi and not FPiLoadedOnce then begin
+         FPiLoadedOnce:= True;
+         if not FPiPrompts then
+            MyMessageDlg( Rst_StopES, mtInformation, [mbOK], [Rst_Ok], Rst_Info );
+         if FRootPath.StartsWith( Cst_Recalbox ) then begin
+            StopOrStartES( True, True );
+            FSysIsRecal:= True;
+         end else begin
+            StopOrStartES( True, False );
+            FSysIsRecal:= False;
          end;
-
-         Cbx_Systems.Enabled:= True;
-         Lbl_SelectSystem.Enabled:= Cbx_Systems.Enabled;
-         Cbx_Filter.Enabled:= Cbx_Systems.Enabled;
-         Lbl_Filter.Enabled:= Cbx_Systems.Enabled;
-         Cbx_Systems.ItemIndex:= 0;
-         EnableControls( True );
-         Cbx_Filter.ItemIndex:= 0;
-         Edt_Search.Enabled:= True;
-         Lbl_Search.Enabled:= True;
-         LoadGamesList( getCurrentFolderName );
-
-         //On remet le curseur par défaut
-         Screen.Cursor:= crDefault;
       end;
+
+      Cbx_Systems.Enabled:= True;
+      Lbl_SelectSystem.Enabled:= Cbx_Systems.Enabled;
+      Cbx_Filter.Enabled:= Cbx_Systems.Enabled;
+      Lbl_Filter.Enabled:= Cbx_Systems.Enabled;
+      Cbx_Systems.ItemIndex:= 0;
+      EnableControls( True );
+      Cbx_Filter.ItemIndex:= 0;
+      Edt_Search.Enabled:= True;
+      Lbl_Search.Enabled:= True;
+      LoadGamesList( getCurrentFolderName );
+      Mnu_Reload.Enabled:= True;
+
+      //On remet le curseur par défaut
+      Screen.Cursor:= crDefault;
    end;
 end;
 
