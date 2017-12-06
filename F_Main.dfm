@@ -6604,7 +6604,7 @@ object Frm_Editor: TFrm_Editor
           MultiSelect = True
           ParentDoubleBuffered = False
           Sorted = True
-          TabOrder = 1
+          TabOrder = 5
           OnClick = Lbx_GamesClick
         end
         object Mmo_Description: TMemo
@@ -6614,7 +6614,7 @@ object Frm_Editor: TFrm_Editor
           Height = 113
           Enabled = False
           ScrollBars = ssVertical
-          TabOrder = 2
+          TabOrder = 20
           OnChange = FieldChange
           OnKeyPress = Mmo_DescriptionKeyPress
         end
@@ -6625,7 +6625,7 @@ object Frm_Editor: TFrm_Editor
           Height = 21
           Enabled = False
           NumbersOnly = True
-          TabOrder = 3
+          TabOrder = 14
           OnChange = FieldChange
         end
         object Edt_ReleaseDate: TEdit
@@ -6639,7 +6639,7 @@ object Frm_Editor: TFrm_Editor
           Enabled = False
           ParentShowHint = False
           ShowHint = True
-          TabOrder = 4
+          TabOrder = 12
           OnChange = FieldChange
         end
         object Edt_Developer: TEdit
@@ -6648,7 +6648,7 @@ object Frm_Editor: TFrm_Editor
           Width = 185
           Height = 21
           Enabled = False
-          TabOrder = 5
+          TabOrder = 18
           OnChange = FieldChange
         end
         object Edt_Publisher: TEdit
@@ -6657,7 +6657,7 @@ object Frm_Editor: TFrm_Editor
           Width = 185
           Height = 21
           Enabled = False
-          TabOrder = 6
+          TabOrder = 17
           OnChange = FieldChange
         end
         object Edt_Genre: TEdit
@@ -6666,7 +6666,7 @@ object Frm_Editor: TFrm_Editor
           Width = 185
           Height = 21
           Enabled = False
-          TabOrder = 7
+          TabOrder = 19
           OnChange = FieldChange
         end
         object Edt_NbPlayers: TEdit
@@ -6675,16 +6675,16 @@ object Frm_Editor: TFrm_Editor
           Width = 108
           Height = 21
           Enabled = False
-          TabOrder = 8
+          TabOrder = 13
           OnChange = FieldChange
         end
         object Edt_Name: TEdit
           Left = 533
-          Top = 376
+          Top = 379
           Width = 417
           Height = 21
           Enabled = False
-          TabOrder = 9
+          TabOrder = 10
           OnChange = FieldChange
         end
         object Btn_SaveChanges: TButton
@@ -6694,7 +6694,7 @@ object Frm_Editor: TFrm_Editor
           Height = 25
           Caption = 'Save Changes for this game'
           Enabled = False
-          TabOrder = 10
+          TabOrder = 22
           OnClick = Btn_SaveChangesClick
         end
         object Btn_ChangeImage: TButton
@@ -6704,7 +6704,7 @@ object Frm_Editor: TFrm_Editor
           Height = 25
           Caption = 'Change Picture'
           Enabled = False
-          TabOrder = 11
+          TabOrder = 6
           OnClick = Btn_ChangeImageClick
         end
         object Btn_SetDefaultPicture: TButton
@@ -6714,7 +6714,7 @@ object Frm_Editor: TFrm_Editor
           Height = 25
           Caption = 'Change Picture to default'
           Enabled = False
-          TabOrder = 12
+          TabOrder = 8
           OnClick = Btn_SetDefaultPictureClick
         end
         object Btn_ChangeAll: TButton
@@ -6724,7 +6724,7 @@ object Frm_Editor: TFrm_Editor
           Height = 25
           Caption = 'Change all missing pictures to default'
           Enabled = False
-          TabOrder = 13
+          TabOrder = 9
           OnClick = Btn_ChangeAllClick
         end
         object Cbx_Filter: TComboBox
@@ -6736,7 +6736,7 @@ object Frm_Editor: TFrm_Editor
           DropDownCount = 15
           Enabled = False
           ItemIndex = 0
-          TabOrder = 14
+          TabOrder = 1
           Text = 'All'
           OnChange = Cbx_FilterChange
           Items.Strings = (
@@ -6755,12 +6755,12 @@ object Frm_Editor: TFrm_Editor
             'Orphan')
         end
         object Edt_Region: TEdit
-          Left = 997
-          Top = 376
+          Left = 998
+          Top = 379
           Width = 185
           Height = 21
           Enabled = False
-          TabOrder = 15
+          TabOrder = 11
           OnChange = FieldChange
         end
         object Btn_MoreInfos: TButton
@@ -6770,7 +6770,7 @@ object Frm_Editor: TFrm_Editor
           Height = 25
           Caption = 'More infos...'
           Enabled = False
-          TabOrder = 16
+          TabOrder = 21
           OnClick = Btn_MoreInfosClick
         end
         object Btn_Delete: TButton
@@ -6790,7 +6790,7 @@ object Frm_Editor: TFrm_Editor
           ImageMargins.Right = -10
           Images = Img_List
           ParentFont = False
-          TabOrder = 17
+          TabOrder = 23
           OnClick = Btn_DeleteClick
         end
         object ProgressBar: TProgressBar
@@ -6800,7 +6800,7 @@ object Frm_Editor: TFrm_Editor
           Height = 17
           MarqueeInterval = 1
           BarColor = clRed
-          TabOrder = 18
+          TabOrder = 24
           Visible = False
         end
         object Btn_RemovePicture: TButton
@@ -6810,7 +6810,7 @@ object Frm_Editor: TFrm_Editor
           Height = 25
           Caption = 'Delete Picture'
           Enabled = False
-          TabOrder = 19
+          TabOrder = 7
           OnClick = Btn_RemovePictureClick
         end
         object Cbx_Hidden: TComboBox
@@ -6820,7 +6820,7 @@ object Frm_Editor: TFrm_Editor
           Height = 21
           Style = csDropDownList
           Enabled = False
-          TabOrder = 20
+          TabOrder = 15
           OnChange = FieldChange
           Items.Strings = (
             'No'
@@ -6833,7 +6833,7 @@ object Frm_Editor: TFrm_Editor
           Height = 21
           Style = csDropDownList
           Enabled = False
-          TabOrder = 21
+          TabOrder = 16
           OnChange = FieldChange
           Items.Strings = (
             'No'
@@ -6846,7 +6846,7 @@ object Frm_Editor: TFrm_Editor
           Height = 21
           Enabled = False
           ReadOnly = True
-          TabOrder = 22
+          TabOrder = 25
         end
         object Edt_Search: TEdit
           Left = 29
@@ -6854,7 +6854,7 @@ object Frm_Editor: TFrm_Editor
           Width = 473
           Height = 21
           Enabled = False
-          TabOrder = 23
+          TabOrder = 4
           OnChange = Edt_SearchChange
         end
         object Chk_ListByRom: TCheckBox
@@ -6866,7 +6866,7 @@ object Frm_Editor: TFrm_Editor
           Caption = 'List by Rom name'
           Enabled = False
           ParentBiDiMode = False
-          TabOrder = 24
+          TabOrder = 2
           OnClick = Chk_ListByRomClick
         end
         object Chk_FullRomName: TCheckBox
@@ -6878,7 +6878,7 @@ object Frm_Editor: TFrm_Editor
           Caption = 'Show full Rom name'
           Enabled = False
           ParentBiDiMode = False
-          TabOrder = 25
+          TabOrder = 3
           OnClick = Chk_FullRomNameClick
         end
       end
@@ -11831,7 +11831,7 @@ object Frm_Editor: TFrm_Editor
           Height = 325
           Align = alTop
           BevelOuter = bvNone
-          TabOrder = 0
+          TabOrder = 26
           object Scl_Pictures: TScrollBox
             Left = 27
             Top = 0
@@ -13142,7 +13142,7 @@ object Frm_Editor: TFrm_Editor
           Height = 25
           Caption = 'Scrape'
           Enabled = False
-          TabOrder = 1
+          TabOrder = 18
           OnClick = Btn_ScrapeClick
         end
         object Mmo_ScrapeDescription: TMemo
@@ -13152,7 +13152,7 @@ object Frm_Editor: TFrm_Editor
           Height = 113
           Enabled = False
           ScrollBars = ssVertical
-          TabOrder = 2
+          TabOrder = 16
           OnKeyPress = Mmo_DescriptionKeyPress
         end
         object Edt_ScrapeGenre: TEdit
@@ -13161,7 +13161,7 @@ object Frm_Editor: TFrm_Editor
           Width = 185
           Height = 21
           Enabled = False
-          TabOrder = 3
+          TabOrder = 13
         end
         object Edt_ScrapeDeveloper: TEdit
           Left = 241
@@ -13169,7 +13169,7 @@ object Frm_Editor: TFrm_Editor
           Width = 185
           Height = 21
           Enabled = False
-          TabOrder = 4
+          TabOrder = 11
         end
         object Edt_ScrapePublisher: TEdit
           Left = 27
@@ -13177,7 +13177,7 @@ object Frm_Editor: TFrm_Editor
           Width = 185
           Height = 21
           Enabled = False
-          TabOrder = 5
+          TabOrder = 10
         end
         object Edt_ScrapeRating: TEdit
           Left = 457
@@ -13185,7 +13185,7 @@ object Frm_Editor: TFrm_Editor
           Width = 108
           Height = 21
           Enabled = False
-          TabOrder = 6
+          TabOrder = 12
         end
         object Edt_ScrapePlayers: TEdit
           Left = 457
@@ -13193,7 +13193,7 @@ object Frm_Editor: TFrm_Editor
           Width = 108
           Height = 21
           Enabled = False
-          TabOrder = 7
+          TabOrder = 15
         end
         object Edt_ScrapeDate: TEdit
           Left = 457
@@ -13206,7 +13206,7 @@ object Frm_Editor: TFrm_Editor
           Enabled = False
           ParentShowHint = False
           ShowHint = True
-          TabOrder = 8
+          TabOrder = 9
         end
         object Edt_ScrapeRegion: TEdit
           Left = 241
@@ -13214,7 +13214,7 @@ object Frm_Editor: TFrm_Editor
           Width = 185
           Height = 21
           Enabled = False
-          TabOrder = 9
+          TabOrder = 14
         end
         object Edt_ScrapeName: TEdit
           Left = 27
@@ -13222,7 +13222,7 @@ object Frm_Editor: TFrm_Editor
           Width = 399
           Height = 21
           Enabled = False
-          TabOrder = 10
+          TabOrder = 8
         end
         object Btn_ScrapeSave: TButton
           Left = 976
@@ -13231,7 +13231,7 @@ object Frm_Editor: TFrm_Editor
           Height = 25
           Caption = 'Save Changes for this game'
           Enabled = False
-          TabOrder = 11
+          TabOrder = 23
           OnClick = Btn_ScrapeSaveClick
         end
         object Edt_ScrapeRomPath: TEdit
@@ -13240,7 +13240,7 @@ object Frm_Editor: TFrm_Editor
           Width = 537
           Height = 21
           ReadOnly = True
-          TabOrder = 12
+          TabOrder = 17
         end
         object Btn_ScrapeLower: TButton
           Left = 976
@@ -13249,7 +13249,7 @@ object Frm_Editor: TFrm_Editor
           Height = 25
           Caption = 'Convert all text to lowercase'
           Enabled = False
-          TabOrder = 13
+          TabOrder = 22
           OnClick = Btn_ScrapeLowerClick
         end
         object Btn_ScrapeUpper: TButton
@@ -13259,7 +13259,7 @@ object Frm_Editor: TFrm_Editor
           Height = 25
           Caption = 'Convert all text to uppercase'
           Enabled = False
-          TabOrder = 14
+          TabOrder = 21
           OnClick = Btn_ScrapeUpperClick
         end
         object Chk_ScrapePicture: TCheckBox
@@ -13269,7 +13269,7 @@ object Frm_Editor: TFrm_Editor
           Height = 17
           Caption = 'Save picture'
           Enabled = False
-          TabOrder = 15
+          TabOrder = 24
           OnClick = Chk_ScrapeClick
         end
         object Chk_ScrapeInfos: TCheckBox
@@ -13281,7 +13281,7 @@ object Frm_Editor: TFrm_Editor
           Checked = True
           Enabled = False
           State = cbChecked
-          TabOrder = 16
+          TabOrder = 25
           OnClick = Chk_ScrapeClick
         end
         object Chk_ManualCRC: TCheckBox
@@ -13291,7 +13291,7 @@ object Frm_Editor: TFrm_Editor
           Height = 17
           Caption = 'Enter CRC32 manually'
           Enabled = False
-          TabOrder = 17
+          TabOrder = 19
           OnClick = Chk_ManualCRCClick
         end
         object Edt_ManualCRC: TEdit
@@ -13300,7 +13300,7 @@ object Frm_Editor: TFrm_Editor
           Width = 209
           Height = 21
           Enabled = False
-          TabOrder = 18
+          TabOrder = 20
         end
         object Chk_Box2D: TCheckBox
           Left = 27
@@ -13310,7 +13310,7 @@ object Frm_Editor: TFrm_Editor
           Caption = 'Box 2D'
           Checked = True
           State = cbChecked
-          TabOrder = 19
+          TabOrder = 0
         end
         object Chk_Box3D: TCheckBox
           Left = 130
@@ -13320,7 +13320,7 @@ object Frm_Editor: TFrm_Editor
           Caption = 'Box 3D'
           Checked = True
           State = cbChecked
-          TabOrder = 20
+          TabOrder = 1
         end
         object Chk_Mix1: TCheckBox
           Left = 233
@@ -13330,7 +13330,7 @@ object Frm_Editor: TFrm_Editor
           Caption = 'Mix 1'
           Checked = True
           State = cbChecked
-          TabOrder = 21
+          TabOrder = 2
         end
         object Chk_Mix2: TCheckBox
           Left = 336
@@ -13340,7 +13340,7 @@ object Frm_Editor: TFrm_Editor
           Caption = 'Mix 2'
           Checked = True
           State = cbChecked
-          TabOrder = 22
+          TabOrder = 3
         end
         object Chk_Screenshot: TCheckBox
           Left = 439
@@ -13350,7 +13350,7 @@ object Frm_Editor: TFrm_Editor
           Caption = 'Screenshot'
           Checked = True
           State = cbChecked
-          TabOrder = 23
+          TabOrder = 4
         end
         object Chk_Title: TCheckBox
           Left = 542
@@ -13360,7 +13360,7 @@ object Frm_Editor: TFrm_Editor
           Caption = 'Title'
           Checked = True
           State = cbChecked
-          TabOrder = 24
+          TabOrder = 5
         end
         object Chk_ArcadeBox: TCheckBox
           Left = 638
@@ -13370,7 +13370,7 @@ object Frm_Editor: TFrm_Editor
           Caption = 'Arcade Box'
           Checked = True
           State = cbChecked
-          TabOrder = 25
+          TabOrder = 6
         end
         object Chk_Wheel: TCheckBox
           Left = 741
@@ -13380,7 +13380,7 @@ object Frm_Editor: TFrm_Editor
           Caption = 'Wheel'
           Checked = True
           State = cbChecked
-          TabOrder = 26
+          TabOrder = 7
         end
       end
     end
@@ -13400,7 +13400,6 @@ object Frm_Editor: TFrm_Editor
     Top = 40
   end
   object MainMenu: TMainMenu
-    AutoHotkeys = maManual
     Left = 72
     Top = 40
     object Mnu_File: TMenuItem
@@ -13746,7 +13745,7 @@ object Frm_Editor: TFrm_Editor
     Left = 184
     Top = 40
     Bitmap = {
-      494C010101000800500110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800580110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

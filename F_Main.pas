@@ -259,6 +259,8 @@ type
       FScrapedGame: TGame;
       GSystemList: TObjectDictionary<string,TObjectList<TGame>>;
 
+      FPrevWinControl: TWinControl;
+
       //Pour le scrape
       FPictureLinks: TObjectList<TMediaInfo>;
       FInfosList: TStringList;
@@ -326,6 +328,7 @@ type
       FProxyUse: Boolean;
       FImgList: TObjectList<TImage>;
       procedure WarnUser( const aMessage: string );
+      function SetFocusedControl( Control: TWinControl ): Boolean; override;
 
    end;
 
@@ -337,6 +340,13 @@ var
 implementation
 
 {$R *.dfm}
+
+function TFrm_Editor.SetFocusedControl(Control: TWinControl): Boolean;
+begin
+   if ( Control = Btn_SaveChanges ) and ( ActiveControl is TEdit ) then
+      FPrevWinControl := ActiveControl;
+   Result:= inherited SetFocusedControl(Control);
+end;
 
 function TFrm_Editor.GetPhysicalRomPath( const aRomPath: string ): string;
 var
@@ -833,8 +843,8 @@ begin
    //Si pas de jeu trouvé on sort et on renvoie nil
    if not Assigned( _Node ) then Exit;
 
-    //On crée la liste d'objets TGame
-    _GameList:= TObjectList<TGame>.Create( True );
+   //On crée la liste d'objets TGame
+   _GameList:= TObjectList<TGame>.Create( True );
 
    //Ensuite on boucle sur tous les jeux et pour chaque jeu
    //on crée un objet TGame qu'on renseigne et ajoute à la _Gamelist
@@ -1462,7 +1472,9 @@ procedure TFrm_Editor.Btn_SaveChangesClick( Sender: TObject );
 begin
    SaveChangesToGamelist( False, False, True );
    Btn_SaveChanges.Enabled:= False;
-   Lbx_Games.SetFocus;
+//   Lbx_Games.SetFocus;
+   if Assigned( FPrevWinControl ) then
+      FPrevWinControl.SetFocus;
 end;
 
 //vidage des champs de scrape
