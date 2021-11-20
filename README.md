@@ -1,5 +1,7 @@
 ![alt text](https://github.com/NeeeeB/GameList_Editor/blob/master/Images/logo.png)
 
+***NOTE: NeeeeB is no longer supporting the project. The fork https://github.com/andresdelcampo/GameList_Editor is now supporting it and keeping it up to date with newer systems and additional features.***
+
 GameList Editor is a tool written in Delphi(Windows only but Wine compatible) to help the edition of gamelist.xml files generated from UXS for Recalbox or Retropie.
 
 *GameList Editor est un outil écrit en Delphi(Windows uniquement mais compatible Wine) vous permettant d'éditer facilement vos gamelist.xml Recalbox ou Retropie créés par UXS.*
